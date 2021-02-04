@@ -1,0 +1,19 @@
+{
+  "name": "san-games",
+  "version": "0.0.1",
+  "description": "Santiment games smart contracts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "SAN",
+    "Santiment",
+    "Smart Contracts"
+  ],
+  "author": "Nail Khafizov <nailkhaf@pm.me>",
+  "license": "MIT",
+  "devDependencies": {
+    "solhint": "^3.3.2",
+    "truffle": "^5.1.64"
+  }
+}
