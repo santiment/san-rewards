@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0 <0.8.0;
 
-import "./interfaces/IStakingRewards.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./interfaces/IStakingRewards.sol";
+import "./interfaces/IRewardsDistributionRecipient.sol";
 
-contract StakingRewards is AccessControl, IStakingRewards {
+contract StakingRewards is AccessControl, IRewardsDistributionRecipient, IStakingRewards {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 

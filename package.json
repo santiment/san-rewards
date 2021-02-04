@@ -4,6 +4,8 @@
   "description": "Santiment games smart contracts",
   "scripts": {
     "compile": "truffle compile",
+    "migrate": "truffle migrate --network development",
+    "ganache": "ganache-cli",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -14,10 +16,14 @@
   "author": "Nail Khafizov <nailkhaf@pm.me>",
   "license": "MIT",
   "devDependencies": {
+    "@openzeppelin/test-environment": "^0.1.9",
+    "chai": "^4.3.0",
+    "mocha": "^8.2.1",
     "solhint": "^3.3.2",
     "truffle": "^5.1.64"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^3.4.0"
+    "@openzeppelin/contracts": "^3.4.0",
+    "ganache-cli": "^6.12.2"
   }
 }

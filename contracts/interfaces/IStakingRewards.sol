@@ -22,6 +22,4 @@ interface IStakingRewards {
     function getReward() external;
 
     function exit() external;
-
-    function notifyRewardAmount(uint256 reward) external;
 }
