@@ -3,23 +3,24 @@ pragma solidity >=0.6.0 <0.8.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./interfaces/IStakingRewards.sol";
-import "./interfaces/IRewardsDistributionRecipient.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "../interfaces/IStakingRewards.sol";
+import "../interfaces/IRewardsDistributionRecipient.sol";
 
-contract StakingRewards is AccessControl, IRewardsDistributionRecipient, IStakingRewards {
+contract StakingRewards is Ownable, IRewardsDistributionRecipient, IStakingRewards {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
-
-    bytes32 public constant REWARD_DISTRIBUTOR_ROLE = keccak256("REWARD_DISTRIBUTOR_ROLE");
 
     IERC20 public immutable rewardsToken;
     IERC20 public immutable stakingToken;
 
+    uint256 public immutable rewardsDuration;
+    uint256 public immutable maximalStake;
+
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
-    uint256 public immutable rewardsDuration;
 
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
@@ -49,7 +50,8 @@ contract StakingRewards is AccessControl, IRewardsDistributionRecipient, IStakin
         address _rewardsDistribution,
         address _rewardsToken,
         address _stakingToken,
-        uint256 _rewardsDuration
+        uint256 _rewardsDuration,
+        uint256 _maximalStake
     ) {
         rewardsToken = IERC20(_rewardsToken);
         stakingToken = IERC20(_stakingToken);
@@ -58,39 +60,38 @@ contract StakingRewards is AccessControl, IRewardsDistributionRecipient, IStakin
         _setupRole(REWARD_DISTRIBUTOR_ROLE, _rewardsDistribution);
     }
 
-    function stake(uint256 amount) external override updateReward(msg.sender) {
+    function stake(uint256 amount) external override updateReward(_msgSender()) {
         require(amount > 0, "Cannot stake 0");
+        require(_balances[_msgSender()].add(amount) <= maximalStake, "Cannot stake more than maximal");
         _totalSupply = _totalSupply.add(amount);
-        _balances[msg.sender] = _balances[msg.sender].add(amount);
-        stakingToken.safeTransferFrom(msg.sender, address(this), amount);
-        emit Staked(msg.sender, amount);
+        _balances[_msgSender()] = _balances[_msgSender()].add(amount);
+        stakingToken.safeTransferFrom(_msgSender(), address(this), amount);
+        emit Staked(_msgSender(), amount);
     }
 
-    function withdraw(uint256 amount) public override updateReward(msg.sender) {
+    function withdraw(uint256 amount) public override updateReward(_msgSender()) {
         require(amount > 0, "Cannot withdraw 0");
         _totalSupply = _totalSupply.sub(amount);
-        _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        stakingToken.safeTransfer(msg.sender, amount);
-        emit Withdrawn(msg.sender, amount);
+        _balances[_msgSender()] = _balances[_msgSender()].sub(amount);
+        stakingToken.safeTransfer(_msgSender(), amount);
+        emit Withdrawn(_msgSender(), amount);
     }
 
-    function getReward() public override updateReward(msg.sender) {
-        uint256 reward = rewards[msg.sender];
+    function getReward() public override updateReward(_msgSender()) {
+        uint256 reward = rewards[_msgSender()];
         if (reward > 0) {
-            rewards[msg.sender] = 0;
-            rewardsToken.safeTransfer(msg.sender, reward);
-            emit RewardPaid(msg.sender, reward);
+            rewards[_msgSender()] = 0;
+            rewardsToken.safeTransfer(_msgSender(), reward);
+            emit RewardPaid(_msgSender(), reward);
         }
     }
 
     function exit() external override {
-        withdraw(_balances[msg.sender]);
+        withdraw(_balances[_msgSender()]);
         getReward();
     }
 
-    function notifyRewardAmount(uint256 reward) external override updateReward(address(0)) {
-        require(hasRole(REWARD_DISTRIBUTOR_ROLE, _msgSender()), "StakingRewards: must have reward distributor role");
-
+    function notifyRewardAmount(uint256 reward) external override onlyOwner updateReward(address(0)) {
         if (block.timestamp >= periodFinish) {
             rewardRate = reward.div(rewardsDuration);
         } else {

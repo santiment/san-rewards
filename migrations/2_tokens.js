@@ -1,3 +1,5 @@
+import {isMainnet} from "./utils";
+
 const SanMock = artifacts.require("SanMock")
 const TokenMock = artifacts.require("TokenMock")
 
@@ -8,8 +10,8 @@ module.exports = async (deployer, network, accounts) => {
 
     await deployer.deploy(SanFT, {from: owner})
 
-    if (network === 'development') {
-        await deployer.deploy(SanMock, 1_000_000, {from: owner})
-        await deployer.deploy(TokenMock, 1_000_000, {from: owner})
+    if (!isMainnet(network)) {
+        await deployer.deploy(SanMock, 1_000_000_000, {from: owner})
+        await deployer.deploy(TokenMock, 1_000_000_000, {from: owner})
     }
 }
