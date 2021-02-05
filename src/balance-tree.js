@@ -1,19 +1,18 @@
 const MerkleTree = require('./merkle-tree')
-const web3 = require('web3')
-const solidityKeccak256 = web3.utils.soliditySha3
+const {utils: {soliditySha3: solidityKeccak256}} = require('web3')
 
-export default class BalanceTree {
+module.exports = class BalanceTree {
 
     constructor(balances) {
         this._tree = new MerkleTree(
-            balances.map(({account, amount}, index) => {
-                return BalanceTree.toNode(index, account, amount)
+            balances.map(({account, amount}) => {
+                return BalanceTree.toNode(account, amount)
             })
         )
     }
 
-    static verifyProof(index, account, amount, proof, root) {
-        let pair = BalanceTree.toNode(index, account, amount)
+    static verifyProof(account, amount, proof, root) {
+        let pair = BalanceTree.toNode(account, amount)
         for (const item of proof) {
             pair = MerkleTree.combinedHash(pair, item)
         }
@@ -22,10 +21,9 @@ export default class BalanceTree {
     }
 
     // keccak256(abi.encode(index, account, amount))
-    static toNode(index, account, amount) {
+    static toNode(account, amount) {
         return Buffer.from(
             solidityKeccak256(
-                {t: 'uint256', v: index},
                 {t: 'address', v: account},
                 {t: 'uint256', v: amount},
             ).substr(2),
@@ -38,7 +36,7 @@ export default class BalanceTree {
     }
 
     // returns the hex bytes32 values of the proof
-    getProof(index, account, amount) {
-        return this._tree.getHexProof(BalanceTree.toNode(index, account, amount))
+    getProof(account, amount) {
+        return this._tree.getHexProof(BalanceTree.toNode(account, amount))
     }
 }

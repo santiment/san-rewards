@@ -9,40 +9,30 @@ contract MerkleDistributor is IMerkleDistributor {
     address immutable _token;
     bytes32 immutable _merkleRoot;
 
-    // This is a packed array of booleans.
-    mapping(uint256 => uint256) private claimedBitMap;
+    mapping(address => bool) _claimedAccounts;
 
     constructor(address token_, bytes32 merkleRoot_) {
         _token = token_;
         _merkleRoot = merkleRoot_;
     }
 
-    function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
-        require(!isClaimed(index), 'MerkleDistributor: Drop already claimed.');
+    function claim(address account, uint256 amount, bytes32[] calldata merkleProof) external override {
+        require(msg.sender == account, "MerkleDistributor: Caller must be account");
+        require(!_claimedAccounts[account], 'MerkleDistributor: Drop already claimed.');
 
         // Verify the merkle proof.
-        bytes32 node = keccak256(abi.encodePacked(index, account, amount));
-        require(MerkleProof.verify(merkleProof, _merkleRoot, node), 'MerkleDistributor: Invalid proof.');
+        bytes32 leaf = keccak256(abi.encodePacked(account, amount));
+        require(MerkleProof.verify(merkleProof, _merkleRoot, leaf), 'MerkleDistributor: Invalid proof.');
 
         // Mark it claimed and send the token.
-        _setClaimed(index);
+        _claimedAccounts[account] = true;
         require(IERC20(_token).transfer(account, amount), 'MerkleDistributor: Transfer failed.');
 
-        emit Claimed(index, account, amount);
+        emit Claimed(account, amount);
     }
 
-    function _setClaimed(uint256 index) private {
-        uint256 claimedWordIndex = index / 256;
-        uint256 claimedBitIndex = index % 256;
-        claimedBitMap[claimedWordIndex] = claimedBitMap[claimedWordIndex] | (1 << claimedBitIndex);
-    }
-
-    function isClaimed(uint256 index) public view override returns (bool) {
-        uint256 claimedWordIndex = index / 256;
-        uint256 claimedBitIndex = index % 256;
-        uint256 claimedWord = claimedBitMap[claimedWordIndex];
-        uint256 mask = (1 << claimedBitIndex);
-        return claimedWord & mask == mask;
+    function isClaimed(address account) external view override returns (bool) {
+        return _claimedAccounts[account];
     }
 
     function token() external view override returns (address) {

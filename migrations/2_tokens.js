@@ -1,4 +1,4 @@
-import {isMainnet} from "./utils";
+const {isMainnet} = require("./utils")
 
 const SanMock = artifacts.require("SanMock")
 const TokenMock = artifacts.require("TokenMock")

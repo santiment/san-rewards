@@ -47,7 +47,6 @@ contract StakingRewards is Ownable, IRewardsDistributionRecipient, IStakingRewar
     }
 
     constructor(
-        address _rewardsDistribution,
         address _rewardsToken,
         address _stakingToken,
         uint256 _rewardsDuration,
@@ -56,8 +55,7 @@ contract StakingRewards is Ownable, IRewardsDistributionRecipient, IStakingRewar
         rewardsToken = IERC20(_rewardsToken);
         stakingToken = IERC20(_stakingToken);
         rewardsDuration = _rewardsDuration;
-
-        _setupRole(REWARD_DISTRIBUTOR_ROLE, _rewardsDistribution);
+        maximalStake = _maximalStake;
     }
 
     function stake(uint256 amount) external override updateReward(_msgSender()) {

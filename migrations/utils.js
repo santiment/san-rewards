@@ -6,8 +6,6 @@ const testnet = [
 ]
 const mainnet = 'mainnet'
 
-export const isDevnet = (network) => ![...testnet, mainnet].includes(network)
-
-export const isTestnet = (network) => [...testnet].includes(network)
-
-export const isMainnet = (network) => mainnet === network
+module.exports.isDevnet = (network) => ![...testnet, mainnet].includes(network)
+module.exports.isTestnet = (network) => [...testnet].includes(network)
+module.exports.isMainnet = (network) => mainnet === network
