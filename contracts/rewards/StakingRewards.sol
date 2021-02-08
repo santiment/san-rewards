@@ -7,49 +7,55 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IStakingRewards.sol";
-import "../interfaces/IRewardsDistributionRecipient.sol";
+import "../interfaces/IERC20Mintable.sol";
 import "./BaseRewards.sol";
 
-contract StakingRewards is BaseRewards {
+contract StakingRewards is Ownable, BaseRewards {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    IERC20 public immutable stakingToken;
-    uint256 public immutable maximalStake;
-
-    event Staked(address indexed user, uint256 amount);
-    event Withdrawn(address indexed user, uint256 amount);
+    event RewardProlonged(uint256 rewardsDuration);
 
     constructor(
         string memory name_,
         string memory symbol_,
-        uint256 _duration,
         address _rewardsToken,
         address _stakingToken,
-        uint256 _maximalStake
-    ) BaseRewards(name_, symbol_, _duration, _rewardsToken) {
-        require(_maximalStake > 0, "Maximal stake is zero");
-        stakingToken = IERC20(_stakingToken);
-        maximalStake = _maximalStake;
+        uint256 _maximalStake,
+        uint256 rewardRate_
+    ) BaseRewards(name_, symbol_, _rewardsToken, _stakingToken, _maximalStake) {
+        rewardRate = rewardRate_;
     }
 
-    function stake(uint256 amount) public updateReward(msg.sender) override {
-        require(amount > 0, "Cannot stake 0");
-        require(balanceOf(msg.sender).add(amount) <= maximalStake, "Stake exceed maximal");
-        _mint(msg.sender, amount);
-        stakingToken.safeTransferFrom(msg.sender, address(this), amount);
-        emit Staked(msg.sender, amount);
+    function getReward() public override updateReward(msg.sender) {
+        uint256 reward = earned(msg.sender);
+        if (reward > 0) {
+            rewards[msg.sender] = 0;
+            IERC20Mintable(address(rewardsToken)).mint(msg.sender, reward);
+            emit RewardPaid(msg.sender, reward);
+        }
     }
 
-    function withdraw(uint256 amount) public updateReward(msg.sender) override {
-        require(amount > 0, "Cannot withdraw 0");
-        _burn(msg.sender, amount);
-        stakingToken.safeTransfer(msg.sender, amount);
-        emit Withdrawn(msg.sender, amount);
+    function rewardPerToken() public view override returns (uint256) {
+        if (totalSupply() == 0) {
+            return rewardPerTokenStored;
+        }
+        return rewardPerTokenStored.add(
+            lastTimeRewardApplicable()
+                .sub(lastUpdateTime)
+                .mul(rewardRate)
+        );
     }
 
-    function exit() external override {
-        withdraw(balanceOf(msg.sender));
-        getReward();
+    function prolongStacking(uint256 _rewardsDuration) external onlyOwner updateReward(address(0)) {
+        if (periodFinish == 0) {
+            periodFinish = block.timestamp.add(_rewardsDuration);
+        } else {
+            periodFinish = periodFinish.add(_rewardsDuration);
+        }
+
+        lastUpdateTime = block.timestamp;
+
+        emit RewardProlonged(_rewardsDuration);
     }
 }

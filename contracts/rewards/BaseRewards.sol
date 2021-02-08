@@ -11,14 +11,14 @@ import "../interfaces/IRewardsDistributionRecipient.sol";
 import "./AccountingToken.sol";
 import "../interfaces/IStakingRewards.sol";
 
-abstract contract BaseRewards is Ownable, AccountingToken, IRewardsDistributionRecipient, IStakingRewards {
+abstract contract BaseRewards is AccountingToken, IStakingRewards {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    uint256 public immutable rewardsDuration;
     IERC20 public immutable rewardsToken;
+    IERC20 public immutable stakingToken;
+    uint256 public immutable maximalStake;
 
-    address public rewardDistribution;
     uint256 public periodFinish;
     uint256 public rewardRate;
     uint256 public lastUpdateTime;
@@ -26,8 +26,9 @@ abstract contract BaseRewards is Ownable, AccountingToken, IRewardsDistributionR
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
 
-    event RewardAdded(uint256 reward);
     event RewardPaid(address indexed user, uint256 reward);
+    event Staked(address indexed user, uint256 amount);
+    event Withdrawn(address indexed user, uint256 amount);
 
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
@@ -39,36 +40,41 @@ abstract contract BaseRewards is Ownable, AccountingToken, IRewardsDistributionR
         _;
     }
 
-    modifier onlyRewardDistribution() {
-        require(_msgSender() == rewardDistribution, "Access denied");
-        _;
-    }
-
     constructor(
         string memory name_,
         string memory symbol_,
-        uint256 _rewardsDuration,
-        address _rewardsToken
+        address _rewardsToken,
+        address _stakingToken,
+        uint256 _maximalStake
     ) AccountingToken(name_, symbol_) {
+        require(_maximalStake > 0, "Maximal stake is zero");
         rewardsToken = IERC20(_rewardsToken);
-        rewardsDuration = _rewardsDuration;
+        maximalStake = _maximalStake;
+        stakingToken = IERC20(_stakingToken);
+    }
+
+    function stake(uint256 amount) public updateReward(msg.sender) override {
+        require(amount > 0, "Cannot stake 0");
+        require(balanceOf(msg.sender).add(amount) <= maximalStake, "Stake exceed maximal");
+        _mint(msg.sender, amount);
+        stakingToken.safeTransferFrom(msg.sender, address(this), amount);
+        emit Staked(msg.sender, amount);
+    }
+
+    function withdraw(uint256 amount) public updateReward(msg.sender) override {
+        require(amount > 0, "Cannot withdraw 0");
+        _burn(msg.sender, amount);
+        stakingToken.safeTransfer(msg.sender, amount);
+        emit Withdrawn(msg.sender, amount);
+    }
+
+    function exit() external override {
+        withdraw(balanceOf(msg.sender));
+        getReward();
     }
 
     function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
-    }
-
-    function rewardPerToken() public view override returns (uint256) {
-        if (totalSupply() == 0) {
-            return rewardPerTokenStored;
-        }
-        return rewardPerTokenStored.add(
-            lastTimeRewardApplicable()
-                .sub(lastUpdateTime)
-                .mul(rewardRate)
-                .mul(1e18)
-                .div(totalSupply())
-        );
     }
 
     function earned(address account) public view override returns (uint256) {
@@ -78,37 +84,7 @@ abstract contract BaseRewards is Ownable, AccountingToken, IRewardsDistributionR
             .add(rewards[account]);
     }
 
-    function getReward() public override updateReward(msg.sender) {
-        uint256 reward = earned(msg.sender);
-        if (reward > 0) {
-            rewards[msg.sender] = 0;
-            rewardsToken.safeTransfer(msg.sender, reward);
-            emit RewardPaid(msg.sender, reward);
-        }
-    }
+    function rewardPerToken() public view override virtual returns (uint256);
 
-    function notifyRewardAmount(uint256 reward) external override onlyRewardDistribution updateReward(address(0)) {
-        if (block.timestamp >= periodFinish) {
-            rewardRate = reward.div(rewardsDuration);
-        } else {
-            uint256 remaining = periodFinish.sub(block.timestamp);
-            uint256 leftover = remaining.mul(rewardRate);
-            rewardRate = reward.add(leftover).div(rewardsDuration);
-        }
-
-        // Ensure the provided reward amount is not more than the balance in the contract.
-        // This keeps the reward rate in the right range, preventing overflows due to
-        // very high values of rewardRate in the earned and rewardsPerToken functions;
-        // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        uint balance = rewardsToken.balanceOf(address(this));
-        require(rewardRate <= balance.div(rewardsDuration), "Provided reward too high");
-
-        lastUpdateTime = block.timestamp;
-        periodFinish = block.timestamp.add(rewardsDuration);
-        emit RewardAdded(reward);
-    }
-
-    function setRewardDistribution(address _rewardDistribution) external onlyOwner {
-        rewardDistribution = _rewardDistribution;
-    }
+    function getReward() public override virtual;
 }
