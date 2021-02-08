@@ -10,8 +10,8 @@ const {BN, expectEvent, expectRevert, ether} = require('@openzeppelin/test-helpe
 const {expect} = require('chai')
 const {createDistribution} = require('../src/create-distribution')
 
-const MerkleDistributor = contract.fromArtifact('MerkleDistributor') // Loads a compiled contract
-const SanFT = contract.fromArtifact('SanFT') // Loads a compiled contract
+const MerkleDistributor = contract.fromArtifact('MerkleDistributor')
+const SanFT = contract.fromArtifact('SanFT')
 
 const AIRDROP_AMOUNT = ether('100')
 

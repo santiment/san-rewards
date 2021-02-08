@@ -13,6 +13,7 @@ module.exports = async (deployer, network, accounts) => {
 
     const distribution = createDistribution(balances)
 
+    console.log(JSON.stringify(balances, null, 4))
     console.log(JSON.stringify(distribution, null, 4))
 
     await deployer.deploy(MerkleDistributor, SanFT.address, distribution.merkleRoot, {from: owner})
