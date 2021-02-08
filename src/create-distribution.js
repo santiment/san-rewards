@@ -24,11 +24,12 @@ module.exports.createDistribution = (balances) => {
     )
 
     // generate claims
-    const claims = sortedAddresses.reduce((memo, address) => {
+    const claims = sortedAddresses.reduce((memo, address, index) => {
         const {amount} = dataByAddress[address]
         memo[address] = {
+            index,
             amount: amount.toString(10),
-            proof: tree.getProof(address, amount),
+            proof: tree.getProof(index, address, amount),
         }
         return memo
     }, {})

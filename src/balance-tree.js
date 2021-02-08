@@ -5,14 +5,14 @@ module.exports = class BalanceTree {
 
     constructor(balances) {
         this._tree = new MerkleTree(
-            balances.map(({account, amount}) => {
-                return BalanceTree.toNode(account, amount)
+            balances.map(({account, amount}, index) => {
+                return BalanceTree.toNode(index, account, amount)
             })
         )
     }
 
-    static verifyProof(account, amount, proof, root) {
-        let pair = BalanceTree.toNode(account, amount)
+    static verifyProof(index, account, amount, proof, root) {
+        let pair = BalanceTree.toNode(index, account, amount)
         for (const item of proof) {
             pair = MerkleTree.combinedHash(pair, item)
         }
@@ -21,9 +21,10 @@ module.exports = class BalanceTree {
     }
 
     // keccak256(abi.encode(index, account, amount))
-    static toNode(account, amount) {
+    static toNode(index, account, amount) {
         return Buffer.from(
             solidityKeccak256(
+                {t: 'uint256', v: index},
                 {t: 'address', v: account},
                 {t: 'uint256', v: amount},
             ).substr(2),
@@ -36,7 +37,7 @@ module.exports = class BalanceTree {
     }
 
     // returns the hex bytes32 values of the proof
-    getProof(account, amount) {
-        return this._tree.getHexProof(BalanceTree.toNode(account, amount))
+    getProof(index, account, amount) {
+        return this._tree.getHexProof(BalanceTree.toNode(index, account, amount))
     }
 }
