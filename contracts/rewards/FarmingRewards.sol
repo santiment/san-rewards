@@ -15,27 +15,21 @@ contract FarmingRewards is BaseRewards, IRewardsDistributionRecipient, Ownable {
     using SafeMath for uint256;
 
     uint256 public immutable rewardsDuration;
-    address public rewardDistribution;
 
     event RewardAdded(uint256 reward);
 
-    modifier onlyRewardDistribution() {
-        require(_msgSender() == rewardDistribution, "Access denied");
-        _;
-    }
-
     constructor(
-        string memory name_,
-        string memory symbol_,
+        string memory _name,
+        string memory _symbol,
         uint256 _rewardsDuration,
         address _rewardsToken,
         address _stakingToken,
         uint256 _maximalStake
-    ) BaseRewards(name_, symbol_, _rewardsToken, _stakingToken, _maximalStake) {
+    ) BaseRewards(_name, _symbol, _rewardsToken, _stakingToken, _maximalStake) {
         rewardsDuration = _rewardsDuration;
     }
 
-    function notifyRewardAmount(uint256 reward) external override onlyRewardDistribution updateReward(address(0)) {
+    function notifyRewardAmount(uint256 reward) external override onlyOwner updateReward(address(0)) {
         if (block.timestamp >= periodFinish) {
             rewardRate = reward.div(rewardsDuration);
         } else {
@@ -54,10 +48,6 @@ contract FarmingRewards is BaseRewards, IRewardsDistributionRecipient, Ownable {
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(rewardsDuration);
         emit RewardAdded(reward);
-    }
-
-    function setRewardDistribution(address _rewardDistribution) external onlyOwner {
-        rewardDistribution = _rewardDistribution;
     }
 
     function getReward() public override updateReward(msg.sender) {

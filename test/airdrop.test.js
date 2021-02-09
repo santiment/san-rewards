@@ -11,7 +11,7 @@ const {expect} = require('chai')
 const {createDistribution} = require('../src/create-distribution')
 
 const MerkleDistributor = contract.fromArtifact('MerkleDistributor')
-const SanFT = contract.fromArtifact('SanFT')
+const RewardsToken = contract.fromArtifact('RewardsToken')
 
 const AIRDROP_AMOUNT = ether('100')
 
@@ -27,17 +27,17 @@ describe('MerkleDistributor', function () {
 
         this.distribution = createDistribution(balances)
 
-        this.tokenContract = await SanFT.new({from: deployer})
-        this.distributorContract = await MerkleDistributor.new(this.tokenContract.address, this.distribution.merkleRoot, {from: deployer})
+        this.rewardsToken = await RewardsToken.new({from: deployer})
+        this.distributorContract = await MerkleDistributor.new(this.rewardsToken.address, this.distribution.merkleRoot, {from: deployer})
 
-        await this.tokenContract.mint(this.distributorContract.address, this.distribution.tokenTotal, {from: deployer})
+        await this.rewardsToken.mint(this.distributorContract.address, this.distribution.tokenTotal, {from: deployer})
     })
 
     it('Check initial state of merkle distributor', async () => {
-        const balance = await this.tokenContract.balanceOf(this.distributorContract.address)
+        const balance = await this.rewardsToken.balanceOf(this.distributorContract.address)
         expect(balance).to.be.bignumber.equal(AIRDROP_AMOUNT.mul(new BN(accounts.length)))
 
-        expect(await this.distributorContract.token()).to.be.equal(this.tokenContract.address)
+        expect(await this.distributorContract.token()).to.be.equal(this.rewardsToken.address)
         expect(await this.distributorContract.merkleRoot()).to.be.equal(this.distribution.merkleRoot)
 
         for (const account in this.distribution.claims) {
@@ -71,7 +71,7 @@ describe('MerkleDistributor', function () {
             })
             const claimed = await this.distributorContract.isClaimed(claim.index)
             expect(claimed).to.be.true
-            const balance = await this.tokenContract.balanceOf(account)
+            const balance = await this.rewardsToken.balanceOf(account)
             expect(balance).to.be.bignumber.equal(AIRDROP_AMOUNT)
 
             // Check that can't claim twice
@@ -81,7 +81,7 @@ describe('MerkleDistributor', function () {
             )
         }
 
-        const balance = await this.tokenContract.balanceOf(this.distributorContract.address)
+        const balance = await this.rewardsToken.balanceOf(this.distributorContract.address)
         expect(balance).to.be.bignumber.equal(AIRDROP_AMOUNT.mul(new BN(accounts.length / 2)))
     })
 })

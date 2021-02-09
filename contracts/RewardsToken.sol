@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
-contract SanFT is Context, AccessControl, ERC20Burnable {
+contract RewardsToken is Context, AccessControl, ERC20Burnable {
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
@@ -15,7 +15,7 @@ contract SanFT is Context, AccessControl, ERC20Burnable {
      *
      * See {ERC20-constructor}.
      */
-    constructor() ERC20("Santiment FT", "SFT") {
+    constructor() ERC20("Santiment Rewards Token", "SRT") {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
         _setupRole(MINTER_ROLE, _msgSender());

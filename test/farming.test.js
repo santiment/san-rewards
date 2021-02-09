@@ -5,7 +5,7 @@ const {BN, constants, expectEvent, expectRevert, ether, time} = require('@openze
 const {expect} = require('chai')
 
 const FarmingRewards = contract.fromArtifact('FarmingRewards')
-const SanFT = contract.fromArtifact('SanFT')
+const RewardsToken = contract.fromArtifact('RewardsToken')
 const SanMock = contract.fromArtifact('SanMock')
 
 const bn = (n) => new BN(n)
@@ -13,7 +13,8 @@ const token = (n) => ether(n)
 const ZERO = bn(0)
 
 describe('FarmingRewards', function () {
-    const [deployer, rewardsDistributor, staker1, staker2] = accounts
+    const [deployer, staker1, staker2] = accounts
+    const rewardsDistributor = deployer
     const stakingDuration = time.duration.days(60)
     const rewardPool = token('100000')
     const staker1SanBalance = token('1000')
@@ -21,8 +22,9 @@ describe('FarmingRewards', function () {
     const maximalStake = token('10000')
 
     before('Setup staking rewards', async () => {
+        // TODO use factory
 
-        this.rewardsToken = await SanFT.new({from: deployer})
+        this.rewardsToken = await RewardsToken.new({from: deployer})
 
         this.sanToken = await SanMock.new(1_000_000, {from: deployer})
         this.stakingContract = await FarmingRewards.new(
@@ -35,29 +37,24 @@ describe('FarmingRewards', function () {
             {from: deployer}
         )
 
-        await this.stakingContract.setRewardDistribution(rewardsDistributor, {from: deployer})
-        await this.rewardsToken.mint(rewardsDistributor, rewardPool, {from: deployer})
+        await this.rewardsToken.mint(this.stakingContract.address, rewardPool, {from: deployer})
         await this.sanToken.transfer(staker1, staker1SanBalance, {from: deployer})
         await this.sanToken.transfer(staker2, staker2SanBalance, {from: deployer})
 
         expect(await this.sanToken.balanceOf(staker1)).to.be.bignumber.equal(staker1SanBalance)
         expect(await this.sanToken.balanceOf(staker2)).to.be.bignumber.equal(staker2SanBalance)
         expect(await this.rewardsToken.totalSupply()).to.be.bignumber.equal(rewardPool)
-        expect(await this.rewardsToken.balanceOf(rewardsDistributor)).to.be.bignumber.equal(rewardPool)
         expect(await this.stakingContract.totalSupply()).to.be.bignumber.equal(ZERO)
-        expect(await this.stakingContract.rewardDistribution()).to.be.equal(rewardsDistributor)
         expect(await this.stakingContract.rewardsToken()).to.be.equal(this.rewardsToken.address)
         expect(await this.stakingContract.stakingToken()).to.be.equal(this.sanToken.address)
         expect(await this.stakingContract.rewardPerToken()).to.be.bignumber.equal(ZERO)
+        expect(await this.rewardsToken.balanceOf(this.stakingContract.address)).to.be.bignumber.equal(rewardPool)
     })
 
     it('Distribute reward for staking', async () => {
-        await this.rewardsToken.transfer(this.stakingContract.address, rewardPool, {from: rewardsDistributor})
-        let receipt = await this.stakingContract.notifyRewardAmount(rewardPool, {from: rewardsDistributor})
+        let receipt = await this.stakingContract.notifyRewardAmount(rewardPool, {from: deployer})
         expectEvent(receipt, 'RewardAdded', {reward: rewardPool})
 
-        expect(await this.rewardsToken.balanceOf(rewardsDistributor)).to.be.bignumber.equal(ZERO)
-        expect(await this.rewardsToken.balanceOf(this.stakingContract.address)).to.be.bignumber.equal(rewardPool)
     })
 
     it('Stake', async () => {

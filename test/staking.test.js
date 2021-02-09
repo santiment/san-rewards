@@ -5,7 +5,7 @@ const {BN, constants, expectEvent, expectRevert, ether, time} = require('@openze
 const {expect} = require('chai')
 
 const StakingRewards = contract.fromArtifact('StakingRewards')
-const SanFT = contract.fromArtifact('SanFT')
+const RewardsToken = contract.fromArtifact('RewardsToken')
 const SanMock = contract.fromArtifact('SanMock')
 
 const bn = (n) => new BN(n)
@@ -21,8 +21,9 @@ describe('StakingRewards', function () {
     const rewardRate = token('100').div(stakingDuration)
 
     before('Setup staking rewards', async () => {
+        // TODO use factory
 
-        this.rewardsToken = await SanFT.new({from: deployer})
+        this.rewardsToken = await RewardsToken.new({from: deployer})
 
         this.sanToken = await SanMock.new(1_000_000, {from: deployer})
         this.stakingContract = await StakingRewards.new(
