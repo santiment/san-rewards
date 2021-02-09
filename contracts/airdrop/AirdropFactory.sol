@@ -13,7 +13,7 @@ contract AirdropFactory is Ownable {
         rewardsToken = IERC20Mintable(rewardsToken_);
     }
 
-    function createAirdrop(uint256 total, bytes32 merkleRoot) external onlyOwner returns(address) {
+    function createAirdrop(bytes32 merkleRoot, uint256 total) external onlyOwner returns(address) {
         MerkleDistributor airdrop = new MerkleDistributor(address(rewardsToken), merkleRoot);
         rewardsToken.mint(address(airdrop), total);
         return address(airdrop);

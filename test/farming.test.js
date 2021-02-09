@@ -14,7 +14,6 @@ const ZERO = bn(0)
 
 describe('FarmingRewards', function () {
     const [deployer, staker1, staker2] = accounts
-    const rewardsDistributor = deployer
     const stakingDuration = time.duration.days(60)
     const rewardPool = token('100000')
     const staker1SanBalance = token('1000')

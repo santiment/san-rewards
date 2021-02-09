@@ -8,6 +8,9 @@ const writeAsync = util.promisify(fs.writeFile)
 
 const distribute = async (input, output) => {
     const balances = JSON.parse(await readAsync(input))
+    if (balances.length === 0) {
+        throw Error("Balances empty")
+    }
 
     const distribution = createDistribution(balances)
 
@@ -23,7 +26,6 @@ async function main() {
         })
         .action(async (input, output) => {
             output = output ?? "scripts/distribution.json"
-            console.log(`params=${input} ${output}`)
             await distribute(input, output)
         });
 
