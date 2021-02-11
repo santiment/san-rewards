@@ -9,12 +9,12 @@ contract AccountingToken is ERC20 {
     }
 
     // Do not need transfer of this token
-    function _transfer(address, address, uint256) internal override {
+    function _transfer(address, address, uint256) internal pure override {
         revert("Forbidden");
     }
 
     // Do not need allowance of this token
-    function _approve(address, address, uint256) internal override {
+    function _approve(address, address, uint256) internal pure override {
         revert("Forbidden");
     }
 }

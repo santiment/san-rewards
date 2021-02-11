@@ -25,7 +25,7 @@ contract StakingRewardsFactory is Ownable {
         return address(staking);
     }
 
-    function distributeRewards(address staking, uint256 stakingDuration) external onlyOwner {
+    function prolongStacking(address staking, uint256 stakingDuration) external onlyOwner {
         // TODO check minter role
         IProlongStaking(staking).prolongStacking(stakingDuration);
     }
