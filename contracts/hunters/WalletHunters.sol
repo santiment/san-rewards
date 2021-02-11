@@ -19,13 +19,13 @@ contract WalletHunters is IWalletHunters, Context, AccessControl, AccountingToke
     uint256 public constant SUPER_MAJORITY = 67;
     uint256 public constant SHERIFFS_REWARD_SHARE = 20;
     uint256 public constant FIXED_SHERIFF_REWARD = 10000 ether;
-    uint256 public constant MINIMAL_VOTES_FOR_REQUEST = 10000 ether;
-    uint256 public constant MINIMAL_DEPOSIT_FOR_SHERIFF = 10000 ether;
+    uint256 public constant MINIMAL_VOTES_FOR_REQUEST = 2000 ether;
+    uint256 public constant MINIMAL_DEPOSIT_FOR_SHERIFF = 1000 ether;
 
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
 
     uint256 public immutable _votingDuration;
-    IERC20Mintable _rewardsToken;
+    IERC20Mintable immutable _rewardsToken;
     Counters.Counter _requestCounter;
     mapping(uint256 => IWalletHunters.WalletRequest) public walletRequests;
     mapping(uint256 => IWalletHunters.RequestVoting) public requestVotings;
@@ -42,12 +42,13 @@ contract WalletHunters is IWalletHunters, Context, AccessControl, AccountingToke
         _;
     }
 
-    constructor(string memory name_, string memory symbol_, uint256 votingDuration_) AccountingToken(name_, symbol_) {
+    constructor(address rewardsToken_, uint256 votingDuration_) AccountingToken("Wallet Hunters, Sheriff Token", "WHST") {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
         _setupRole(MAYOR_ROLE, _msgSender());
 
         _votingDuration = votingDuration_;
+        _rewardsToken = IERC20Mintable(rewardsToken_);
     }
 
     function submitRequest(
@@ -75,7 +76,7 @@ contract WalletHunters is IWalletHunters, Context, AccessControl, AccountingToke
         address hunter,
         uint256 reward,
         uint256 requestTime,
-        uint256 finishTime,
+        bool votingState,
         bool rewardPaid,
         bool discarded
     ) {
@@ -83,7 +84,7 @@ contract WalletHunters is IWalletHunters, Context, AccessControl, AccountingToke
         hunter = walletRequests[requestId].hunter;
         reward = walletRequests[requestId].reward;
         requestTime = walletRequests[requestId].requestTime;
-        finishTime = requestTime.add(_votingDuration);
+        votingState = block.timestamp <= requestTime.add(_votingDuration);
         rewardPaid = walletRequests[requestId].rewardPaid;
         discarded = walletRequests[requestId].discarded;
     }
@@ -110,6 +111,8 @@ contract WalletHunters is IWalletHunters, Context, AccessControl, AccountingToke
             requestVotings[requestId].sheriffsAgainst[sheriff] = amount;
             requestVotings[requestId].votesAgainst = requestVotings[requestId].votesAgainst.add(amount);
         }
+
+        emit Voted(sheriff, amount, kind);
     }
 
     function discardRequest(uint256 requestId) external override onlyMayor validateRequestId(requestId) {
@@ -128,6 +131,11 @@ contract WalletHunters is IWalletHunters, Context, AccessControl, AccountingToke
         _burn(sheriff, amount);
         _rewardsToken.safeTransfer(sheriff, amount);
         emit Withdrawn(sheriff, amount);
+    }
+
+    function countVotes(uint256 requestId) external view override returns (uint256 votesFor, uint256 votesAgainst) {
+        votesFor = requestVotings[requestId].votesFor;
+        votesAgainst = requestVotings[requestId].votesAgainst;
     }
 
     function withdrawHunterReward(uint256 requestId) external override {
@@ -171,6 +179,8 @@ contract WalletHunters is IWalletHunters, Context, AccessControl, AccountingToke
         if (reward > 0) {
             _rewardsToken.mint(sheriff, reward);
         }
+
+        emit SheriffRewarded(sheriff, requestId, reward);
     }
 
     function withdrawSheriffRewards(address sheriff, uint256[] calldata requestIds) external override {

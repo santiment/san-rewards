@@ -27,6 +27,7 @@ interface IWalletHunters {
     event NewWalletRequest(uint256 indexed requestId, address indexed hunter, address indexed wallet, uint256 reward);
     event Deposited(address indexed sheriff, uint256 amount);
     event Withdrawn(address indexed sheriff, uint256 amount);
+    event Voted(address indexed sheriff, uint256 amount, Vote kind);
     event HunterRewarded(address indexed hunter, uint256 indexed requestId, uint256 reward);
     event SheriffRewarded(address indexed sheriff, uint256 indexed requestId, uint256 reward);
     event RequestDiscarded(uint256 indexed requestId);
@@ -42,7 +43,7 @@ interface IWalletHunters {
         address hunter,
         uint256 reward,
         uint256 requestTime,
-        uint256 finishTime,
+        bool votingState,
         bool rewardPaid,
         bool discarded
     );
@@ -72,6 +73,8 @@ interface IWalletHunters {
     function withdraw(address sheriff, uint256 amount) external;
 
     function isSheriff(address sheriff) external view returns (bool);
+
+    function countVotes(uint256 requestId) external view returns (uint256 votesFor, uint256 votesAgainst);
 
     // View functions
 
