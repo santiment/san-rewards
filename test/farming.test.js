@@ -109,7 +109,7 @@ describe('FarmingRewards', function () {
         expect(await this.sanToken.balanceOf(staker2)).to.be.bignumber.equal(withdraw)
         expect(await this.rewardsToken.balanceOf(staker2)).to.be.bignumber.gt(token(`44999.999`))
         expect(await this.rewardsToken.balanceOf(staker2)).to.be.bignumber.lt(token(`45001`))
-        expect(await this.stakingContract.earned(staker2)).to.be.bignumber.lt(token('0.1'))
+        expect(await this.stakingContract.earned(staker2)).to.be.bignumber.lt(token('1'))
     })
 
     it('Wait 31 days', async () => {

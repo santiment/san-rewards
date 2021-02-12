@@ -80,7 +80,7 @@ describe('WalletHunters', function () {
     it("Voting", async () => {
         const vote = async (sheriff, amount, voteFor) => {
             let kind = bn(voteFor ? 1 : 0)
-            const receipt = await this.walletHunters.vote(sheriff, this.requestId, amount, kind, {from: sheriff})
+            const receipt = await this.walletHunters.vote(sheriff, this.requestId, kind, {from: sheriff})
             expectEvent(receipt, "Voted", {sheriff, amount, kind: kind})
             expect(await this.rewardsToken.balanceOf(sheriff)).to.be.bignumber.equal(ZERO)
         }

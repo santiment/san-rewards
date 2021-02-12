@@ -124,13 +124,13 @@ contract WalletHunters is
     function vote(
         address sheriff,
         uint256 requestId,
-        uint256 amount,
         Vote kind
     ) external override validateRequestId(requestId) {
         require(sheriff == _msgSender(), "Sheriff must be sender");
         require(isSheriff(sheriff), "Sender is not sheriff");
         require(_votingState(requestId), "Voting is finished");
-        require(amount <= balanceOf(sheriff), "Amount of votes not enough");
+
+        uint256 amount = balanceOf(sheriff);
 
         require(
             sheriffVotes[sheriff].requests.add(requestId),

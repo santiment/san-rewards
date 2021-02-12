@@ -15,3 +15,6 @@ Pass - Verified: https://ropsten.etherscan.io/address/0x8F7E9944D782882453632507
 
 TokenMock:
 Pass - Verified: https://ropsten.etherscan.io/address/0xE774e5740d5A6ED18d1B6965F95F1e7198D71952#contracts
+
+WalletHunter:
+Pass - Verified: https://ropsten.etherscan.io/address/0x6fCf4bF558d13703BE1245fE0a0465aE798CBF56#contracts

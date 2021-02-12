@@ -103,7 +103,6 @@ interface IWalletHunters {
     function vote(
         address sheriff,
         uint256 requestId,
-        uint256 amount,
         Vote kind
     ) external;
 
