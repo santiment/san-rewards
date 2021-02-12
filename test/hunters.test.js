@@ -88,6 +88,7 @@ describe('WalletHunters', function () {
         await vote(sheriff1, token('1000'), true)
         await vote(sheriff2, token('5000'), false)
         await vote(sheriff3, token('10000'), true)
+        await expectRevert(vote(sheriff3, token('10000'), true), "Sheriff is already voted")
 
         const votes = await this.walletHunters.countVotes(this.requestId)
         expect(votes["votesFor"]).to.be.bignumber.equal(token("11000"))
@@ -95,6 +96,11 @@ describe('WalletHunters', function () {
     })
 
     it("Wait finish voting", async () => {
+        const locked = async (sheriff) => await this.walletHunters.lockedBalance(sheriff)
+        expect(await locked(sheriff1)).to.be.bignumber.equal(token('1000'))
+        expect(await locked(sheriff2)).to.be.bignumber.equal(token('5000'))
+        expect(await locked(sheriff3)).to.be.bignumber.equal(token('10000'))
+        expectRevert(this.walletHunters.withdraw(sheriff3, '1000', {from: sheriff3}), "Withdraw exceeds balance")
 
         await time.increase(time.duration.days(4))
 
