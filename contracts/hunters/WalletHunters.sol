@@ -9,8 +9,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
 import "../interfaces/IWalletHunters.sol";
-import "../interfaces/IERC20Mintable.sol";
-import "../rewards/AccountingToken.sol";
+import "../interfaces/IRewardsToken.sol";
+import "../utils/AccountingToken.sol";
 
 contract WalletHunters is
     IWalletHunters,
@@ -20,7 +20,7 @@ contract WalletHunters is
 {
     using Counters for Counters.Counter;
     using SafeMath for uint256;
-    using SafeERC20 for IERC20Mintable;
+    using SafeERC20 for IRewardsToken;
     using EnumerableSet for EnumerableSet.UintSet;
 
     uint256 public constant SUPER_MAJORITY = 67;
@@ -32,7 +32,7 @@ contract WalletHunters is
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
 
     uint256 private immutable _votingDuration;
-    IERC20Mintable private immutable _rewardsToken;
+    IRewardsToken private immutable _rewardsToken;
 
     Counters.Counter private _requestCounter;
     mapping(uint256 => IWalletHunters.WalletRequest) private walletRequests;
@@ -64,7 +64,7 @@ contract WalletHunters is
         _setupRole(MAYOR_ROLE, _msgSender());
 
         _votingDuration = votingDuration_;
-        _rewardsToken = IERC20Mintable(rewardsToken_);
+        _rewardsToken = IRewardsToken(rewardsToken_);
     }
 
     function submitRequest(

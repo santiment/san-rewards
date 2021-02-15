@@ -2,36 +2,46 @@
 pragma solidity >=0.6.0 <0.8.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
-contract RewardsToken is Context, AccessControl, ERC20Burnable {
+import "./interfaces/IRewardsToken.sol";
 
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+contract RewardsToken is IRewardsToken, ERC20, AccessControl {
+    using SafeMath for uint256;
 
-    /**
-     * @dev Grants `DEFAULT_ADMIN_ROLE` and `MINTER_ROLE` to the
-     * account that deploys the contract.
-     *
-     * See {ERC20-constructor}.
-     */
+    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
     constructor() ERC20("Santiment Rewards Token", "SRT") {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
         _setupRole(MINTER_ROLE, _msgSender());
     }
 
-    /**
-     * @dev Creates `amount` new tokens for `to`.
-     *
-     * See {ERC20-_mint}.
-     *
-     * Requirements:
-     *
-     * - the caller must have the `MINTER_ROLE`.
-     */
-    function mint(address to, uint256 amount) public virtual {
-        require(hasRole(MINTER_ROLE, _msgSender()), "SanNFT: must have minter role to mint");
+    function mint(address to, uint256 amount) external override {
+        require(
+            hasRole(MINTER_ROLE, _msgSender()),
+            "RewardsToken: must have minter role to mint"
+        );
         _mint(to, amount);
+    }
+
+    function burn(uint256 amount) external override {
+        _burn(_msgSender(), amount);
+    }
+
+    function burnFrom(address account, uint256 amount) external override {
+        uint256 decreasedAllowance =
+            allowance(account, _msgSender()).sub(
+                amount,
+                "RewardsToken: burn amount exceeds allowance"
+            );
+
+        _approve(account, _msgSender(), decreasedAllowance);
+        _burn(account, amount);
+    }
+
+    function minterRole() external pure override returns (bytes32) {
+        return MINTER_ROLE;
     }
 }

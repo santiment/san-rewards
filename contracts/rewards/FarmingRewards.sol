@@ -6,17 +6,16 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IStakingRewards.sol";
-import "../interfaces/IRewardsDistributionRecipient.sol";
+
 import "./BaseRewards.sol";
+import "../interfaces/IRewardsDistributionRecipient.sol";
 
 contract FarmingRewards is BaseRewards, IRewardsDistributionRecipient, Ownable {
-    using SafeERC20 for IERC20;
+    using SafeERC20 for IRewardsToken;
     using SafeMath for uint256;
 
     uint256 public immutable rewardsDuration;
-
-    event RewardAdded(uint256 reward);
+    uint256 internal _rewardRate;
 
     constructor(
         string memory _name,
@@ -29,47 +28,55 @@ contract FarmingRewards is BaseRewards, IRewardsDistributionRecipient, Ownable {
         rewardsDuration = _rewardsDuration;
     }
 
-    function notifyRewardAmount(uint256 reward) external override onlyOwner updateReward(address(0)) {
-        if (block.timestamp >= periodFinish) {
-            rewardRate = reward.div(rewardsDuration);
+    function getReward() public override updateReward(msg.sender) {
+        uint256 reward = earned(msg.sender);
+        if (reward > 0) {
+            _rewards[msg.sender] = 0;
+            rewardsToken.safeTransfer(msg.sender, reward);
+            emit RewardPaid(msg.sender, reward);
+        }
+    }
+
+    function _rewardPerToken() internal view override returns (uint256) {
+        if (totalSupply() == 0) {
+            return _rewardPerTokenStored;
+        }
+        return
+            _rewardPerTokenStored.add(
+                _lastTimeRewardApplicable()
+                    .sub(_lastUpdateTime)
+                    .mul(_rewardRate)
+                    .mul(1e18)
+                    .div(totalSupply())
+            );
+    }
+
+    function notifyRewardAmount(uint256 reward)
+        external
+        override
+        onlyOwner
+        updateReward(address(0))
+    {
+        if (block.timestamp >= _periodFinish) {
+            _rewardRate = reward.div(rewardsDuration);
         } else {
-            uint256 remaining = periodFinish.sub(block.timestamp);
-            uint256 leftover = remaining.mul(rewardRate);
-            rewardRate = reward.add(leftover).div(rewardsDuration);
+            uint256 remaining = _periodFinish.sub(block.timestamp);
+            uint256 leftover = remaining.mul(_rewardRate);
+            _rewardRate = reward.add(leftover).div(rewardsDuration);
         }
 
         // Ensure the provided reward amount is not more than the balance in the contract.
         // This keeps the reward rate in the right range, preventing overflows due to
         // very high values of rewardRate in the earned and rewardsPerToken functions;
         // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        uint balance = rewardsToken.balanceOf(address(this));
-        require(rewardRate <= balance.div(rewardsDuration), "Provided reward too high");
+        uint256 balance = rewardsToken.balanceOf(address(this));
+        require(
+            _rewardRate <= balance.div(rewardsDuration),
+            "Provided reward too high"
+        );
 
-        lastUpdateTime = block.timestamp;
-        periodFinish = block.timestamp.add(rewardsDuration);
+        _lastUpdateTime = block.timestamp;
+        _periodFinish = block.timestamp.add(rewardsDuration);
         emit RewardAdded(reward);
     }
-
-    function getReward() public override updateReward(msg.sender) {
-        uint256 reward = earned(msg.sender);
-        if (reward > 0) {
-            rewards[msg.sender] = 0;
-            rewardsToken.safeTransfer(msg.sender, reward);
-            emit RewardPaid(msg.sender, reward);
-        }
-    }
-
-    function rewardPerToken() public view override returns (uint256) {
-        if (totalSupply() == 0) {
-            return rewardPerTokenStored;
-        }
-        return rewardPerTokenStored.add(
-            lastTimeRewardApplicable()
-            .sub(lastUpdateTime)
-            .mul(rewardRate)
-            .mul(1e18)
-            .div(totalSupply())
-        );
-    }
-
 }

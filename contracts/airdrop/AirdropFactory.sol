@@ -1,21 +1,33 @@
-    // SPDX-License-Identifier: MIT
-    pragma solidity >=0.6.0 <0.8.0;
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.6.0 <0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IERC20Mintable.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+
 import "./MerkleDistributor.sol";
+import "../interfaces/IRewardsToken.sol";
+import "../interfaces/IAirdropFactory.sol";
 
-contract AirdropFactory is Ownable {
+contract AirdropFactory is IAirdropFactory, Ownable {
+    using Address for address;
 
-    IERC20Mintable public immutable rewardsToken;
+    IRewardsToken public immutable rewardsToken;
 
     constructor(address rewardsToken_) {
-        rewardsToken = IERC20Mintable(rewardsToken_);
+        require(rewardsToken_.isContract(), "RewardsToken must be contract");
+        rewardsToken = IRewardsToken(rewardsToken_);
     }
 
-    function createAirdrop(bytes32 merkleRoot, uint256 total) external onlyOwner returns(address) {
-        MerkleDistributor airdrop = new MerkleDistributor(address(rewardsToken), merkleRoot);
+    function createAirdrop(bytes32 merkleRoot, uint256 total)
+        external
+        override
+        onlyOwner
+        returns (address)
+    {
+        MerkleDistributor airdrop =
+            new MerkleDistributor(address(rewardsToken), merkleRoot);
         rewardsToken.mint(address(airdrop), total);
+        emit AirdropCreated(address(airdrop));
         return address(airdrop);
     }
 }

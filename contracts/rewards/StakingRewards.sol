@@ -6,58 +6,61 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IStakingRewards.sol";
-import "../interfaces/IERC20Mintable.sol";
+
 import "./BaseRewards.sol";
+import "../interfaces/IRewardsToken.sol";
 import "../interfaces/IProlongStaking.sol";
 
 contract StakingRewards is Ownable, BaseRewards, IProlongStaking {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    event RewardProlonged(uint256 rewardsDuration);
+    uint256 public immutable rewardRate;
 
     constructor(
-        string memory _name,
-        string memory _symbol,
-        address _rewardsToken,
-        address _stakingToken,
-        uint256 _maximalStake,
-        uint256 _rewardRate
-    ) BaseRewards(_name, _symbol, _rewardsToken, _stakingToken, _maximalStake) {
-        rewardRate = _rewardRate;
+        string memory name_,
+        string memory symbol_,
+        address rewardsToken_,
+        address stakingToken_,
+        uint256 maximalStake_,
+        uint256 rewardRate_
+    ) BaseRewards(name_, symbol_, rewardsToken_, stakingToken_, maximalStake_) {
+        rewardRate = rewardRate_;
     }
 
     function getReward() public override updateReward(msg.sender) {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
-            rewards[msg.sender] = 0;
-            IERC20Mintable(address(rewardsToken)).mint(msg.sender, reward);
+            _rewards[msg.sender] = 0;
+            rewardsToken.mint(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
 
-    function rewardPerToken() public view override returns (uint256) {
+    function _rewardPerToken() internal view override returns (uint256) {
         if (totalSupply() == 0) {
-            return rewardPerTokenStored;
+            return _rewardPerTokenStored;
         }
-        return rewardPerTokenStored.add(
-            lastTimeRewardApplicable()
-                .sub(lastUpdateTime)
-                .mul(rewardRate)
-        );
+        return
+            _rewardPerTokenStored.add(
+                _lastTimeRewardApplicable().sub(_lastUpdateTime).mul(rewardRate)
+            );
     }
 
-    function prolongStacking(uint256 duration) external override onlyOwner updateReward(address(0)) {
-        // TODO check minter role
-        // TODO bound maximal duration
-        if (periodFinish == 0) {
-            periodFinish = block.timestamp.add(duration);
+    function prolongStacking(uint256 duration)
+        external
+        override
+        onlyOwner
+        updateReward(address(0))
+    {
+        require(duration < 64 weeks, "Duration too long");
+        if (_periodFinish == 0) {
+            _periodFinish = block.timestamp.add(duration);
         } else {
-            periodFinish = periodFinish.add(duration);
+            _periodFinish = _periodFinish.add(duration);
         }
 
-        lastUpdateTime = block.timestamp;
+        _lastUpdateTime = block.timestamp;
 
         emit RewardProlonged(duration);
     }

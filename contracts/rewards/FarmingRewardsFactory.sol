@@ -2,31 +2,50 @@
 pragma solidity >=0.6.0 <0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../interfaces/IERC20Mintable.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+
 import "./FarmingRewards.sol";
+import "../interfaces/IRewardsToken.sol";
 import "../interfaces/IRewardsDistributionRecipient.sol";
+import "../interfaces/IFarmingRewardsFactory.sol";
 
-contract FarmingRewardsFactory is Ownable {
+contract FarmingRewardsFactory is IFarmingRewardsFactory, Ownable {
+    using Address for address;
 
-    IERC20Mintable public immutable rewardsToken;
+    IRewardsToken public immutable rewardsToken;
 
     constructor(address rewardsToken_) {
-        rewardsToken = IERC20Mintable(rewardsToken_);
+        require(rewardsToken_.isContract(), "RewardsToken must be contract");
+        rewardsToken = IRewardsToken(rewardsToken_);
     }
 
     function createFarming(
         string memory _name,
         string memory _symbol,
-        uint256 _rewardsDuration,
         address _stakingToken,
+        uint256 _rewardsDuration,
         uint256 _maximalStake
-    ) external onlyOwner returns(address) {
-        FarmingRewards farming = new FarmingRewards(_name, _symbol, _rewardsDuration, address(rewardsToken), _stakingToken, _maximalStake);
+    ) external override onlyOwner returns (address) {
+        FarmingRewards farming =
+            new FarmingRewards(
+                _name,
+                _symbol,
+                _rewardsDuration,
+                address(rewardsToken),
+                _stakingToken,
+                _maximalStake
+            );
+        emit FarmingCreated(address(farming));
         return address(farming);
     }
 
-    function distributeRewards(address farming, uint256 total) external onlyOwner {
+    function distributeRewards(address farming, uint256 total)
+        external
+        override
+        onlyOwner
+    {
         rewardsToken.mint(farming, total);
         IRewardsDistributionRecipient(farming).notifyRewardAmount(total);
+        emit FarmingDistributed(address(farming));
     }
 }
