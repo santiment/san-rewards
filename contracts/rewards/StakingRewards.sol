@@ -28,12 +28,13 @@ contract StakingRewards is Ownable, BaseRewards, IProlongStaking {
         rewardRate = rewardRate_;
     }
 
-    function getReward() public override updateReward(msg.sender) {
-        uint256 reward = earned(msg.sender);
+    function getReward(address account) public override updateReward(account) {
+        require(account == msg.sender, "Sender must be account");
+        uint256 reward = earned(account);
         if (reward > 0) {
-            _rewards[msg.sender] = 0;
-            rewardsToken.mint(msg.sender, reward);
-            emit RewardPaid(msg.sender, reward);
+            _rewards[account] = 0;
+            rewardsToken.mint(account, reward);
+            emit RewardPaid(account, reward);
         }
     }
 

@@ -4,8 +4,6 @@ pragma solidity >=0.6.0 <0.8.0;
 
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 
-// TODO split getReward and withdraw
-
 interface IWalletHunters {
     enum Vote {AGAINST, FOR}
 
@@ -55,10 +53,54 @@ interface IWalletHunters {
     event RequestDiscarded(uint256 indexed requestId, address indexed mayor);
 
     function submitRequest(
-        address wallet,
         address hunter,
+        address wallet,
         uint256 reward
     ) external returns (uint256);
+
+    function discardRequest(address mayor, uint256 requestId) external;
+
+    function stake(address sheriff, uint256 amount) external;
+
+    function vote(
+        address sheriff,
+        uint256 requestId,
+        Vote kind
+    ) external;
+
+    function withdraw(address sheriff, uint256 amount) external;
+
+    function exit(address sheriff) external;
+
+    function getHunterReward(address hunter, uint256 requestId) external;
+
+    function getHunterRewards(
+        address hunter,
+        uint256[] calldata requestIds
+    ) external;
+
+    function getSheriffReward(address sheriff, uint256 requestId) external;
+
+    function getSheriffRewards(
+        address sheriff,
+        uint256[] calldata requestIds
+    ) external;
+
+    function hunterReward(uint256 requestId) external view returns (uint256);
+
+    function sheriffReward(address sheriff, uint256 requestId)
+    external
+    view
+    returns (uint256);
+
+    function lockedBalance(address sheriff) external view returns (uint256);
+
+    function isSheriff(address sheriff) external view returns (bool);
+
+    function countVotes(uint256 requestId)
+        external
+        view
+        returns (uint256 votesFor, uint256 votesAgainst);
 
     function request(uint256 requestId)
         external
@@ -72,56 +114,6 @@ interface IWalletHunters {
             bool rewardPaid,
             bool discarded
         );
-
-    function withdrawHunterReward(uint256 requestId) external;
-
-    function withdrawHunterRewards(
-        address hunter,
-        uint256[] calldata requestIds
-    ) external;
-
-    function withdrawSheriffReward(address sheriff, uint256 requestId) external;
-
-    function withdrawSheriffRewards(
-        address sheriff,
-        uint256[] calldata requestIds
-    ) external;
-
-    function hunterReward(uint256 requestId) external view returns (uint256);
-
-    function sheriffReward(address sheriff, uint256 requestId)
-        external
-        view
-        returns (uint256);
-
-    // Mayor logic
-
-    function discardRequest(address mayor, uint256 requestId) external;
-
-    // Sheriff logic
-
-    function deposit(address sheriff, uint256 amount) external;
-
-    function vote(
-        address sheriff,
-        uint256 requestId,
-        Vote kind
-    ) external;
-
-    function lockedBalance(address sheriff) external view returns (uint256);
-
-    function withdraw(address sheriff, uint256 amount) external;
-
-    function isSheriff(address sheriff) external view returns (bool);
-
-    function countVotes(uint256 requestId)
-        external
-        view
-        returns (uint256 votesFor, uint256 votesAgainst);
-
-    // View functions
-
-    function rewardsToken() external view returns (address);
 
     function votingDuration() external view returns (uint256);
 }

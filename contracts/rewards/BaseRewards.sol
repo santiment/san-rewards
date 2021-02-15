@@ -53,30 +53,41 @@ abstract contract BaseRewards is IStakingRewards, AccountingToken {
         _maximalStake = maximalStake_;
     }
 
-    function stake(uint256 amount) external override updateReward(msg.sender) {
+    function stake(address account, uint256 amount)
+        external
+        override
+        updateReward(account)
+    {
+        require(account == msg.sender, "Sender must be account");
         require(amount > 0, "Cannot stake 0");
         require(
-            balanceOf(msg.sender).add(amount) <= _maximalStake,
+            balanceOf(account).add(amount) <= _maximalStake,
             "Stake exceed maximal"
         );
-        _mint(msg.sender, amount);
-        stakingToken.safeTransferFrom(msg.sender, address(this), amount);
-        emit Staked(msg.sender, amount);
+        _mint(account, amount);
+        stakingToken.safeTransferFrom(account, address(this), amount);
+        emit Staked(account, amount);
     }
 
-    function exit() external override {
-        withdraw(balanceOf(msg.sender));
-        getReward();
+    function exit(address account) external override {
+        require(account == msg.sender, "Sender must be account");
+        withdraw(account, balanceOf(account));
+        getReward(account);
     }
 
-    function withdraw(uint256 amount) public override updateReward(msg.sender) {
+    function withdraw(address account, uint256 amount)
+        public
+        override
+        updateReward(account)
+    {
+        require(account == msg.sender, "Sender must be account");
         require(amount > 0, "Cannot withdraw 0");
-        _burn(msg.sender, amount);
-        stakingToken.safeTransfer(msg.sender, amount);
-        emit Withdrawn(msg.sender, amount);
+        _burn(account, amount);
+        stakingToken.safeTransfer(account, amount);
+        emit Withdrawn(account, amount);
     }
 
-    function getReward() public virtual override;
+    function getReward(address account) public virtual override;
 
     function maximalStake() external view override returns (uint256) {
         return _maximalStake;

@@ -6,13 +6,13 @@ interface IStakingRewards {
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
 
-    function stake(uint256 amount) external;
+    function stake(address account, uint256 amount) external;
 
-    function getReward() external;
+    function getReward(address account) external;
 
-    function withdraw(uint256 amount) external;
+    function withdraw(address account, uint256 amount) external;
 
-    function exit() external;
+    function exit(address account) external;
 
     function earned(address account) external view returns (uint256);
 
