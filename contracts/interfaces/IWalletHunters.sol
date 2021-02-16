@@ -37,20 +37,20 @@ interface IWalletHunters {
         address indexed wallet,
         uint256 reward
     );
-    event Deposited(address indexed sheriff, uint256 amount);
+    event Staked(address indexed sheriff, uint256 amount);
     event Withdrawn(address indexed sheriff, uint256 amount);
     event Voted(address indexed sheriff, uint256 amount, Vote kind);
-    event HunterRewarded(
+    event HunterRewardPaid(
         address indexed hunter,
         uint256 indexed requestId,
         uint256 reward
     );
-    event SheriffRewarded(
+    event SheriffRewardPaid(
         address indexed sheriff,
         uint256 indexed requestId,
         uint256 reward
     );
-    event RequestDiscarded(uint256 indexed requestId, address indexed mayor);
+    event RequestDiscarded(uint256 indexed requestId, address mayor);
 
     function submitRequest(
         address hunter,

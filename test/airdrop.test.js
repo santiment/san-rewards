@@ -10,8 +10,9 @@ const {BN, expectEvent, expectRevert, ether} = require('@openzeppelin/test-helpe
 const {expect} = require('chai')
 const {createDistribution} = require('../src/create-distribution')
 
-const MerkleDistributor = contract.fromArtifact('MerkleDistributor')
 const RewardsToken = contract.fromArtifact('RewardsToken')
+const MerkleDistributor = contract.fromArtifact('MerkleDistributor')
+const AirdropFactory = contract.fromArtifact('AirdropFactory')
 
 const AIRDROP_AMOUNT = ether('100')
 
@@ -28,21 +29,29 @@ describe('MerkleDistributor', function () {
         this.distribution = createDistribution(balances)
 
         this.rewardsToken = await RewardsToken.new({from: deployer})
-        this.distributorContract = await MerkleDistributor.new(this.rewardsToken.address, this.distribution.merkleRoot, {from: deployer})
+        this.factory = await AirdropFactory.new(this.rewardsToken.address, {from: deployer})
+        await this.rewardsToken.grantRole(await this.rewardsToken.minterRole(), this.factory.address, {from: deployer})
 
-        await this.rewardsToken.mint(this.distributorContract.address, this.distribution.tokenTotal, {from: deployer})
+        expect(await this.rewardsToken.hasRole(await this.rewardsToken.minterRole(), this.factory.address)).to.be.true
     })
 
-    it('Check initial state of merkle distributor', async () => {
-        const balance = await this.rewardsToken.balanceOf(this.distributorContract.address)
+    it("Create airdrop", async () => {
+
+        const receipt = await this.factory.createAirdrop(this.distribution.merkleRoot, this.distribution.tokenTotal, {from: deployer})
+        expectEvent(receipt, 'AirdropCreated')
+        this.airdrop = await MerkleDistributor.at(receipt.logs[0].args.addr)
+    })
+
+    it('Check initial state of airdrop', async () => {
+        const balance = await this.rewardsToken.balanceOf(this.airdrop.address)
         expect(balance).to.be.bignumber.equal(AIRDROP_AMOUNT.mul(new BN(accounts.length)))
 
-        expect(await this.distributorContract.token()).to.be.equal(this.rewardsToken.address)
-        expect(await this.distributorContract.merkleRoot()).to.be.equal(this.distribution.merkleRoot)
+        expect(await this.airdrop.token()).to.be.equal(this.rewardsToken.address)
+        expect(await this.airdrop.merkleRoot()).to.be.equal(this.distribution.merkleRoot)
 
         for (const account in this.distribution.claims) {
             const claim = this.distribution.claims[account]
-            const claimed = await this.distributorContract.isClaimed(claim.index)
+            const claimed = await this.airdrop.isClaimed(claim.index)
             expect(claimed).to.be.false
         }
     })
@@ -51,7 +60,7 @@ describe('MerkleDistributor', function () {
         const userClaim = this.distribution.claims[user]
 
         await expectRevert(
-            this.distributorContract.claim(userClaim.index, attacker, userClaim.amount, userClaim.proof, {from: attacker}),
+            this.airdrop.claim(userClaim.index, attacker, userClaim.amount, userClaim.proof, {from: attacker}),
             'MerkleDistributor: Invalid proof'
         )
     })
@@ -62,26 +71,26 @@ describe('MerkleDistributor', function () {
 
             if (parseInt(claim.index) % 2 === 0) continue
 
-            const receipt = await this.distributorContract.claim(claim.index, account, claim.amount, claim.proof, {from: account})
+            const receipt = await this.airdrop.claim(claim.index, account, claim.amount, claim.proof, {from: account})
 
             expectEvent(receipt, 'Claimed', {
                 account,
                 index: new BN(claim.index),
                 amount: new BN(claim.amount)
             })
-            const claimed = await this.distributorContract.isClaimed(claim.index)
+            const claimed = await this.airdrop.isClaimed(claim.index)
             expect(claimed).to.be.true
             const balance = await this.rewardsToken.balanceOf(account)
             expect(balance).to.be.bignumber.equal(AIRDROP_AMOUNT)
 
             // Check that can't claim twice
             await expectRevert(
-                this.distributorContract.claim(claim.index, account, claim.amount, claim.proof, {from: account}),
+                this.airdrop.claim(claim.index, account, claim.amount, claim.proof, {from: account}),
                 'MerkleDistributor: Drop already claimed'
             )
         }
 
-        const balance = await this.rewardsToken.balanceOf(this.distributorContract.address)
+        const balance = await this.rewardsToken.balanceOf(this.airdrop.address)
         expect(balance).to.be.bignumber.equal(AIRDROP_AMOUNT.mul(new BN(accounts.length / 2)))
     })
 })

@@ -21,26 +21,26 @@ describe('WalletHunters', function () {
         this.rewardsToken = await RewardsToken.new({from: deployer})
         this.walletHunters = await WalletHunters.new(this.rewardsToken.address, votingDuration, {from: deployer})
 
-        await this.rewardsToken.grantRole(await this.rewardsToken.MINTER_ROLE(), this.walletHunters.address, {from: deployer})
+        await this.rewardsToken.grantRole(await this.rewardsToken.minterRole(), this.walletHunters.address, {from: deployer})
         await this.walletHunters.grantRole(await this.walletHunters.MAYOR_ROLE(), mayor, {from: deployer})
 
-        this.rewardsToken.mint(sheriff1, token('1000'), {from: deployer})
-        this.rewardsToken.mint(sheriff2, token('5000'), {from: deployer})
-        this.rewardsToken.mint(sheriff3, token('10000'), {from: deployer})
+        await this.rewardsToken.mint(sheriff1, token('1000'), {from: deployer})
+        await this.rewardsToken.mint(sheriff2, token('5000'), {from: deployer})
+        await this.rewardsToken.mint(sheriff3, token('10000'), {from: deployer})
 
         expect(await this.rewardsToken.balanceOf(sheriff1)).to.be.bignumber.equal(token('1000'))
         expect(await this.rewardsToken.balanceOf(sheriff2)).to.be.bignumber.equal(token('5000'))
         expect(await this.rewardsToken.balanceOf(sheriff3)).to.be.bignumber.equal(token('10000'))
         expect(await this.walletHunters.rewardsToken()).to.be.equal(this.rewardsToken.address)
         expect(await this.walletHunters.votingDuration()).to.be.bignumber.equal(bn(votingDuration))
-        expect(await this.rewardsToken.hasRole(await this.rewardsToken.MINTER_ROLE(), this.walletHunters.address)).to.be.true
+        expect(await this.rewardsToken.hasRole(await this.rewardsToken.minterRole(), this.walletHunters.address)).to.be.true
         expect(await this.walletHunters.hasRole(await this.walletHunters.MAYOR_ROLE(), mayor)).to.be.true
         expect(await this.rewardsToken.balanceOf(hunter)).to.be.bignumber.equal(ZERO)
     })
 
     it("Submit a new wallet", async () => {
         this.requestId = bn(1)
-        const receipt = await this.walletHunters.submitRequest(wallet, hunter, reward, {from: hunter})
+        const receipt = await this.walletHunters.submitRequest(hunter, wallet, reward, {from: hunter})
         expectEvent(receipt, "NewWalletRequest", {wallet, hunter, reward, requestId: this.requestId})
 
         const request = await this.walletHunters.request(this.requestId)
@@ -60,8 +60,8 @@ describe('WalletHunters', function () {
 
         const becomeSheriff = async (sheriff, amount) => {
             await this.rewardsToken.approve(this.walletHunters.address, amount, {from: sheriff})
-            const receipt = await this.walletHunters.deposit(sheriff, amount, {from: sheriff})
-            expectEvent(receipt, "Deposited", {sheriff, amount})
+            const receipt = await this.walletHunters.stake(sheriff, amount, {from: sheriff})
+            expectEvent(receipt, "Staked", {sheriff, amount})
         }
         await becomeSheriff(sheriff1, token('1000'))
         await becomeSheriff(sheriff2, token('5000'))
@@ -112,8 +112,8 @@ describe('WalletHunters', function () {
         const actualReward = await this.walletHunters.hunterReward(this.requestId)
         expect(actualReward).to.be.bignumber.equal(token('80000'))
 
-        const receipt = await this.walletHunters.withdrawHunterReward(this.requestId, {from: hunter})
-        expectEvent(receipt, "HunterRewarded", {hunter, requestId: this.requestId, reward: actualReward})
+        const receipt = await this.walletHunters.getHunterReward(hunter, this.requestId, {from: hunter})
+        expectEvent(receipt, "HunterRewardPaid", {hunter, requestId: this.requestId, reward: actualReward})
 
         expect(await this.rewardsToken.balanceOf(hunter)).to.be.bignumber.equal(actualReward)
         expect(await this.walletHunters.hunterReward(this.requestId)).to.be.bignumber.equal(ZERO)
@@ -128,8 +128,8 @@ describe('WalletHunters', function () {
         expect(await actualReward(sheriff3)).to.be.bignumber.lt(token('18182'))
 
         const withdrawReward = async (sheriff) => {
-            const receipt = await this.walletHunters.withdrawSheriffReward(sheriff, this.requestId, {from: sheriff})
-            expectEvent(receipt, "SheriffRewarded", {sheriff, requestId: this.requestId})
+            const receipt = await this.walletHunters.getSheriffReward(sheriff, this.requestId, {from: sheriff})
+            expectEvent(receipt, "SheriffRewardPaid", {sheriff, requestId: this.requestId})
         }
 
         await withdrawReward(sheriff1)

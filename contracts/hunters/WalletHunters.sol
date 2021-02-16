@@ -93,7 +93,7 @@ contract WalletHunters is
         require(amount > 0, "Cannot deposit 0");
         _mint(sheriff, amount);
         rewardsToken.safeTransferFrom(sheriff, address(this), amount);
-        emit Deposited(sheriff, amount);
+        emit Staked(sheriff, amount);
     }
 
     function vote(
@@ -174,7 +174,7 @@ contract WalletHunters is
             rewardsToken.mint(hunter, reward);
         }
 
-        emit HunterRewarded(hunter, requestId, reward);
+        emit HunterRewardPaid(hunter, requestId, reward);
     }
 
     function getHunterRewards(address hunter, uint256[] calldata requestIds)
@@ -196,7 +196,7 @@ contract WalletHunters is
 
             walletRequests[requestId].rewardPaid = true;
 
-            emit HunterRewarded(hunter, requestId, reward);
+            emit HunterRewardPaid(hunter, requestId, reward);
         }
 
         if (totalReward > 0) {
@@ -217,7 +217,7 @@ contract WalletHunters is
             rewardsToken.mint(sheriff, reward);
         }
 
-        emit SheriffRewarded(sheriff, requestId, reward);
+        emit SheriffRewardPaid(sheriff, requestId, reward);
     }
 
     function getSheriffRewards(address sheriff, uint256[] calldata requestIds)
@@ -234,7 +234,7 @@ contract WalletHunters is
 
             _removeVote(sheriff, requestId);
 
-            emit SheriffRewarded(sheriff, requestId, reward);
+            emit SheriffRewardPaid(sheriff, requestId, reward);
         }
 
         if (totalReward > 0) {
