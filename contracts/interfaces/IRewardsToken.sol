@@ -29,7 +29,26 @@ interface IRewardsToken is IERC20 {
     function burnFrom(address account, uint256 amount) external;
 
     /**
+     * @dev Pause transferring, minting, burning tokens.
+     *
+     * - the caller must have the `PAUSER_ROLE`.
+     */
+    function pause() external;
+
+    /**
+     * @dev Resume transferring, minting, burning tokens.
+     *
+     * - the caller must have the `PAUSER_ROLE`.
+     */
+    function unpause() external;
+
+    /**
      * @dev Return minter role unique id. Used for managing minter role at contract {AccessControl}
      */
     function minterRole() external view returns (bytes32);
+
+    /**
+     * @dev Return pauser role unique id. Used for managing pauser role at contract {AccessControl}
+     */
+    function pauserRole() external view returns (bytes32);
 }

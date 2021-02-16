@@ -1,17 +1,13 @@
 const {accounts, contract} = require('@openzeppelin/test-environment')
-
-const {BN, constants, expectEvent, expectRevert, ether, time} = require('@openzeppelin/test-helpers')
-
+const {constants, expectEvent, expectRevert, time} = require('@openzeppelin/test-helpers')
 const {expect} = require('chai')
+
+const {token, bn, ZERO} = require("./utils");
 
 const RewardsToken = contract.fromArtifact('RewardsToken')
 const SanMock = contract.fromArtifact('SanMock')
 const StakingRewards = contract.fromArtifact('StakingRewards')
 const StakingRewardsFactory = contract.fromArtifact('StakingRewardsFactory')
-
-const bn = (n) => new BN(n)
-const token = (n) => ether(n)
-const ZERO = bn(0)
 
 describe('StakingRewards', function () {
     const [deployer, staker1, staker2] = accounts
@@ -29,7 +25,6 @@ describe('StakingRewards', function () {
 
         await this.sanToken.transfer(staker1, staker1SanBalance, {from: deployer})
         await this.sanToken.transfer(staker2, staker2SanBalance, {from: deployer})
-        // await this.rewardsToken.grantRole(await this.rewardsToken.MINTER_ROLE(), this.stakingContract.address, {from: deployer})
 
         expect(await this.sanToken.balanceOf(staker1)).to.be.bignumber.equal(staker1SanBalance)
         expect(await this.sanToken.balanceOf(staker2)).to.be.bignumber.equal(staker2SanBalance)
