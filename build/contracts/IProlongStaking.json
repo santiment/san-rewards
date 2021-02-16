@@ -1,0 +1,395 @@
+{
+  "contractName": "IProlongStaking",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "rewardsDuration",
+          "type": "uint256"
+        }
+      ],
+      "name": "RewardProlonged",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "name": "prolongStacking",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"rewardsDuration\",\"type\":\"uint256\"}],\"name\":\"RewardProlonged\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"name\":\"prolongStacking\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"This is an interface that `IStakingRewards` implementation can use to be started.\",\"kind\":\"dev\",\"methods\":{\"prolongStacking(uint256)\":{\"details\":\"Prolong staking rewards for `duration` time.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IProlongStaking.sol\":\"IProlongStaking\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IProlongStaking.sol\":{\"keccak256\":\"0xf2b11fb5ca14078c15481747e5b7bc367c265bb5a4e57a29046fb6182f84e0f8\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://dea0b675de9b58e603bdbd528f3a4cb90c4b5deca6027b93db20e6542e9d5d88\",\"dweb:/ipfs/QmbgWd5pHVZrUmbN4RNGaM3Dify4LHZrXZ39FEpCtCMBTM\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.6.0 <0.8.0;\n\n/**\n * @dev This is an interface that `IStakingRewards` implementation can use to be started.\n */\ninterface IProlongStaking {\n    event RewardProlonged(uint256 rewardsDuration);\n\n    /**\n     * @dev Prolong staking rewards for `duration` time.\n     */\n    function prolongStacking(uint256 duration) external;\n}\n",
+  "sourcePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IProlongStaking.sol",
+  "ast": {
+    "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IProlongStaking.sol",
+    "exportedSymbols": {
+      "IProlongStaking": [
+        1834
+      ]
+    },
+    "id": 1835,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1822,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.6",
+          ".0",
+          "<",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:31:9"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 1823,
+          "nodeType": "StructuredDocumentation",
+          "src": "65:97:9",
+          "text": " @dev This is an interface that `IStakingRewards` implementation can use to be started."
+        },
+        "fullyImplemented": false,
+        "id": 1834,
+        "linearizedBaseContracts": [
+          1834
+        ],
+        "name": "IProlongStaking",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "id": 1827,
+            "name": "RewardProlonged",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 1826,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1825,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "rewardsDuration",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1827,
+                  "src": "217:23:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1824,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "217:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "216:25:9"
+            },
+            "src": "195:47:9"
+          },
+          {
+            "documentation": {
+              "id": 1828,
+              "nodeType": "StructuredDocumentation",
+              "src": "248:68:9",
+              "text": " @dev Prolong staking rewards for `duration` time."
+            },
+            "functionSelector": "15f10118",
+            "id": 1833,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "prolongStacking",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1831,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1830,
+                  "mutability": "mutable",
+                  "name": "duration",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1833,
+                  "src": "346:16:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1829,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "346:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "345:18:9"
+            },
+            "returnParameters": {
+              "id": 1832,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "372:0:9"
+            },
+            "scope": 1834,
+            "src": "321:52:9",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 1835,
+        "src": "163:212:9"
+      }
+    ],
+    "src": "32:344:9"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IProlongStaking.sol",
+      "exportedSymbols": {
+        "IProlongStaking": [
+          1834
+        ]
+      },
+      "license": "MIT"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            ">=",
+            "0.6",
+            ".0",
+            "<",
+            "0.8",
+            ".0"
+          ]
+        },
+        "id": 1822,
+        "name": "PragmaDirective",
+        "src": "32:31:9"
+      },
+      {
+        "attributes": {
+          "abstract": false,
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "interface",
+          "fullyImplemented": false,
+          "linearizedBaseContracts": [
+            1834
+          ],
+          "name": "IProlongStaking",
+          "scope": 1835
+        },
+        "children": [
+          {
+            "attributes": {
+              "text": " @dev This is an interface that `IStakingRewards` implementation can use to be started."
+            },
+            "id": 1823,
+            "name": "StructuredDocumentation",
+            "src": "65:97:9"
+          },
+          {
+            "attributes": {
+              "anonymous": false,
+              "name": "RewardProlonged"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": false,
+                      "mutability": "mutable",
+                      "name": "rewardsDuration",
+                      "scope": 1827,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 1824,
+                        "name": "ElementaryTypeName",
+                        "src": "217:7:9"
+                      }
+                    ],
+                    "id": 1825,
+                    "name": "VariableDeclaration",
+                    "src": "217:23:9"
+                  }
+                ],
+                "id": 1826,
+                "name": "ParameterList",
+                "src": "216:25:9"
+              }
+            ],
+            "id": 1827,
+            "name": "EventDefinition",
+            "src": "195:47:9"
+          },
+          {
+            "attributes": {
+              "functionSelector": "15f10118",
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "prolongStacking",
+              "scope": 1834,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @dev Prolong staking rewards for `duration` time."
+                },
+                "id": 1828,
+                "name": "StructuredDocumentation",
+                "src": "248:68:9"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "duration",
+                      "scope": 1833,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 1829,
+                        "name": "ElementaryTypeName",
+                        "src": "346:7:9"
+                      }
+                    ],
+                    "id": 1830,
+                    "name": "VariableDeclaration",
+                    "src": "346:16:9"
+                  }
+                ],
+                "id": 1831,
+                "name": "ParameterList",
+                "src": "345:18:9"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 1832,
+                "name": "ParameterList",
+                "src": "372:0:9"
+              }
+            ],
+            "id": 1833,
+            "name": "FunctionDefinition",
+            "src": "321:52:9"
+          }
+        ],
+        "id": 1834,
+        "name": "ContractDefinition",
+        "src": "163:212:9"
+      }
+    ],
+    "id": 1835,
+    "name": "SourceUnit",
+    "src": "32:344:9"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.6+commit.7338295f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.3.3",
+  "updatedAt": "2021-02-16T10:30:05.211Z",
+  "devdoc": {
+    "details": "This is an interface that `IStakingRewards` implementation can use to be started.",
+    "kind": "dev",
+    "methods": {
+      "prolongStacking(uint256)": {
+        "details": "Prolong staking rewards for `duration` time."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

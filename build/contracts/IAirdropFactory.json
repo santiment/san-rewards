@@ -1,0 +1,511 @@
+{
+  "contractName": "IAirdropFactory",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "AirdropCreated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "merkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "total",
+          "type": "uint256"
+        }
+      ],
+      "name": "createAirdrop",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"AirdropCreated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"merkleRoot\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"total\",\"type\":\"uint256\"}],\"name\":\"createAirdrop\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Factory for deploying airdrop contract {MerkleDistributor}.\",\"kind\":\"dev\",\"methods\":{\"createAirdrop(bytes32,uint256)\":{\"details\":\"Mint `total` amount of rewards tokens and deploy airdrop contract {MerkleDistributor} with `merkleRoot`. Return address of deployed contract.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IAirdropFactory.sol\":\"IAirdropFactory\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IAirdropFactory.sol\":{\"keccak256\":\"0x824b6b7b91d70eb8c0c51431fe3dc61bd787cbf79f04ff7ceaa9e1d7d9695e55\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://0a051c9ae9daf7764cc561d30ba00a36603e12c8cddea088f767cfed80e3c55f\",\"dweb:/ipfs/QmWSK31zteCerRabhcxxhC6zJWRdiQ98f35fBgCbFjpcax\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.6.0 <0.8.0;\n\n/**\n * @dev Factory for deploying airdrop contract {MerkleDistributor}.\n */\ninterface IAirdropFactory {\n    event AirdropCreated(address addr);\n\n    /**\n     * @dev Mint `total` amount of rewards tokens and deploy airdrop contract {MerkleDistributor} with `merkleRoot`.\n     * Return address of deployed contract.\n     */\n    function createAirdrop(bytes32 merkleRoot, uint256 total)\n        external\n        returns (address);\n}\n",
+  "sourcePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IAirdropFactory.sol",
+  "ast": {
+    "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IAirdropFactory.sol",
+    "exportedSymbols": {
+      "IAirdropFactory": [
+        1744
+      ]
+    },
+    "id": 1745,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1728,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.6",
+          ".0",
+          "<",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:31:6"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 1729,
+          "nodeType": "StructuredDocumentation",
+          "src": "65:75:6",
+          "text": " @dev Factory for deploying airdrop contract {MerkleDistributor}."
+        },
+        "fullyImplemented": false,
+        "id": 1744,
+        "linearizedBaseContracts": [
+          1744
+        ],
+        "name": "IAirdropFactory",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "id": 1733,
+            "name": "AirdropCreated",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 1732,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1731,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "addr",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1733,
+                  "src": "194:12:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1730,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "194:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "193:14:6"
+            },
+            "src": "173:35:6"
+          },
+          {
+            "documentation": {
+              "id": 1734,
+              "nodeType": "StructuredDocumentation",
+              "src": "214:172:6",
+              "text": " @dev Mint `total` amount of rewards tokens and deploy airdrop contract {MerkleDistributor} with `merkleRoot`.\n Return address of deployed contract."
+            },
+            "functionSelector": "8fa97cfd",
+            "id": 1743,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createAirdrop",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1739,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1736,
+                  "mutability": "mutable",
+                  "name": "merkleRoot",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1743,
+                  "src": "414:18:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 1735,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "414:7:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1738,
+                  "mutability": "mutable",
+                  "name": "total",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1743,
+                  "src": "434:13:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1737,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "434:7:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "413:35:6"
+            },
+            "returnParameters": {
+              "id": 1742,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1741,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1743,
+                  "src": "483:7:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1740,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "483:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "482:9:6"
+            },
+            "scope": 1744,
+            "src": "391:101:6",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 1745,
+        "src": "141:353:6"
+      }
+    ],
+    "src": "32:463:6"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IAirdropFactory.sol",
+      "exportedSymbols": {
+        "IAirdropFactory": [
+          1744
+        ]
+      },
+      "license": "MIT"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            ">=",
+            "0.6",
+            ".0",
+            "<",
+            "0.8",
+            ".0"
+          ]
+        },
+        "id": 1728,
+        "name": "PragmaDirective",
+        "src": "32:31:6"
+      },
+      {
+        "attributes": {
+          "abstract": false,
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "interface",
+          "fullyImplemented": false,
+          "linearizedBaseContracts": [
+            1744
+          ],
+          "name": "IAirdropFactory",
+          "scope": 1745
+        },
+        "children": [
+          {
+            "attributes": {
+              "text": " @dev Factory for deploying airdrop contract {MerkleDistributor}."
+            },
+            "id": 1729,
+            "name": "StructuredDocumentation",
+            "src": "65:75:6"
+          },
+          {
+            "attributes": {
+              "anonymous": false,
+              "name": "AirdropCreated"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": false,
+                      "mutability": "mutable",
+                      "name": "addr",
+                      "scope": 1733,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 1730,
+                        "name": "ElementaryTypeName",
+                        "src": "194:7:6"
+                      }
+                    ],
+                    "id": 1731,
+                    "name": "VariableDeclaration",
+                    "src": "194:12:6"
+                  }
+                ],
+                "id": 1732,
+                "name": "ParameterList",
+                "src": "193:14:6"
+              }
+            ],
+            "id": 1733,
+            "name": "EventDefinition",
+            "src": "173:35:6"
+          },
+          {
+            "attributes": {
+              "functionSelector": "8fa97cfd",
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "createAirdrop",
+              "scope": 1744,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @dev Mint `total` amount of rewards tokens and deploy airdrop contract {MerkleDistributor} with `merkleRoot`.\n Return address of deployed contract."
+                },
+                "id": 1734,
+                "name": "StructuredDocumentation",
+                "src": "214:172:6"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "merkleRoot",
+                      "scope": 1743,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "bytes32",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "bytes32",
+                          "type": "bytes32"
+                        },
+                        "id": 1735,
+                        "name": "ElementaryTypeName",
+                        "src": "414:7:6"
+                      }
+                    ],
+                    "id": 1736,
+                    "name": "VariableDeclaration",
+                    "src": "414:18:6"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "total",
+                      "scope": 1743,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 1737,
+                        "name": "ElementaryTypeName",
+                        "src": "434:7:6"
+                      }
+                    ],
+                    "id": 1738,
+                    "name": "VariableDeclaration",
+                    "src": "434:13:6"
+                  }
+                ],
+                "id": 1739,
+                "name": "ParameterList",
+                "src": "413:35:6"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 1743,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 1740,
+                        "name": "ElementaryTypeName",
+                        "src": "483:7:6"
+                      }
+                    ],
+                    "id": 1741,
+                    "name": "VariableDeclaration",
+                    "src": "483:7:6"
+                  }
+                ],
+                "id": 1742,
+                "name": "ParameterList",
+                "src": "482:9:6"
+              }
+            ],
+            "id": 1743,
+            "name": "FunctionDefinition",
+            "src": "391:101:6"
+          }
+        ],
+        "id": 1744,
+        "name": "ContractDefinition",
+        "src": "141:353:6"
+      }
+    ],
+    "id": 1745,
+    "name": "SourceUnit",
+    "src": "32:463:6"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.6+commit.7338295f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.3.3",
+  "updatedAt": "2021-02-16T10:30:05.209Z",
+  "devdoc": {
+    "details": "Factory for deploying airdrop contract {MerkleDistributor}.",
+    "kind": "dev",
+    "methods": {
+      "createAirdrop(bytes32,uint256)": {
+        "details": "Mint `total` amount of rewards tokens and deploy airdrop contract {MerkleDistributor} with `merkleRoot`. Return address of deployed contract."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

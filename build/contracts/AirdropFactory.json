@@ -1,0 +1,2397 @@
+{
+  "contractName": "AirdropFactory",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "rewardsToken_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "AirdropCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rewardsToken",
+      "outputs": [
+        {
+          "internalType": "contract IRewardsToken",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "merkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "total",
+          "type": "uint256"
+        }
+      ],
+      "name": "createAirdrop",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"rewardsToken_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"AirdropCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"merkleRoot\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"total\",\"type\":\"uint256\"}],\"name\":\"createAirdrop\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rewardsToken\",\"outputs\":[{\"internalType\":\"contract IRewardsToken\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"createAirdrop(bytes32,uint256)\":{\"details\":\"Mint `total` amount of rewards tokens and deploy airdrop contract {MerkleDistributor} with `merkleRoot`. Return address of deployed contract.\"},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/airdrop/AirdropFactory.sol\":\"AirdropFactory\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/airdrop/AirdropFactory.sol\":{\"keccak256\":\"0x3591ca6d55e40a74a16c0be0d3f319cd90c2725cb253189e8328d04ae13d5559\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://640827981a6f98d4664ddb3d994bd95d8474a8d88cdcf0dd599d459fe2e2a843\",\"dweb:/ipfs/Qmc66fKw8NZLSCVRzDbuFhXgBmZZ9zvh31kmhkqaTgMiuN\"]},\"/home/nailkhaf/Projects/san-games/contracts/airdrop/MerkleDistributor.sol\":{\"keccak256\":\"0x27b13a607a00d73c2692ec597d19ef63b2289257f2b9ac0011f7803223cf6a66\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7a8743a8cc3209f4cde90760ad443eaca632f4c14f93e0a7b893d77923ff42cc\",\"dweb:/ipfs/QmewW9yaVTLB7nTSqFNLUM13mJmqtVpE3TPcmuWFCqf1Qg\"]},\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IAirdropFactory.sol\":{\"keccak256\":\"0x824b6b7b91d70eb8c0c51431fe3dc61bd787cbf79f04ff7ceaa9e1d7d9695e55\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://0a051c9ae9daf7764cc561d30ba00a36603e12c8cddea088f767cfed80e3c55f\",\"dweb:/ipfs/QmWSK31zteCerRabhcxxhC6zJWRdiQ98f35fBgCbFjpcax\"]},\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IMerkleDistributor.sol\":{\"keccak256\":\"0x272955caf62c7f3f7623747ec0889807bdb8235ff4df71eaddd314b5afe4f089\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9025651758971809069b549f0a08382a65615460d139ced7c702b8cf08ac6230\",\"dweb:/ipfs/Qmcrc6Uwxj7ZamgpXDy1EQGTTgNVDKcUdM99zBArrJ22dh\"]},\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsToken.sol\":{\"keccak256\":\"0x823deef06304fd7ba691ad86f2a99a725e76480f964c5a53eb02142ea3b61216\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://106003e20fce0a6a088f3fe174826c1f9f805113f7aec3906c50781b582f97b0\",\"dweb:/ipfs/Qmdc76nia9g3JDo8piy7HPBdNFgALrCdonpE2uNRS9PTGh\"]},\"@openzeppelin/contracts/access/Ownable.sol\":{\"keccak256\":\"0x15e2d5bd4c28a88548074c54d220e8086f638a71ed07e6b3ba5a70066fcf458d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://90faf5851c02f9bd42c5bfb54d4f0421a2612f50ab80b2c4fa24fa3792071cc2\",\"dweb:/ipfs/QmRGM4F2PcGVF85aTfaA9YBhCHHDqrMhRjyp6fGeBTtirb\"]},\"@openzeppelin/contracts/cryptography/MerkleProof.sol\":{\"keccak256\":\"0x782ac63a026ef1d6ab242478016bf7006074726786de9a94bc6c0c33a87dd40d\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://dc91825edb53657735e00ffc89cdcf8137d960f33032685178a1867824815967\",\"dweb:/ipfs/QmUC6Bhz3ehTpey2WJutWEBgntEZduwxa4ZpwHMyxhpEUZ\"]},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x5f02220344881ce43204ae4a6281145a67bc52c2bb1290a791857df3d19d78f5\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://24427744bd3e6cb73c17010119af12a318289c0253a4d9acb8576c9fb3797b08\",\"dweb:/ipfs/QmTLDqpKRBuxGxRAmjgXt9AkXyACW3MtKzi7PYjm5iMfGC\"]},\"@openzeppelin/contracts/utils/Address.sol\":{\"keccak256\":\"0x28911e614500ae7c607a432a709d35da25f3bc5ddc8bd12b278b66358070c0ea\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://256c8c8af5eb072bc473226ab2b2187149b8fc04f5f4a4820db22527f5ce8e3c\",\"dweb:/ipfs/QmRvi5BhnL7Rxf85KrJhwM6RRhukm4tzoctRdgQEheNyiN\"]},\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0x8d3cb350f04ff49cfb10aef08d87f19dcbaecc8027b0bed12f3275cd12f38cf0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ded47ec7c96750f9bd04bbbc84f659992d4ba901cb7b532a52cd468272cf378f\",\"dweb:/ipfs/QmfBrGtQP7rZEqEg6Wz6jh2N2Kukpj1z5v3CGWmAqrzm96\"]}},\"version\":1}",
+  "bytecode": "0x60a060405234801561001057600080fd5b50604051610c41380380610c418339818101604052602081101561003357600080fd5b5051600061003f61010b565b600080546001600160a01b0319166001600160a01b0383169081178255604051929350917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908290a3506100a5816001600160a01b031661010f60201b61048d1760201c565b6100f6576040805162461bcd60e51b815260206004820152601d60248201527f52657761726473546f6b656e206d75737420626520636f6e7472616374000000604482015290519081900360640190fd5b60601b6001600160601b031916608052610115565b3390565b3b151590565b60805160601c610b0561013c60003980610222528061028452806103575250610b056000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c8063715018a61461005c5780638da5cb5b146100665780638fa97cfd1461008a578063d1af0c7d146100ad578063f2fde38b146100b5575b600080fd5b6100646100db565b005b61006e610199565b604080516001600160a01b039092168252519081900360200190f35b61006e600480360360408110156100a057600080fd5b50803590602001356101a8565b61006e610355565b610064600480360360208110156100cb57600080fd5b50356001600160a01b0316610379565b6100e3610493565b6001600160a01b03166100f4610199565b6001600160a01b03161461014f576040805162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572604482015290519081900360640190fd5b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080546001600160a01b0319169055565b6000546001600160a01b031690565b60006101b2610493565b6001600160a01b03166101c3610199565b6001600160a01b03161461021e576040805162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572604482015290519081900360640190fd5b60007f00000000000000000000000000000000000000000000000000000000000000008460405161024e90610497565b6001600160a01b0390921682526020820152604080519182900301906000f08015801561027f573d6000803e3d6000fd5b5090507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03166340c10f1982856040518363ffffffff1660e01b815260040180836001600160a01b0316815260200182815260200192505050600060405180830381600087803b1580156102f957600080fd5b505af115801561030d573d6000803e3d6000fd5b5050604080516001600160a01b038516815290517f6de9d4eaa10e18ecc95e73fd9c072390dc7373156d2b52477f38338eff8d1cb49350908190036020019150a19392505050565b7f000000000000000000000000000000000000000000000000000000000000000081565b610381610493565b6001600160a01b0316610392610199565b6001600160a01b0316146103ed576040805162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572604482015290519081900360640190fd5b6001600160a01b0381166104325760405162461bcd60e51b8152600401808060200182810382526026815260200180610aaa6026913960400191505060405180910390fd5b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b3b151590565b3390565b610605806104a58339019056fe60c060405234801561001057600080fd5b506040516106053803806106058339818101604052604081101561003357600080fd5b508051602090910151606082901b6001600160601b03191660805260a08190526001600160a01b039091169061057f6100866000398061020f52806103c4525080610296528061040e525061057f6000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80632e7ba6ef146100515780632eb4a7ab146100df5780639e34070f146100f9578063fc0c546a1461012a575b600080fd5b6100dd6004803603608081101561006757600080fd5b8135916001600160a01b03602082013516916040820135919081019060808101606082013564010000000081111561009e57600080fd5b8201836020820111156100b057600080fd5b803590602001918460208302840111640100000000831117156100d257600080fd5b50909250905061014e565b005b6100e76103c2565b60408051918252519081900360200190f35b6101166004803603602081101561010f57600080fd5b50356103e6565b604080519115158252519081900360200190f35b61013261040c565b604080516001600160a01b039092168252519081900360200190f35b610157856103e6565b156101935760405162461bcd60e51b81526004018080602001828103825260278152602001806105016027913960400191505060405180910390fd5b600085858560405160200180848152602001836001600160a01b031660601b8152601401828152602001935050505060405160208183030381529060405280519060200120905061023a8383808060200260200160405190810160405280939291908181526020018383602002808284376000920191909152507f000000000000000000000000000000000000000000000000000000000000000092508591506104309050565b61028b576040805162461bcd60e51b815260206004820181905260248201527f4d65726b6c654469737472696275746f723a20496e76616c69642070726f6f66604482015290519081900360640190fd5b610294866104d9565b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663a9059cbb86866040518363ffffffff1660e01b815260040180836001600160a01b0316815260200182815260200192505050602060405180830381600087803b15801561030b57600080fd5b505af115801561031f573d6000803e3d6000fd5b505050506040513d602081101561033557600080fd5b50516103725760405162461bcd60e51b81526004018080602001828103825260228152602001806105286022913960400191505060405180910390fd5b604080518781526001600160a01b038716602082015280820186905290517f4ec90e965519d92681267467f775ada5bd214aa92c0dc93d90a5e880ce9ed0269181900360600190a1505050505050565b7f000000000000000000000000000000000000000000000000000000000000000090565b6101008104600090815260208190526040902054600160ff9092169190911b9081161490565b7f000000000000000000000000000000000000000000000000000000000000000090565b600081815b85518110156104ce57600086828151811061044c57fe5b6020026020010151905080831161049357828160405160200180838152602001828152602001925050506040516020818303038152906040528051906020012092506104c5565b808360405160200180838152602001828152602001925050506040516020818303038152906040528051906020012092505b50600101610435565b509092149392505050565b610100810460009081526020819052604090208054600160ff9093169290921b909117905556fe4d65726b6c654469737472696275746f723a2044726f7020616c726561647920636c61696d65644d65726b6c654469737472696275746f723a205472616e73666572206661696c6564a2646970667358221220f2dda775e816b075124a479043074b498ad3266880cd554be23a653bd57f718664736f6c634300070600334f776e61626c653a206e6577206f776e657220697320746865207a65726f2061646472657373a26469706673582212200bb2f3d6e6765841d8c7e765a74dae91ee03f7fc008f3aebb853bd2ec429891664736f6c63430007060033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100575760003560e01c8063715018a61461005c5780638da5cb5b146100665780638fa97cfd1461008a578063d1af0c7d146100ad578063f2fde38b146100b5575b600080fd5b6100646100db565b005b61006e610199565b604080516001600160a01b039092168252519081900360200190f35b61006e600480360360408110156100a057600080fd5b50803590602001356101a8565b61006e610355565b610064600480360360208110156100cb57600080fd5b50356001600160a01b0316610379565b6100e3610493565b6001600160a01b03166100f4610199565b6001600160a01b03161461014f576040805162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572604482015290519081900360640190fd5b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080546001600160a01b0319169055565b6000546001600160a01b031690565b60006101b2610493565b6001600160a01b03166101c3610199565b6001600160a01b03161461021e576040805162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572604482015290519081900360640190fd5b60007f00000000000000000000000000000000000000000000000000000000000000008460405161024e90610497565b6001600160a01b0390921682526020820152604080519182900301906000f08015801561027f573d6000803e3d6000fd5b5090507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03166340c10f1982856040518363ffffffff1660e01b815260040180836001600160a01b0316815260200182815260200192505050600060405180830381600087803b1580156102f957600080fd5b505af115801561030d573d6000803e3d6000fd5b5050604080516001600160a01b038516815290517f6de9d4eaa10e18ecc95e73fd9c072390dc7373156d2b52477f38338eff8d1cb49350908190036020019150a19392505050565b7f000000000000000000000000000000000000000000000000000000000000000081565b610381610493565b6001600160a01b0316610392610199565b6001600160a01b0316146103ed576040805162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572604482015290519081900360640190fd5b6001600160a01b0381166104325760405162461bcd60e51b8152600401808060200182810382526026815260200180610aaa6026913960400191505060405180910390fd5b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b3b151590565b3390565b610605806104a58339019056fe60c060405234801561001057600080fd5b506040516106053803806106058339818101604052604081101561003357600080fd5b508051602090910151606082901b6001600160601b03191660805260a08190526001600160a01b039091169061057f6100866000398061020f52806103c4525080610296528061040e525061057f6000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80632e7ba6ef146100515780632eb4a7ab146100df5780639e34070f146100f9578063fc0c546a1461012a575b600080fd5b6100dd6004803603608081101561006757600080fd5b8135916001600160a01b03602082013516916040820135919081019060808101606082013564010000000081111561009e57600080fd5b8201836020820111156100b057600080fd5b803590602001918460208302840111640100000000831117156100d257600080fd5b50909250905061014e565b005b6100e76103c2565b60408051918252519081900360200190f35b6101166004803603602081101561010f57600080fd5b50356103e6565b604080519115158252519081900360200190f35b61013261040c565b604080516001600160a01b039092168252519081900360200190f35b610157856103e6565b156101935760405162461bcd60e51b81526004018080602001828103825260278152602001806105016027913960400191505060405180910390fd5b600085858560405160200180848152602001836001600160a01b031660601b8152601401828152602001935050505060405160208183030381529060405280519060200120905061023a8383808060200260200160405190810160405280939291908181526020018383602002808284376000920191909152507f000000000000000000000000000000000000000000000000000000000000000092508591506104309050565b61028b576040805162461bcd60e51b815260206004820181905260248201527f4d65726b6c654469737472696275746f723a20496e76616c69642070726f6f66604482015290519081900360640190fd5b610294866104d9565b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663a9059cbb86866040518363ffffffff1660e01b815260040180836001600160a01b0316815260200182815260200192505050602060405180830381600087803b15801561030b57600080fd5b505af115801561031f573d6000803e3d6000fd5b505050506040513d602081101561033557600080fd5b50516103725760405162461bcd60e51b81526004018080602001828103825260228152602001806105286022913960400191505060405180910390fd5b604080518781526001600160a01b038716602082015280820186905290517f4ec90e965519d92681267467f775ada5bd214aa92c0dc93d90a5e880ce9ed0269181900360600190a1505050505050565b7f000000000000000000000000000000000000000000000000000000000000000090565b6101008104600090815260208190526040902054600160ff9092169190911b9081161490565b7f000000000000000000000000000000000000000000000000000000000000000090565b600081815b85518110156104ce57600086828151811061044c57fe5b6020026020010151905080831161049357828160405160200180838152602001828152602001925050506040516020818303038152906040528051906020012092506104c5565b808360405160200180838152602001828152602001925050506040516020818303038152906040528051906020012092505b50600101610435565b509092149392505050565b610100810460009081526020819052604090208054600160ff9093169290921b909117905556fe4d65726b6c654469737472696275746f723a2044726f7020616c726561647920636c61696d65644d65726b6c654469737472696275746f723a205472616e73666572206661696c6564a2646970667358221220f2dda775e816b075124a479043074b498ad3266880cd554be23a653bd57f718664736f6c634300070600334f776e61626c653a206e6577206f776e657220697320746865207a65726f2061646472657373a26469706673582212200bb2f3d6e6765841d8c7e765a74dae91ee03f7fc008f3aebb853bd2ec429891664736f6c63430007060033",
+  "immutableReferences": {
+    "243": [
+      {
+        "length": 32,
+        "start": 546
+      },
+      {
+        "length": 32,
+        "start": 644
+      },
+      {
+        "length": 32,
+        "start": 855
+      }
+    ]
+  },
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "292:706:3:-:0;;;432:173;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;432:173:3;884:17:24;904:12;:10;:12::i;:::-;926:6;:18;;-1:-1:-1;;;;;;926:18:24;-1:-1:-1;;;;;926:18:24;;;;;;;959:43;;926:18;;-1:-1:-1;926:18:24;959:43;;926:6;;959:43;850:159;485:26:3;:13;-1:-1:-1;;;;;485:24:3;;;;;;:26;;:::i;:::-;477:68;;;;;-1:-1:-1;;;477:68:3;;;;;;;;;;;;;;;;;;;;;;;;;;;;555:43;;-1:-1:-1;;;;;;555:43:3;;;292:706;;598:104:40;685:10;598:104;:::o;726:413:39:-;1086:20;1124:8;;;726:413::o;292:706:3:-;;;;;;;;;;;;",
+  "deployedSourceMap": "292:706:3:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1717:145:24;;;:::i;:::-;;1085:85;;;:::i;:::-;;;;-1:-1:-1;;;;;1085:85:24;;;;;;;;;;;;;;611:385:3;;;;;;;;;;;;;;;;-1:-1:-1;611:385:3;;;;;;;:::i;382:43::-;;;:::i;2011:240:24:-;;;;;;;;;;;;;;;;-1:-1:-1;2011:240:24;-1:-1:-1;;;;;2011:240:24;;:::i;1717:145::-;1308:12;:10;:12::i;:::-;-1:-1:-1;;;;;1297:23:24;:7;:5;:7::i;:::-;-1:-1:-1;;;;;1297:23:24;;1289:68;;;;;-1:-1:-1;;;1289:68:24;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1823:1:::1;1807:6:::0;;1786:40:::1;::::0;-1:-1:-1;;;;;1807:6:24;;::::1;::::0;1786:40:::1;::::0;1823:1;;1786:40:::1;1853:1;1836:19:::0;;-1:-1:-1;;;;;;1836:19:24::1;::::0;;1717:145::o;1085:85::-;1131:7;1157:6;-1:-1:-1;;;;;1157:6:24;1085:85;:::o;611:385:3:-;738:7;1308:12:24;:10;:12::i;:::-;-1:-1:-1;;;;;1297:23:24;:7;:5;:7::i;:::-;-1:-1:-1;;;;;1297:23:24;;1289:68;;;;;-1:-1:-1;;;1289:68:24;;;;;;;;;;;;;;;;;;;;;;;;;;;;;761:25:3::1;831:12;846:10;801:56;;;;;:::i;:::-;-1:-1:-1::0;;;;;801:56:3;;::::1;::::0;;::::1;::::0;::::1;::::0;;;;;;;;;;-1:-1:-1;801:56:3::1;;;;;;;;;::::0;::::1;;;;;;761:96;;867:12;-1:-1:-1::0;;;;;867:17:3::1;;893:7;903:5;867:42;;;;;;;;;;;;;-1:-1:-1::0;;;;;867:42:3::1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;::::0;::::1;;;;;;;;;;;;::::0;::::1;;;;;-1:-1:-1::0;;924:32:3::1;::::0;;-1:-1:-1;;;;;924:32:3;::::1;::::0;;;;::::1;::::0;-1:-1:-1;924:32:3;;;;::::1;::::0;;-1:-1:-1;924:32:3::1;981:7:::0;611:385;-1:-1:-1;;;611:385:3:o;382:43::-;;;:::o;2011:240:24:-;1308:12;:10;:12::i;:::-;-1:-1:-1;;;;;1297:23:24;:7;:5;:7::i;:::-;-1:-1:-1;;;;;1297:23:24;;1289:68;;;;;-1:-1:-1;;;1289:68:24;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;2099:22:24;::::1;2091:73;;;;-1:-1:-1::0;;;2091:73:24::1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2200:6;::::0;;2179:38:::1;::::0;-1:-1:-1;;;;;2179:38:24;;::::1;::::0;2200:6;::::1;::::0;2179:38:::1;::::0;::::1;2227:6;:17:::0;;-1:-1:-1;;;;;;2227:17:24::1;-1:-1:-1::0;;;;;2227:17:24;;;::::1;::::0;;;::::1;::::0;;2011:240::o;726:413:39:-;1086:20;1124:8;;;726:413::o;598:104:40:-;685:10;598:104;:::o;-1:-1:-1:-;;;;;;;;:::o",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.6.0 <0.8.0;\n\nimport \"@openzeppelin/contracts/access/Ownable.sol\";\nimport \"@openzeppelin/contracts/utils/Address.sol\";\n\nimport \"./MerkleDistributor.sol\";\nimport \"../interfaces/IRewardsToken.sol\";\nimport \"../interfaces/IAirdropFactory.sol\";\n\ncontract AirdropFactory is IAirdropFactory, Ownable {\n    using Address for address;\n\n    IRewardsToken public immutable rewardsToken;\n\n    constructor(address rewardsToken_) {\n        require(rewardsToken_.isContract(), \"RewardsToken must be contract\");\n        rewardsToken = IRewardsToken(rewardsToken_);\n    }\n\n    function createAirdrop(bytes32 merkleRoot, uint256 total)\n        external\n        override\n        onlyOwner\n        returns (address)\n    {\n        MerkleDistributor airdrop =\n            new MerkleDistributor(address(rewardsToken), merkleRoot);\n        rewardsToken.mint(address(airdrop), total);\n        emit AirdropCreated(address(airdrop));\n        return address(airdrop);\n    }\n}\n",
+  "sourcePath": "/home/nailkhaf/Projects/san-games/contracts/airdrop/AirdropFactory.sol",
+  "ast": {
+    "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/airdrop/AirdropFactory.sol",
+    "exportedSymbols": {
+      "Address": [
+        6563
+      ],
+      "AirdropFactory": [
+        309
+      ],
+      "Context": [
+        6586
+      ],
+      "IAirdropFactory": [
+        1744
+      ],
+      "IERC20": [
+        4889
+      ],
+      "IMerkleDistributor": [
+        1820
+      ],
+      "IRewardsToken": [
+        1883
+      ],
+      "MerkleDistributor": [
+        494
+      ],
+      "MerkleProof": [
+        3811
+      ],
+      "Ownable": [
+        3740
+      ]
+    },
+    "id": 310,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 229,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.6",
+          ".0",
+          "<",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:31:3"
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/access/Ownable.sol",
+        "file": "@openzeppelin/contracts/access/Ownable.sol",
+        "id": 230,
+        "nodeType": "ImportDirective",
+        "scope": 310,
+        "sourceUnit": 3741,
+        "src": "65:52:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "@openzeppelin/contracts/utils/Address.sol",
+        "file": "@openzeppelin/contracts/utils/Address.sol",
+        "id": 231,
+        "nodeType": "ImportDirective",
+        "scope": 310,
+        "sourceUnit": 6564,
+        "src": "118:51:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/airdrop/MerkleDistributor.sol",
+        "file": "./MerkleDistributor.sol",
+        "id": 232,
+        "nodeType": "ImportDirective",
+        "scope": 310,
+        "sourceUnit": 495,
+        "src": "171:33:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsToken.sol",
+        "file": "../interfaces/IRewardsToken.sol",
+        "id": 233,
+        "nodeType": "ImportDirective",
+        "scope": 310,
+        "sourceUnit": 1884,
+        "src": "205:41:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IAirdropFactory.sol",
+        "file": "../interfaces/IAirdropFactory.sol",
+        "id": 234,
+        "nodeType": "ImportDirective",
+        "scope": 310,
+        "sourceUnit": 1745,
+        "src": "247:43:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 235,
+              "name": "IAirdropFactory",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 1744,
+              "src": "319:15:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_IAirdropFactory_$1744",
+                "typeString": "contract IAirdropFactory"
+              }
+            },
+            "id": 236,
+            "nodeType": "InheritanceSpecifier",
+            "src": "319:15:3"
+          },
+          {
+            "baseName": {
+              "id": 237,
+              "name": "Ownable",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 3740,
+              "src": "336:7:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Ownable_$3740",
+                "typeString": "contract Ownable"
+              }
+            },
+            "id": 238,
+            "nodeType": "InheritanceSpecifier",
+            "src": "336:7:3"
+          }
+        ],
+        "contractDependencies": [
+          494,
+          1744,
+          3740,
+          6586
+        ],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 309,
+        "linearizedBaseContracts": [
+          309,
+          3740,
+          6586,
+          1744
+        ],
+        "name": "AirdropFactory",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "id": 241,
+            "libraryName": {
+              "id": 239,
+              "name": "Address",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 6563,
+              "src": "356:7:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_Address_$6563",
+                "typeString": "library Address"
+              }
+            },
+            "nodeType": "UsingForDirective",
+            "src": "350:26:3",
+            "typeName": {
+              "id": 240,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "368:7:3",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            }
+          },
+          {
+            "constant": false,
+            "functionSelector": "d1af0c7d",
+            "id": 243,
+            "mutability": "immutable",
+            "name": "rewardsToken",
+            "nodeType": "VariableDeclaration",
+            "scope": 309,
+            "src": "382:43:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_IRewardsToken_$1883",
+              "typeString": "contract IRewardsToken"
+            },
+            "typeName": {
+              "id": 242,
+              "name": "IRewardsToken",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 1883,
+              "src": "382:13:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_IRewardsToken_$1883",
+                "typeString": "contract IRewardsToken"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 261,
+              "nodeType": "Block",
+              "src": "467:138:3",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "expression": {
+                            "id": 249,
+                            "name": "rewardsToken_",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 245,
+                            "src": "485:13:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          "id": 250,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "isContract",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 6287,
+                          "src": "485:24:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$bound_to$_t_address_$",
+                            "typeString": "function (address) view returns (bool)"
+                          }
+                        },
+                        "id": 251,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "485:26:3",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "52657761726473546f6b656e206d75737420626520636f6e7472616374",
+                        "id": 252,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "513:31:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_60433363c3581163c6070d1ecffb1f3c9e91e5d0acf936e9625f4104106d417e",
+                          "typeString": "literal_string \"RewardsToken must be contract\""
+                        },
+                        "value": "RewardsToken must be contract"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_60433363c3581163c6070d1ecffb1f3c9e91e5d0acf936e9625f4104106d417e",
+                          "typeString": "literal_string \"RewardsToken must be contract\""
+                        }
+                      ],
+                      "id": 248,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "477:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 253,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "477:68:3",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 254,
+                  "nodeType": "ExpressionStatement",
+                  "src": "477:68:3"
+                },
+                {
+                  "expression": {
+                    "id": 259,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 255,
+                      "name": "rewardsToken",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 243,
+                      "src": "555:12:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IRewardsToken_$1883",
+                        "typeString": "contract IRewardsToken"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "id": 257,
+                          "name": "rewardsToken_",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 245,
+                          "src": "584:13:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 256,
+                        "name": "IRewardsToken",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 1883,
+                        "src": "570:13:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_IRewardsToken_$1883_$",
+                          "typeString": "type(contract IRewardsToken)"
+                        }
+                      },
+                      "id": 258,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "570:28:3",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_IRewardsToken_$1883",
+                        "typeString": "contract IRewardsToken"
+                      }
+                    },
+                    "src": "555:43:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_IRewardsToken_$1883",
+                      "typeString": "contract IRewardsToken"
+                    }
+                  },
+                  "id": 260,
+                  "nodeType": "ExpressionStatement",
+                  "src": "555:43:3"
+                }
+              ]
+            },
+            "id": 262,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 246,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 245,
+                  "mutability": "mutable",
+                  "name": "rewardsToken_",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 262,
+                  "src": "444:21:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 244,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "444:7:3",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "443:23:3"
+            },
+            "returnParameters": {
+              "id": 247,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "467:0:3"
+            },
+            "scope": 309,
+            "src": "432:173:3",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "baseFunctions": [
+              1743
+            ],
+            "body": {
+              "id": 307,
+              "nodeType": "Block",
+              "src": "751:245:3",
+              "statements": [
+                {
+                  "assignments": [
+                    275
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 275,
+                      "mutability": "mutable",
+                      "name": "airdrop",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 307,
+                      "src": "761:25:3",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                        "typeString": "contract MerkleDistributor"
+                      },
+                      "typeName": {
+                        "id": 274,
+                        "name": "MerkleDistributor",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 494,
+                        "src": "761:17:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                          "typeString": "contract MerkleDistributor"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 284,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 280,
+                            "name": "rewardsToken",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 243,
+                            "src": "831:12:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_IRewardsToken_$1883",
+                              "typeString": "contract IRewardsToken"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_IRewardsToken_$1883",
+                              "typeString": "contract IRewardsToken"
+                            }
+                          ],
+                          "id": 279,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "823:7:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 278,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "823:7:3",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 281,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "823:21:3",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 282,
+                        "name": "merkleRoot",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 264,
+                        "src": "846:10:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      ],
+                      "id": 277,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "801:21:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_creation_nonpayable$_t_address_$_t_bytes32_$returns$_t_contract$_MerkleDistributor_$494_$",
+                        "typeString": "function (address,bytes32) returns (contract MerkleDistributor)"
+                      },
+                      "typeName": {
+                        "id": 276,
+                        "name": "MerkleDistributor",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 494,
+                        "src": "805:17:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                          "typeString": "contract MerkleDistributor"
+                        }
+                      }
+                    },
+                    "id": 283,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "801:56:3",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                      "typeString": "contract MerkleDistributor"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "761:96:3"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 290,
+                            "name": "airdrop",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 275,
+                            "src": "893:7:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                              "typeString": "contract MerkleDistributor"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                              "typeString": "contract MerkleDistributor"
+                            }
+                          ],
+                          "id": 289,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "885:7:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 288,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "885:7:3",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 291,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "885:16:3",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      },
+                      {
+                        "id": 292,
+                        "name": "total",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 266,
+                        "src": "903:5:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "expression": {
+                        "id": 285,
+                        "name": "rewardsToken",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 243,
+                        "src": "867:12:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_IRewardsToken_$1883",
+                          "typeString": "contract IRewardsToken"
+                        }
+                      },
+                      "id": 287,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "mint",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 1862,
+                      "src": "867:17:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
+                        "typeString": "function (address,uint256) external"
+                      }
+                    },
+                    "id": 293,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "867:42:3",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 294,
+                  "nodeType": "ExpressionStatement",
+                  "src": "867:42:3"
+                },
+                {
+                  "eventCall": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "id": 298,
+                            "name": "airdrop",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 275,
+                            "src": "947:7:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                              "typeString": "contract MerkleDistributor"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                              "typeString": "contract MerkleDistributor"
+                            }
+                          ],
+                          "id": 297,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "lValueRequested": false,
+                          "nodeType": "ElementaryTypeNameExpression",
+                          "src": "939:7:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_type$_t_address_$",
+                            "typeString": "type(address)"
+                          },
+                          "typeName": {
+                            "id": 296,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "939:7:3",
+                            "typeDescriptions": {}
+                          }
+                        },
+                        "id": 299,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "typeConversion",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "939:16:3",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 295,
+                      "name": "AirdropCreated",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 1733,
+                      "src": "924:14:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 300,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "924:32:3",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 301,
+                  "nodeType": "EmitStatement",
+                  "src": "919:37:3"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "id": 304,
+                        "name": "airdrop",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 275,
+                        "src": "981:7:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                          "typeString": "contract MerkleDistributor"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                          "typeString": "contract MerkleDistributor"
+                        }
+                      ],
+                      "id": 303,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "973:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_address_$",
+                        "typeString": "type(address)"
+                      },
+                      "typeName": {
+                        "id": 302,
+                        "name": "address",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "973:7:3",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 305,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "973:16:3",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "functionReturnParameters": 273,
+                  "id": 306,
+                  "nodeType": "Return",
+                  "src": "966:23:3"
+                }
+              ]
+            },
+            "functionSelector": "8fa97cfd",
+            "id": 308,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "id": 270,
+                "modifierName": {
+                  "id": 269,
+                  "name": "onlyOwner",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 3689,
+                  "src": "711:9:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "711:9:3"
+              }
+            ],
+            "name": "createAirdrop",
+            "nodeType": "FunctionDefinition",
+            "overrides": {
+              "id": 268,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "694:8:3"
+            },
+            "parameters": {
+              "id": 267,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 264,
+                  "mutability": "mutable",
+                  "name": "merkleRoot",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 308,
+                  "src": "634:18:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 263,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "634:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 266,
+                  "mutability": "mutable",
+                  "name": "total",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 308,
+                  "src": "654:13:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 265,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "654:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "633:35:3"
+            },
+            "returnParameters": {
+              "id": 273,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 272,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 308,
+                  "src": "738:7:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 271,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "738:7:3",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "737:9:3"
+            },
+            "scope": 309,
+            "src": "611:385:3",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 310,
+        "src": "292:706:3"
+      }
+    ],
+    "src": "32:967:3"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/airdrop/AirdropFactory.sol",
+      "exportedSymbols": {
+        "Address": [
+          6563
+        ],
+        "AirdropFactory": [
+          309
+        ],
+        "Context": [
+          6586
+        ],
+        "IAirdropFactory": [
+          1744
+        ],
+        "IERC20": [
+          4889
+        ],
+        "IMerkleDistributor": [
+          1820
+        ],
+        "IRewardsToken": [
+          1883
+        ],
+        "MerkleDistributor": [
+          494
+        ],
+        "MerkleProof": [
+          3811
+        ],
+        "Ownable": [
+          3740
+        ]
+      },
+      "license": "MIT"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            ">=",
+            "0.6",
+            ".0",
+            "<",
+            "0.8",
+            ".0"
+          ]
+        },
+        "id": 229,
+        "name": "PragmaDirective",
+        "src": "32:31:3"
+      },
+      {
+        "attributes": {
+          "SourceUnit": 3741,
+          "absolutePath": "@openzeppelin/contracts/access/Ownable.sol",
+          "file": "@openzeppelin/contracts/access/Ownable.sol",
+          "scope": 310,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
+        "id": 230,
+        "name": "ImportDirective",
+        "src": "65:52:3"
+      },
+      {
+        "attributes": {
+          "SourceUnit": 6564,
+          "absolutePath": "@openzeppelin/contracts/utils/Address.sol",
+          "file": "@openzeppelin/contracts/utils/Address.sol",
+          "scope": 310,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
+        "id": 231,
+        "name": "ImportDirective",
+        "src": "118:51:3"
+      },
+      {
+        "attributes": {
+          "SourceUnit": 495,
+          "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/airdrop/MerkleDistributor.sol",
+          "file": "./MerkleDistributor.sol",
+          "scope": 310,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
+        "id": 232,
+        "name": "ImportDirective",
+        "src": "171:33:3"
+      },
+      {
+        "attributes": {
+          "SourceUnit": 1884,
+          "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsToken.sol",
+          "file": "../interfaces/IRewardsToken.sol",
+          "scope": 310,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
+        "id": 233,
+        "name": "ImportDirective",
+        "src": "205:41:3"
+      },
+      {
+        "attributes": {
+          "SourceUnit": 1745,
+          "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IAirdropFactory.sol",
+          "file": "../interfaces/IAirdropFactory.sol",
+          "scope": 310,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
+        "id": 234,
+        "name": "ImportDirective",
+        "src": "247:43:3"
+      },
+      {
+        "attributes": {
+          "abstract": false,
+          "contractDependencies": [
+            494,
+            1744,
+            3740,
+            6586
+          ],
+          "contractKind": "contract",
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            309,
+            3740,
+            6586,
+            1744
+          ],
+          "name": "AirdropFactory",
+          "scope": 310
+        },
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {
+                  "name": "IAirdropFactory",
+                  "referencedDeclaration": 1744,
+                  "type": "contract IAirdropFactory"
+                },
+                "id": 235,
+                "name": "UserDefinedTypeName",
+                "src": "319:15:3"
+              }
+            ],
+            "id": 236,
+            "name": "InheritanceSpecifier",
+            "src": "319:15:3"
+          },
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {
+                  "name": "Ownable",
+                  "referencedDeclaration": 3740,
+                  "type": "contract Ownable"
+                },
+                "id": 237,
+                "name": "UserDefinedTypeName",
+                "src": "336:7:3"
+              }
+            ],
+            "id": 238,
+            "name": "InheritanceSpecifier",
+            "src": "336:7:3"
+          },
+          {
+            "children": [
+              {
+                "attributes": {
+                  "name": "Address",
+                  "referencedDeclaration": 6563,
+                  "type": "library Address"
+                },
+                "id": 239,
+                "name": "UserDefinedTypeName",
+                "src": "356:7:3"
+              },
+              {
+                "attributes": {
+                  "name": "address",
+                  "stateMutability": "nonpayable",
+                  "type": "address"
+                },
+                "id": 240,
+                "name": "ElementaryTypeName",
+                "src": "368:7:3"
+              }
+            ],
+            "id": 241,
+            "name": "UsingForDirective",
+            "src": "350:26:3"
+          },
+          {
+            "attributes": {
+              "constant": false,
+              "functionSelector": "d1af0c7d",
+              "mutability": "immutable",
+              "name": "rewardsToken",
+              "scope": 309,
+              "stateVariable": true,
+              "storageLocation": "default",
+              "type": "contract IRewardsToken",
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "name": "IRewardsToken",
+                  "referencedDeclaration": 1883,
+                  "type": "contract IRewardsToken"
+                },
+                "id": 242,
+                "name": "UserDefinedTypeName",
+                "src": "382:13:3"
+              }
+            ],
+            "id": 243,
+            "name": "VariableDeclaration",
+            "src": "382:43:3"
+          },
+          {
+            "attributes": {
+              "implemented": true,
+              "isConstructor": true,
+              "kind": "constructor",
+              "modifiers": [
+                null
+              ],
+              "name": "",
+              "scope": 309,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "rewardsToken_",
+                      "scope": 262,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 244,
+                        "name": "ElementaryTypeName",
+                        "src": "444:7:3"
+                      }
+                    ],
+                    "id": 245,
+                    "name": "VariableDeclaration",
+                    "src": "444:21:3"
+                  }
+                ],
+                "id": 246,
+                "name": "ParameterList",
+                "src": "443:23:3"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 247,
+                "name": "ParameterList",
+                "src": "467:0:3"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_bool",
+                                  "typeString": "bool"
+                                },
+                                {
+                                  "typeIdentifier": "t_stringliteral_60433363c3581163c6070d1ecffb1f3c9e91e5d0acf936e9625f4104106d417e",
+                                  "typeString": "literal_string \"RewardsToken must be contract\""
+                                }
+                              ],
+                              "overloadedDeclarations": [
+                                4294967278,
+                                4294967278
+                              ],
+                              "referencedDeclaration": 4294967278,
+                              "type": "function (bool,string memory) pure",
+                              "value": "require"
+                            },
+                            "id": 248,
+                            "name": "Identifier",
+                            "src": "477:7:3"
+                          },
+                          {
+                            "attributes": {
+                              "arguments": [
+                                null
+                              ],
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "isStructConstructorCall": false,
+                              "lValueRequested": false,
+                              "names": [
+                                null
+                              ],
+                              "tryCall": false,
+                              "type": "bool",
+                              "type_conversion": false
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": [
+                                    null
+                                  ],
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "member_name": "isContract",
+                                  "referencedDeclaration": 6287,
+                                  "type": "function (address) view returns (bool)"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 245,
+                                      "type": "address",
+                                      "value": "rewardsToken_"
+                                    },
+                                    "id": 249,
+                                    "name": "Identifier",
+                                    "src": "485:13:3"
+                                  }
+                                ],
+                                "id": 250,
+                                "name": "MemberAccess",
+                                "src": "485:24:3"
+                              }
+                            ],
+                            "id": 251,
+                            "name": "FunctionCall",
+                            "src": "485:26:3"
+                          },
+                          {
+                            "attributes": {
+                              "hexvalue": "52657761726473546f6b656e206d75737420626520636f6e7472616374",
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "token": "string",
+                              "type": "literal_string \"RewardsToken must be contract\"",
+                              "value": "RewardsToken must be contract"
+                            },
+                            "id": 252,
+                            "name": "Literal",
+                            "src": "513:31:3"
+                          }
+                        ],
+                        "id": 253,
+                        "name": "FunctionCall",
+                        "src": "477:68:3"
+                      }
+                    ],
+                    "id": 254,
+                    "name": "ExpressionStatement",
+                    "src": "477:68:3"
+                  },
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "operator": "=",
+                          "type": "contract IRewardsToken"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 243,
+                              "type": "contract IRewardsToken",
+                              "value": "rewardsToken"
+                            },
+                            "id": 255,
+                            "name": "Identifier",
+                            "src": "555:12:3"
+                          },
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "isStructConstructorCall": false,
+                              "lValueRequested": false,
+                              "names": [
+                                null
+                              ],
+                              "tryCall": false,
+                              "type": "contract IRewardsToken",
+                              "type_conversion": true
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_address",
+                                      "typeString": "address"
+                                    }
+                                  ],
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 1883,
+                                  "type": "type(contract IRewardsToken)",
+                                  "value": "IRewardsToken"
+                                },
+                                "id": 256,
+                                "name": "Identifier",
+                                "src": "570:13:3"
+                              },
+                              {
+                                "attributes": {
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 245,
+                                  "type": "address",
+                                  "value": "rewardsToken_"
+                                },
+                                "id": 257,
+                                "name": "Identifier",
+                                "src": "584:13:3"
+                              }
+                            ],
+                            "id": 258,
+                            "name": "FunctionCall",
+                            "src": "570:28:3"
+                          }
+                        ],
+                        "id": 259,
+                        "name": "Assignment",
+                        "src": "555:43:3"
+                      }
+                    ],
+                    "id": 260,
+                    "name": "ExpressionStatement",
+                    "src": "555:43:3"
+                  }
+                ],
+                "id": 261,
+                "name": "Block",
+                "src": "467:138:3"
+              }
+            ],
+            "id": 262,
+            "name": "FunctionDefinition",
+            "src": "432:173:3"
+          },
+          {
+            "attributes": {
+              "baseFunctions": [
+                1743
+              ],
+              "functionSelector": "8fa97cfd",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "name": "createAirdrop",
+              "scope": 309,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "overrides": [
+                    null
+                  ]
+                },
+                "id": 268,
+                "name": "OverrideSpecifier",
+                "src": "694:8:3"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "merkleRoot",
+                      "scope": 308,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "bytes32",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "bytes32",
+                          "type": "bytes32"
+                        },
+                        "id": 263,
+                        "name": "ElementaryTypeName",
+                        "src": "634:7:3"
+                      }
+                    ],
+                    "id": 264,
+                    "name": "VariableDeclaration",
+                    "src": "634:18:3"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "total",
+                      "scope": 308,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 265,
+                        "name": "ElementaryTypeName",
+                        "src": "654:7:3"
+                      }
+                    ],
+                    "id": 266,
+                    "name": "VariableDeclaration",
+                    "src": "654:13:3"
+                  }
+                ],
+                "id": 267,
+                "name": "ParameterList",
+                "src": "633:35:3"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 308,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 271,
+                        "name": "ElementaryTypeName",
+                        "src": "738:7:3"
+                      }
+                    ],
+                    "id": 272,
+                    "name": "VariableDeclaration",
+                    "src": "738:7:3"
+                  }
+                ],
+                "id": 273,
+                "name": "ParameterList",
+                "src": "737:9:3"
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {
+                      "overloadedDeclarations": [
+                        null
+                      ],
+                      "referencedDeclaration": 3689,
+                      "type": "modifier ()",
+                      "value": "onlyOwner"
+                    },
+                    "id": 269,
+                    "name": "Identifier",
+                    "src": "711:9:3"
+                  }
+                ],
+                "id": 270,
+                "name": "ModifierInvocation",
+                "src": "711:9:3"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "assignments": [
+                        275
+                      ]
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "constant": false,
+                          "mutability": "mutable",
+                          "name": "airdrop",
+                          "scope": 307,
+                          "stateVariable": false,
+                          "storageLocation": "default",
+                          "type": "contract MerkleDistributor",
+                          "visibility": "internal"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "name": "MerkleDistributor",
+                              "referencedDeclaration": 494,
+                              "type": "contract MerkleDistributor"
+                            },
+                            "id": 274,
+                            "name": "UserDefinedTypeName",
+                            "src": "761:17:3"
+                          }
+                        ],
+                        "id": 275,
+                        "name": "VariableDeclaration",
+                        "src": "761:25:3"
+                      },
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "contract MerkleDistributor",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                },
+                                {
+                                  "typeIdentifier": "t_bytes32",
+                                  "typeString": "bytes32"
+                                }
+                              ],
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "type": "function (address,bytes32) returns (contract MerkleDistributor)"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "name": "MerkleDistributor",
+                                  "referencedDeclaration": 494,
+                                  "type": "contract MerkleDistributor"
+                                },
+                                "id": 276,
+                                "name": "UserDefinedTypeName",
+                                "src": "805:17:3"
+                              }
+                            ],
+                            "id": 277,
+                            "name": "NewExpression",
+                            "src": "801:21:3"
+                          },
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "isStructConstructorCall": false,
+                              "lValueRequested": false,
+                              "names": [
+                                null
+                              ],
+                              "tryCall": false,
+                              "type": "address",
+                              "type_conversion": true
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_contract$_IRewardsToken_$1883",
+                                      "typeString": "contract IRewardsToken"
+                                    }
+                                  ],
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "type": "type(address)"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "name": "address"
+                                    },
+                                    "id": 278,
+                                    "name": "ElementaryTypeName",
+                                    "src": "823:7:3"
+                                  }
+                                ],
+                                "id": 279,
+                                "name": "ElementaryTypeNameExpression",
+                                "src": "823:7:3"
+                              },
+                              {
+                                "attributes": {
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 243,
+                                  "type": "contract IRewardsToken",
+                                  "value": "rewardsToken"
+                                },
+                                "id": 280,
+                                "name": "Identifier",
+                                "src": "831:12:3"
+                              }
+                            ],
+                            "id": 281,
+                            "name": "FunctionCall",
+                            "src": "823:21:3"
+                          },
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 264,
+                              "type": "bytes32",
+                              "value": "merkleRoot"
+                            },
+                            "id": 282,
+                            "name": "Identifier",
+                            "src": "846:10:3"
+                          }
+                        ],
+                        "id": 283,
+                        "name": "FunctionCall",
+                        "src": "801:56:3"
+                      }
+                    ],
+                    "id": 284,
+                    "name": "VariableDeclarationStatement",
+                    "src": "761:96:3"
+                  },
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                },
+                                {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              ],
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "member_name": "mint",
+                              "referencedDeclaration": 1862,
+                              "type": "function (address,uint256) external"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 243,
+                                  "type": "contract IRewardsToken",
+                                  "value": "rewardsToken"
+                                },
+                                "id": 285,
+                                "name": "Identifier",
+                                "src": "867:12:3"
+                              }
+                            ],
+                            "id": 287,
+                            "name": "MemberAccess",
+                            "src": "867:17:3"
+                          },
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "isStructConstructorCall": false,
+                              "lValueRequested": false,
+                              "names": [
+                                null
+                              ],
+                              "tryCall": false,
+                              "type": "address",
+                              "type_conversion": true
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                                      "typeString": "contract MerkleDistributor"
+                                    }
+                                  ],
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "type": "type(address)"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "name": "address"
+                                    },
+                                    "id": 288,
+                                    "name": "ElementaryTypeName",
+                                    "src": "885:7:3"
+                                  }
+                                ],
+                                "id": 289,
+                                "name": "ElementaryTypeNameExpression",
+                                "src": "885:7:3"
+                              },
+                              {
+                                "attributes": {
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 275,
+                                  "type": "contract MerkleDistributor",
+                                  "value": "airdrop"
+                                },
+                                "id": 290,
+                                "name": "Identifier",
+                                "src": "893:7:3"
+                              }
+                            ],
+                            "id": 291,
+                            "name": "FunctionCall",
+                            "src": "885:16:3"
+                          },
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 266,
+                              "type": "uint256",
+                              "value": "total"
+                            },
+                            "id": 292,
+                            "name": "Identifier",
+                            "src": "903:5:3"
+                          }
+                        ],
+                        "id": 293,
+                        "name": "FunctionCall",
+                        "src": "867:42:3"
+                      }
+                    ],
+                    "id": 294,
+                    "name": "ExpressionStatement",
+                    "src": "867:42:3"
+                  },
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              ],
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 1733,
+                              "type": "function (address)",
+                              "value": "AirdropCreated"
+                            },
+                            "id": 295,
+                            "name": "Identifier",
+                            "src": "924:14:3"
+                          },
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "isStructConstructorCall": false,
+                              "lValueRequested": false,
+                              "names": [
+                                null
+                              ],
+                              "tryCall": false,
+                              "type": "address",
+                              "type_conversion": true
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                                      "typeString": "contract MerkleDistributor"
+                                    }
+                                  ],
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "type": "type(address)"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "name": "address"
+                                    },
+                                    "id": 296,
+                                    "name": "ElementaryTypeName",
+                                    "src": "939:7:3"
+                                  }
+                                ],
+                                "id": 297,
+                                "name": "ElementaryTypeNameExpression",
+                                "src": "939:7:3"
+                              },
+                              {
+                                "attributes": {
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 275,
+                                  "type": "contract MerkleDistributor",
+                                  "value": "airdrop"
+                                },
+                                "id": 298,
+                                "name": "Identifier",
+                                "src": "947:7:3"
+                              }
+                            ],
+                            "id": 299,
+                            "name": "FunctionCall",
+                            "src": "939:16:3"
+                          }
+                        ],
+                        "id": 300,
+                        "name": "FunctionCall",
+                        "src": "924:32:3"
+                      }
+                    ],
+                    "id": 301,
+                    "name": "EmitStatement",
+                    "src": "919:37:3"
+                  },
+                  {
+                    "attributes": {
+                      "functionReturnParameters": 273
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "address",
+                          "type_conversion": true
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_contract$_MerkleDistributor_$494",
+                                  "typeString": "contract MerkleDistributor"
+                                }
+                              ],
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "type": "type(address)"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "name": "address"
+                                },
+                                "id": 302,
+                                "name": "ElementaryTypeName",
+                                "src": "973:7:3"
+                              }
+                            ],
+                            "id": 303,
+                            "name": "ElementaryTypeNameExpression",
+                            "src": "973:7:3"
+                          },
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 275,
+                              "type": "contract MerkleDistributor",
+                              "value": "airdrop"
+                            },
+                            "id": 304,
+                            "name": "Identifier",
+                            "src": "981:7:3"
+                          }
+                        ],
+                        "id": 305,
+                        "name": "FunctionCall",
+                        "src": "973:16:3"
+                      }
+                    ],
+                    "id": 306,
+                    "name": "Return",
+                    "src": "966:23:3"
+                  }
+                ],
+                "id": 307,
+                "name": "Block",
+                "src": "751:245:3"
+              }
+            ],
+            "id": 308,
+            "name": "FunctionDefinition",
+            "src": "611:385:3"
+          }
+        ],
+        "id": 309,
+        "name": "ContractDefinition",
+        "src": "292:706:3"
+      }
+    ],
+    "id": 310,
+    "name": "SourceUnit",
+    "src": "32:967:3"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.6+commit.7338295f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.3.3",
+  "updatedAt": "2021-02-16T10:30:05.191Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "createAirdrop(bytes32,uint256)": {
+        "details": "Mint `total` amount of rewards tokens and deploy airdrop contract {MerkleDistributor} with `merkleRoot`. Return address of deployed contract."
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

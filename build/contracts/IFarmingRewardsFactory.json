@@ -1,0 +1,992 @@
+{
+  "contractName": "IFarmingRewardsFactory",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "FarmingCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "FarmingDistributed",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_symbol",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "_stakingToken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_rewardsDuration",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_maximalStake",
+          "type": "uint256"
+        }
+      ],
+      "name": "createFarming",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "farming",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "total",
+          "type": "uint256"
+        }
+      ],
+      "name": "distributeRewards",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"FarmingCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"FarmingDistributed\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_symbol\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"_stakingToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_rewardsDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maximalStake\",\"type\":\"uint256\"}],\"name\":\"createFarming\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"farming\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"total\",\"type\":\"uint256\"}],\"name\":\"distributeRewards\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Factory for deploying contract {FarmingReward}\",\"kind\":\"dev\",\"methods\":{\"createFarming(string,string,address,uint256,uint256)\":{\"details\":\"Deploy contract {FarmingReward} as ERC20 token with `_name`, `_symbol`. Return address of deployed contract.\"},\"distributeRewards(address,uint256)\":{\"details\":\"Distribute farming `total` reward tokens to `farming` contract.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IFarmingRewardsFactory.sol\":\"IFarmingRewardsFactory\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IFarmingRewardsFactory.sol\":{\"keccak256\":\"0x1776efd5122170043ab1906949c5cca391219b7c78f54376f836407e9504cef0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://50ca4b8aea845c995d09e64bb14039af0f8c73afe3160ff2ee65c0189c11d2fa\",\"dweb:/ipfs/QmeRAFeVfdDW7YXnEZoe3Z2jbVCjYYRjmaANrVrSmKV4AK\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.6.0 <0.8.0;\n\n/**\n * @dev Factory for deploying contract {FarmingReward}\n */\ninterface IFarmingRewardsFactory {\n    event FarmingCreated(address addr);\n    event FarmingDistributed(address addr);\n\n    /**\n     * @dev Deploy contract {FarmingReward} as ERC20 token with `_name`, `_symbol`.\n     *\n     * Return address of deployed contract.\n     */\n    function createFarming(\n        string memory _name,\n        string memory _symbol,\n        address _stakingToken,\n        uint256 _rewardsDuration,\n        uint256 _maximalStake\n    ) external returns (address);\n\n    /**\n     * @dev Distribute farming `total` reward tokens to `farming` contract.\n     */\n    function distributeRewards(address farming, uint256 total) external;\n}\n",
+  "sourcePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IFarmingRewardsFactory.sol",
+  "ast": {
+    "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IFarmingRewardsFactory.sol",
+    "exportedSymbols": {
+      "IFarmingRewardsFactory": [
+        1780
+      ]
+    },
+    "id": 1781,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1746,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.6",
+          ".0",
+          "<",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:31:7"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 1747,
+          "nodeType": "StructuredDocumentation",
+          "src": "65:62:7",
+          "text": " @dev Factory for deploying contract {FarmingReward}"
+        },
+        "fullyImplemented": false,
+        "id": 1780,
+        "linearizedBaseContracts": [
+          1780
+        ],
+        "name": "IFarmingRewardsFactory",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "id": 1751,
+            "name": "FarmingCreated",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 1750,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1749,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "addr",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1751,
+                  "src": "188:12:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1748,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "188:7:7",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "187:14:7"
+            },
+            "src": "167:35:7"
+          },
+          {
+            "anonymous": false,
+            "id": 1755,
+            "name": "FarmingDistributed",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 1754,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1753,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "addr",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1755,
+                  "src": "232:12:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1752,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "232:7:7",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "231:14:7"
+            },
+            "src": "207:39:7"
+          },
+          {
+            "documentation": {
+              "id": 1756,
+              "nodeType": "StructuredDocumentation",
+              "src": "252:146:7",
+              "text": " @dev Deploy contract {FarmingReward} as ERC20 token with `_name`, `_symbol`.\n Return address of deployed contract."
+            },
+            "functionSelector": "73b064e8",
+            "id": 1771,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "createFarming",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1767,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1758,
+                  "mutability": "mutable",
+                  "name": "_name",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1771,
+                  "src": "435:19:7",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 1757,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "435:6:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1760,
+                  "mutability": "mutable",
+                  "name": "_symbol",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1771,
+                  "src": "464:21:7",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 1759,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "464:6:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1762,
+                  "mutability": "mutable",
+                  "name": "_stakingToken",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1771,
+                  "src": "495:21:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1761,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "495:7:7",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1764,
+                  "mutability": "mutable",
+                  "name": "_rewardsDuration",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1771,
+                  "src": "526:24:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1763,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "526:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1766,
+                  "mutability": "mutable",
+                  "name": "_maximalStake",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1771,
+                  "src": "560:21:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1765,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "560:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "425:162:7"
+            },
+            "returnParameters": {
+              "id": 1770,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1769,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1771,
+                  "src": "606:7:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1768,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "606:7:7",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "605:9:7"
+            },
+            "scope": 1780,
+            "src": "403:212:7",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 1772,
+              "nodeType": "StructuredDocumentation",
+              "src": "621:87:7",
+              "text": " @dev Distribute farming `total` reward tokens to `farming` contract."
+            },
+            "functionSelector": "a8031a1d",
+            "id": 1779,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "distributeRewards",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1777,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1774,
+                  "mutability": "mutable",
+                  "name": "farming",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1779,
+                  "src": "740:15:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1773,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "740:7:7",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1776,
+                  "mutability": "mutable",
+                  "name": "total",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1779,
+                  "src": "757:13:7",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1775,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "757:7:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "739:32:7"
+            },
+            "returnParameters": {
+              "id": 1778,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "780:0:7"
+            },
+            "scope": 1780,
+            "src": "713:68:7",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 1781,
+        "src": "128:655:7"
+      }
+    ],
+    "src": "32:752:7"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IFarmingRewardsFactory.sol",
+      "exportedSymbols": {
+        "IFarmingRewardsFactory": [
+          1780
+        ]
+      },
+      "license": "MIT"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            ">=",
+            "0.6",
+            ".0",
+            "<",
+            "0.8",
+            ".0"
+          ]
+        },
+        "id": 1746,
+        "name": "PragmaDirective",
+        "src": "32:31:7"
+      },
+      {
+        "attributes": {
+          "abstract": false,
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "interface",
+          "fullyImplemented": false,
+          "linearizedBaseContracts": [
+            1780
+          ],
+          "name": "IFarmingRewardsFactory",
+          "scope": 1781
+        },
+        "children": [
+          {
+            "attributes": {
+              "text": " @dev Factory for deploying contract {FarmingReward}"
+            },
+            "id": 1747,
+            "name": "StructuredDocumentation",
+            "src": "65:62:7"
+          },
+          {
+            "attributes": {
+              "anonymous": false,
+              "name": "FarmingCreated"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": false,
+                      "mutability": "mutable",
+                      "name": "addr",
+                      "scope": 1751,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 1748,
+                        "name": "ElementaryTypeName",
+                        "src": "188:7:7"
+                      }
+                    ],
+                    "id": 1749,
+                    "name": "VariableDeclaration",
+                    "src": "188:12:7"
+                  }
+                ],
+                "id": 1750,
+                "name": "ParameterList",
+                "src": "187:14:7"
+              }
+            ],
+            "id": 1751,
+            "name": "EventDefinition",
+            "src": "167:35:7"
+          },
+          {
+            "attributes": {
+              "anonymous": false,
+              "name": "FarmingDistributed"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": false,
+                      "mutability": "mutable",
+                      "name": "addr",
+                      "scope": 1755,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 1752,
+                        "name": "ElementaryTypeName",
+                        "src": "232:7:7"
+                      }
+                    ],
+                    "id": 1753,
+                    "name": "VariableDeclaration",
+                    "src": "232:12:7"
+                  }
+                ],
+                "id": 1754,
+                "name": "ParameterList",
+                "src": "231:14:7"
+              }
+            ],
+            "id": 1755,
+            "name": "EventDefinition",
+            "src": "207:39:7"
+          },
+          {
+            "attributes": {
+              "functionSelector": "73b064e8",
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "createFarming",
+              "scope": 1780,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @dev Deploy contract {FarmingReward} as ERC20 token with `_name`, `_symbol`.\n Return address of deployed contract."
+                },
+                "id": 1756,
+                "name": "StructuredDocumentation",
+                "src": "252:146:7"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "_name",
+                      "scope": 1771,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "string",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "string",
+                          "type": "string"
+                        },
+                        "id": 1757,
+                        "name": "ElementaryTypeName",
+                        "src": "435:6:7"
+                      }
+                    ],
+                    "id": 1758,
+                    "name": "VariableDeclaration",
+                    "src": "435:19:7"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "_symbol",
+                      "scope": 1771,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "string",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "string",
+                          "type": "string"
+                        },
+                        "id": 1759,
+                        "name": "ElementaryTypeName",
+                        "src": "464:6:7"
+                      }
+                    ],
+                    "id": 1760,
+                    "name": "VariableDeclaration",
+                    "src": "464:21:7"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "_stakingToken",
+                      "scope": 1771,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 1761,
+                        "name": "ElementaryTypeName",
+                        "src": "495:7:7"
+                      }
+                    ],
+                    "id": 1762,
+                    "name": "VariableDeclaration",
+                    "src": "495:21:7"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "_rewardsDuration",
+                      "scope": 1771,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 1763,
+                        "name": "ElementaryTypeName",
+                        "src": "526:7:7"
+                      }
+                    ],
+                    "id": 1764,
+                    "name": "VariableDeclaration",
+                    "src": "526:24:7"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "_maximalStake",
+                      "scope": 1771,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 1765,
+                        "name": "ElementaryTypeName",
+                        "src": "560:7:7"
+                      }
+                    ],
+                    "id": 1766,
+                    "name": "VariableDeclaration",
+                    "src": "560:21:7"
+                  }
+                ],
+                "id": 1767,
+                "name": "ParameterList",
+                "src": "425:162:7"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 1771,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 1768,
+                        "name": "ElementaryTypeName",
+                        "src": "606:7:7"
+                      }
+                    ],
+                    "id": 1769,
+                    "name": "VariableDeclaration",
+                    "src": "606:7:7"
+                  }
+                ],
+                "id": 1770,
+                "name": "ParameterList",
+                "src": "605:9:7"
+              }
+            ],
+            "id": 1771,
+            "name": "FunctionDefinition",
+            "src": "403:212:7"
+          },
+          {
+            "attributes": {
+              "functionSelector": "a8031a1d",
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "distributeRewards",
+              "scope": 1780,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @dev Distribute farming `total` reward tokens to `farming` contract."
+                },
+                "id": 1772,
+                "name": "StructuredDocumentation",
+                "src": "621:87:7"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "farming",
+                      "scope": 1779,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 1773,
+                        "name": "ElementaryTypeName",
+                        "src": "740:7:7"
+                      }
+                    ],
+                    "id": 1774,
+                    "name": "VariableDeclaration",
+                    "src": "740:15:7"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "total",
+                      "scope": 1779,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "uint256",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "uint256",
+                          "type": "uint256"
+                        },
+                        "id": 1775,
+                        "name": "ElementaryTypeName",
+                        "src": "757:7:7"
+                      }
+                    ],
+                    "id": 1776,
+                    "name": "VariableDeclaration",
+                    "src": "757:13:7"
+                  }
+                ],
+                "id": 1777,
+                "name": "ParameterList",
+                "src": "739:32:7"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 1778,
+                "name": "ParameterList",
+                "src": "780:0:7"
+              }
+            ],
+            "id": 1779,
+            "name": "FunctionDefinition",
+            "src": "713:68:7"
+          }
+        ],
+        "id": 1780,
+        "name": "ContractDefinition",
+        "src": "128:655:7"
+      }
+    ],
+    "id": 1781,
+    "name": "SourceUnit",
+    "src": "32:752:7"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.6+commit.7338295f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.3.3",
+  "updatedAt": "2021-02-16T10:30:05.209Z",
+  "devdoc": {
+    "details": "Factory for deploying contract {FarmingReward}",
+    "kind": "dev",
+    "methods": {
+      "createFarming(string,string,address,uint256,uint256)": {
+        "details": "Deploy contract {FarmingReward} as ERC20 token with `_name`, `_symbol`. Return address of deployed contract."
+      },
+      "distributeRewards(address,uint256)": {
+        "details": "Distribute farming `total` reward tokens to `farming` contract."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
