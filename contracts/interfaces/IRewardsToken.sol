@@ -43,6 +43,13 @@ interface IRewardsToken is IERC20 {
     function unpause() external;
 
     /**
+     * @dev Set trusted forwarder address for gsn.
+     *
+     * - `trustedForwarder` can be zero address to disable gsn
+     */
+    function setTrustedForwarder(address trustedForwarder) external;
+
+    /**
      * @dev Return minter role unique id. Used for managing minter role at contract {AccessControl}
      */
     function minterRole() external view returns (bytes32);

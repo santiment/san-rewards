@@ -24,7 +24,6 @@
     "chai": "^4.3.0",
     "eth-sig-util": "^3.0.1",
     "ethereumjs-util": "^7.0.8",
-    "ethereumjs-wallet": "^1.0.1",
     "ganache-cli": "^6.12.2",
     "mocha": "^8.2.1",
     "solc-0.7": "npm:solc@^0.7.6",

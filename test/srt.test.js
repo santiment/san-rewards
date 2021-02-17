@@ -1,18 +1,19 @@
-const {accounts, contract} = require('@openzeppelin/test-environment')
-const {expectEvent, expectRevert, constants} = require('@openzeppelin/test-helpers')
+const {web3, accounts, privateKeys, contract} = require('@openzeppelin/test-environment')
+const {send, balance, expectEvent, expectRevert, constants} = require('@openzeppelin/test-helpers')
 const {expect} = require('chai')
-const { fromRpcSig } = require('ethereumjs-util');
+const {fromRpcSig, bufferToHex} = require('ethereumjs-util');
 const ethSigUtil = require('eth-sig-util');
-const Wallet = require('ethereumjs-wallet').default;
-const {EIP712Domain, Permit} = require("./utils");
+const {TypedDataUtils} = require('eth-sig-util');
+const {EIP712Domain, Permit, ForwardRequest} = require("./utils");
 
 const {token} = require("./utils");
 
 const RewardsToken = contract.fromArtifact('RewardsToken')
-
+const TrustedForwarded = contract.fromArtifact('TrustedForwarder')
 
 describe('StakingRewards', function () {
-    const [deployer, minter, pauser, user1, user2] = accounts
+    const [deployer, minter, pauser, user1, user2, relayer] = accounts
+    const [deployerKey, minterKey, pauserKey, user1Key, user2Key, relayerKey] = privateKeys
 
     before('Setup staking rewards', async () => {
 
@@ -57,9 +58,9 @@ describe('StakingRewards', function () {
         expectEvent(receipt, "Unpaused", {account: pauser})
         expect(await this.token.paused()).to.be.false
 
-        receipt = await this.token.transfer(user2, token('100'), {from: user1})
-        expectEvent(receipt, "Transfer", {from: user1, to: user2, value: token('100')})
-        expect(await this.token.balanceOf(user1)).to.be.bignumber.equal(token('900'))
+        receipt = await this.token.transfer(user2, token('300'), {from: user1})
+        expectEvent(receipt, "Transfer", {from: user1, to: user2, value: token('300')})
+        expect(await this.token.balanceOf(user1)).to.be.bignumber.equal(token('700'))
 
         receipt = await this.token.revokeRole(await this.token.pauserRole(), pauser, {from: deployer})
         expectEvent(receipt, "RoleRevoked", {role: await this.token.pauserRole(), account: pauser, sender: deployer})
@@ -70,33 +71,103 @@ describe('StakingRewards', function () {
 
         let receipt = await this.token.burn(token('100'), {from: user1})
         expectEvent(receipt, "Transfer", {from: user1, to: constants.ZERO_ADDRESS, value: token('100')})
-        expect(await this.token.balanceOf(user1)).to.be.bignumber.equal(token('800'))
+        expect(await this.token.balanceOf(user1)).to.be.bignumber.equal(token('600'))
     })
 
     it("Check permit", async () => {
-        const wallet = Wallet.generate();
-        const user3 = wallet.getAddressString();
-        const version = '1'
 
-        const nonce = await this.token.nonces(user3)
+        const user2BalanceTracker = await balance.tracker(user2)
+
+        this.chainId = await this.token.getChainId()
+        const version = '1'
+        const nonce = await this.token.nonces(user2)
         const name = await this.token.name()
-        let chainId = await this.token.getChainId()
-        let value = token('100')
-        let deadline = constants.MAX_UINT256;
+        const value = token('100')
+        const deadline = constants.MAX_UINT256;
 
         const data = {
             primaryType: 'Permit',
-            types: { EIP712Domain, Permit },
-            domain: { name, version, chainId, verifyingContract: this.token.address },
-            message: { owner: user3, spender: user1, value, nonce, deadline },
+            types: {EIP712Domain, Permit},
+            domain: {name, version, chainId: this.chainId, verifyingContract: this.token.address},
+            message: {owner: user2, spender: user1, value, nonce, deadline},
         }
 
-        const signature = ethSigUtil.signTypedMessage(wallet.getPrivateKey(), { data });
-        const { v, r, s } = fromRpcSig(signature);
+        const hexKey = user2Key.substr(2)
+        const signature = ethSigUtil.signTypedData_v4(Buffer.from(hexKey, 'hex'), {data});
+        const {v, r, s} = fromRpcSig(signature);
 
-        await this.token.mint(user3, token('1000'), {from: deployer})
-        const receipt = await this.token.permit(user3, user1, value, deadline, v, r, s)
+        const receipt = await this.token.permit(user2, user1, value, deadline, v, r, s)
         expectEvent(receipt, 'Approval', {spender: user1, value})
-        expect(await this.token.allowance(user3, user1)).to.be.bignumber.equal(token('100'))
+        expect(await this.token.allowance(user2, user1)).to.be.bignumber.equal(token('100'))
+        expect(await user2BalanceTracker.delta()).to.be.bignumber.equal('0')
+    })
+
+    it("Check forwarder", async () => {
+        const user2BalanceTracker = await balance.tracker(user2)
+        this.forwarder = await TrustedForwarded.new(this.token.address, {from: deployer})
+
+        let receipt = await this.forwarder.grantRole(await this.forwarder.relayerRole(), relayer, {from: deployer})
+        expectEvent(receipt, "RoleGranted", {
+            role: await this.forwarder.relayerRole(),
+            account: relayer,
+            sender: deployer
+        })
+        expect(await this.forwarder.hasRole(await this.forwarder.relayerRole(), relayer)).to.be.true
+        expect(await this.token.balanceOf(user1)).to.be.bignumber.equal(token('600'))
+        expect(await this.token.balanceOf(user2)).to.be.bignumber.equal(token('300'))
+
+        const nonce = await this.forwarder.getNonce(user2).then(nonce => nonce.toString());
+        const request = {
+            from: user2,
+            to: this.token.address,
+            value: 0,
+            gas: 1e6,
+            nonce,
+            data: this.token.contract.methods["transfer"](user1, token('100')).encodeABI()
+        }
+
+        const data = {
+            primaryType: 'ForwardRequest',
+            types: {EIP712Domain, ForwardRequest},
+            domain: {name: 'Defender', version: '1', chainId: this.chainId, verifyingContract: this.forwarder.address},
+            message: request
+        }
+
+        const hexKey = user2Key.substr(2)
+        const signature = ethSigUtil.signTypedData_v4(Buffer.from(hexKey, 'hex'), {data});
+
+        const DomainSeparator = bufferToHex(TypedDataUtils.hashStruct('EIP712Domain', data.domain, data.types))
+
+        const GenericParams = 'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data'
+        const TypeName = `ForwardRequest(${GenericParams})`
+        const TypeHash = web3.utils.keccak256(TypeName)
+        const SuffixData = '0x'
+
+        const args = [
+            request,
+            DomainSeparator,
+            TypeHash,
+            SuffixData,
+            signature
+        ]
+
+        receipt = await this.forwarder.registerDomainSeparator("Defender", "1")
+        expectEvent(receipt, "DomainRegistered")
+
+        receipt = await this.token.setTrustedForwarder(this.forwarder.address, {from: deployer})
+        expectEvent(receipt, "TrustedForwarderChanged", {
+            previous: constants.ZERO_ADDRESS,
+            current: this.forwarder.address
+        })
+        expect(await this.token.isTrustedForwarder(this.forwarder.address)).to.be.true
+
+        await this.forwarder.verify(...args)
+
+        receipt = await this.forwarder.execute(...args, {from: relayer})
+        expectEvent.inTransaction(receipt.tx, this.token, "Transfer", {from: user2, to: user1, value: token('100')})
+
+        expect(await this.token.balanceOf(user1)).to.be.bignumber.equal(token('700'))
+        expect(await this.token.balanceOf(user2)).to.be.bignumber.equal(token('200'))
+        expect(await user2BalanceTracker.delta()).to.be.bignumber.equal('0')
     })
 })

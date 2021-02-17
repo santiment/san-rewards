@@ -8,8 +8,10 @@ import "@openzeppelin/contracts/drafts/ERC20Permit.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./interfaces/IRewardsToken.sol";
+import "./gsn/RelayRecipient.sol";
+import "./gsn/BaseRelayRecipient.sol";
 
-contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, AccessControl {
+contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipient, AccessControl {
     using SafeMath for uint256;
 
     bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -64,6 +66,14 @@ contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, AccessContro
         _unpause();
     }
 
+    function setTrustedForwarder(address trustedForwarder) external override {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
+            "RewardsToken: must have admin role"
+        );
+        super._setTrustedForwarder(trustedForwarder);
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20Pausable, ERC20) {
         ERC20Pausable._beforeTokenTransfer(from, to, amount);
     }
@@ -76,11 +86,23 @@ contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, AccessContro
         return PAUSER_ROLE;
     }
 
+    function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
+        return BaseRelayRecipient._msgSender();
+    }
+
+    function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
+        return BaseRelayRecipient._msgData();
+    }
+
     function getChainId() external view returns (uint256 chainId) {
         this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         // solhint-disable-next-line no-inline-assembly
         assembly {
             chainId := chainid()
         }
+    }
+
+    function versionRecipient() external override pure returns (string memory) {
+        return "2.0.0+";
     }
 }
