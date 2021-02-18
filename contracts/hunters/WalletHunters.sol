@@ -69,7 +69,6 @@ contract WalletHunters is
 
     function submitRequest(
         address hunter,
-        address wallet,
         uint256 reward
     ) external override returns (uint256) {
         _requestCounter.increment();
@@ -77,13 +76,12 @@ contract WalletHunters is
 
         IWalletHunters.WalletRequest storage _request = walletRequests[id];
 
-        _request.wallet = wallet;
         _request.hunter = hunter;
         _request.reward = reward;
         // solhint-disable-next-line not-rely-on-time
         _request.requestTime = block.timestamp;
 
-        emit NewWalletRequest(id, hunter, wallet, reward);
+        emit NewWalletRequest(id, hunter, reward);
 
         return id;
     }
@@ -151,7 +149,7 @@ contract WalletHunters is
         emit RequestDiscarded(requestId, mayor);
     }
 
-    function withdraw(address sheriff, uint256 amount) external override {
+    function withdraw(address sheriff, uint256 amount) public override {
         require(sheriff == _msgSender(), "Sender must be sheriff");
         require(amount > 0, "Cannot withdraw 0");
         uint256 available = balanceOf(sheriff).sub(lockedBalance(sheriff));
@@ -161,9 +159,10 @@ contract WalletHunters is
         emit Withdrawn(sheriff, amount);
     }
 
-    function exit(address sheriff) external pure override {
-        revert("Not implemented");
-        // TODO implement
+    function exit(address sheriff) external override {
+        require(_msgSender() == sheriff, "Sender must be sheriff");
+        withdraw(sheriff, balanceOf(sheriff));
+        getSheriffRewards(sheriff);
     }
 
     function getHunterReward(address hunter, uint256 requestId)
@@ -186,7 +185,7 @@ contract WalletHunters is
         emit HunterRewardPaid(hunter, requestId, reward);
     }
 
-    function getHunterRewards(address hunter, uint256[] calldata requestIds)
+    function getHunterRewardsByIds(address hunter, uint256[] calldata requestIds)
         external
         override
     {
@@ -229,7 +228,32 @@ contract WalletHunters is
         emit SheriffRewardPaid(sheriff, requestId, reward);
     }
 
-    function getSheriffRewards(address sheriff, uint256[] calldata requestIds)
+    function getSheriffRewards(address sheriff) public override {
+        require(sheriff == _msgSender(), "Sender must be sheriff");
+        uint256 totalReward = 0;
+
+        for (uint256 i = 0; i < sheriffVotes[sheriff].requests.length();) {
+            uint256 requestId = sheriffVotes[sheriff].requests.at(i);
+
+            if(_votingState(requestId)) {
+                i = i.add(1);
+                continue;
+            }
+
+            uint256 reward = sheriffReward(sheriff, requestId);
+            totalReward = totalReward.add(reward);
+
+            _removeVote(sheriff, requestId);
+
+            emit SheriffRewardPaid(sheriff, requestId, reward);
+        }
+
+        if (totalReward > 0) {
+            rewardsToken.mint(sheriff, totalReward);
+        }
+    }
+
+    function getSheriffRewardsByIds(address sheriff, uint256[] calldata requestIds)
         external
         override
     {
@@ -283,12 +307,10 @@ contract WalletHunters is
             requestId <= _requestCounter.current(),
             "Request doesn't exist"
         );
+        require(sheriffVotes[sheriff].requests.contains(requestId), "Sheriff doesn't vote");
         require(!_votingState(requestId), "Voting is not finished");
 
-        if (
-            !sheriffVotes[sheriff].requests.contains(requestId) ||
-            walletRequests[requestId].discarded
-        ) {
+        if (walletRequests[requestId].discarded) {
             return 0;
         }
 
@@ -313,7 +335,6 @@ contract WalletHunters is
         override
         validateRequestId(requestId)
         returns (
-            address wallet,
             address hunter,
             uint256 reward,
             uint256 requestTime,
@@ -322,7 +343,6 @@ contract WalletHunters is
             bool discarded
         )
     {
-        wallet = walletRequests[requestId].wallet;
         hunter = walletRequests[requestId].hunter;
         reward = walletRequests[requestId].reward;
         requestTime = walletRequests[requestId].requestTime;

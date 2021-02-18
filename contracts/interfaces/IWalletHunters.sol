@@ -8,7 +8,6 @@ interface IWalletHunters {
     enum Vote {AGAINST, FOR}
 
     struct WalletRequest {
-        address wallet;
         address hunter;
         uint256 reward;
         uint256 requestTime;
@@ -34,7 +33,6 @@ interface IWalletHunters {
     event NewWalletRequest(
         uint256 indexed requestId,
         address indexed hunter,
-        address indexed wallet,
         uint256 reward
     );
     event Staked(address indexed sheriff, uint256 amount);
@@ -54,7 +52,6 @@ interface IWalletHunters {
 
     function submitRequest(
         address hunter,
-        address wallet,
         uint256 reward
     ) external returns (uint256);
 
@@ -76,14 +73,16 @@ interface IWalletHunters {
 
     function getHunterReward(address hunter, uint256 requestId) external;
 
-    function getHunterRewards(
+    function getHunterRewardsByIds(
         address hunter,
         uint256[] calldata requestIds
     ) external;
 
     function getSheriffReward(address sheriff, uint256 requestId) external;
 
-    function getSheriffRewards(
+    function getSheriffRewards(address sheriff) external;
+
+    function getSheriffRewardsByIds(
         address sheriff,
         uint256[] calldata requestIds
     ) external;
@@ -108,7 +107,6 @@ interface IWalletHunters {
     external
     view
     returns (
-        address wallet,
         address hunter,
         uint256 reward,
         uint256 requestTime,
