@@ -2,11 +2,12 @@
 pragma solidity >=0.6.0 <0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/drafts/IERC20Permit.sol";
 
 /**
  * @dev Standard ERC20 token with supports minting and burning tokens.
  */
-interface IRewardsToken is IERC20 {
+interface IRewardsToken is IERC20, IERC20Permit {
     /**
      * @dev Creates `amount` new tokens for `to`.
      *

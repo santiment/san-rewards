@@ -1,18 +1,20 @@
-const {accounts, contract} = require('@openzeppelin/test-environment')
-
-const {BN, constants, expectEvent, expectRevert, ether, time} = require('@openzeppelin/test-helpers')
-
+const {accounts, contract, privateKeys} = require('@openzeppelin/test-environment')
+const {BN, expectEvent, expectRevert, ether, time} = require('@openzeppelin/test-helpers')
 const {expect} = require('chai')
+const {fromRpcSig} = require('ethereumjs-util');
+const ethSigUtil = require('eth-sig-util');
+const {buildPermit, bn} = require("./utils");
 
 const RewardsToken = contract.fromArtifact('RewardsToken')
 const WalletHunters = contract.fromArtifact('WalletHunters')
 
-const bn = (n) => new BN(n)
 const token = (n) => ether(n)
 const ZERO = bn(0)
 
 describe('WalletHunters', function () {
+    this.timeout(10000)
     const [deployer, mayor, hunter, sheriff1, sheriff2, sheriff3, wallet] = accounts
+    const [deployerKey, mayorKey, hunterKey, sheriff1Key, sheriff2Key, sheriff3Key] = privateKeys
     const votingDuration = bn(3 * 24 * 60 * 60)
     const reward = token("100000")
 
@@ -52,20 +54,32 @@ describe('WalletHunters', function () {
         expect(request.discarded).to.be.false
     })
 
-    it("Become a sheriff", async () => {
+    it("Staking a sheriff", async () => {
         const isSheriff = async (sheriff) => await this.walletHunters.isSheriff(sheriff)
         expect(await isSheriff(sheriff1)).to.be.false
         expect(await isSheriff(sheriff2)).to.be.false
         expect(await isSheriff(sheriff3)).to.be.false
 
         const becomeSheriff = async (sheriff, amount) => {
-            await this.rewardsToken.approve(this.walletHunters.address, amount, {from: sheriff})
-            const receipt = await this.walletHunters.stake(sheriff, amount, {from: sheriff})
+            let receipt = await this.rewardsToken.approve(this.walletHunters.address, amount, {from: sheriff})
+            expectEvent(receipt, 'Approval', {spender: this.walletHunters.address, value: amount, owner: sheriff})
+            receipt = await this.walletHunters.stake(sheriff, amount, {from: sheriff})
             expectEvent(receipt, "Staked", {sheriff, amount})
         }
+        const becomeSheriffThroughPermit = async (sheriff, sheriffKey, amount) => {
+            const data = await buildPermit(this.rewardsToken, sheriff, this.walletHunters.address, amount)
+
+            const signature = ethSigUtil.signTypedData_v4(Buffer.from(sheriffKey.substr(2), 'hex'), {data});
+            const {v, r, s} = fromRpcSig(signature);
+
+            const {message: {deadline}} = data
+            let receipt = await this.walletHunters.stakeWithPermit(sheriff, amount, deadline, v, r, s, {from: sheriff})
+            expectEvent(receipt, "Staked", {sheriff, amount})
+        }
+
         await becomeSheriff(sheriff1, token('1000'))
         await becomeSheriff(sheriff2, token('5000'))
-        await becomeSheriff(sheriff3, token('10000'))
+        await becomeSheriffThroughPermit(sheriff3, sheriff3Key, token('10000'))
 
         expect(await isSheriff(sheriff1)).to.be.true
         expect(await isSheriff(sheriff2)).to.be.true

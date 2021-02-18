@@ -96,6 +96,15 @@ contract WalletHunters is
         emit Staked(sheriff, amount);
     }
 
+    function stakeWithPermit(address sheriff, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external override {
+        require(sheriff == _msgSender(), "Sender must be sheriff");
+        require(amount > 0, "Cannot deposit 0");
+        _mint(sheriff, amount);
+        rewardsToken.permit(sheriff, address(this), amount, deadline, v, r, s);
+        rewardsToken.safeTransferFrom(sheriff, address(this), amount);
+        emit Staked(sheriff, amount);
+    }
+
     function vote(
         address sheriff,
         uint256 requestId,

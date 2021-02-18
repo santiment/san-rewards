@@ -4,7 +4,7 @@ const {expect} = require('chai')
 const {fromRpcSig, bufferToHex} = require('ethereumjs-util');
 const ethSigUtil = require('eth-sig-util');
 const {TypedDataUtils} = require('eth-sig-util');
-const {EIP712Domain, Permit, ForwardRequest} = require("./utils");
+const {EIP712Domain, buildPermit, ForwardRequest} = require("./utils");
 
 const {token} = require("./utils");
 
@@ -78,25 +78,14 @@ describe('StakingRewards', function () {
 
         const user2BalanceTracker = await balance.tracker(user2)
 
-        this.chainId = await this.token.getChainId()
-        const version = '1'
-        const nonce = await this.token.nonces(user2)
-        const name = await this.token.name()
         const value = token('100')
-        const deadline = constants.MAX_UINT256;
+        const data = await buildPermit(this.token, user2, user1, value)
 
-        const data = {
-            primaryType: 'Permit',
-            types: {EIP712Domain, Permit},
-            domain: {name, version, chainId: this.chainId, verifyingContract: this.token.address},
-            message: {owner: user2, spender: user1, value, nonce, deadline},
-        }
-
-        const hexKey = user2Key.substr(2)
-        const signature = ethSigUtil.signTypedData_v4(Buffer.from(hexKey, 'hex'), {data});
+        const signature = ethSigUtil.signTypedData_v4(Buffer.from(user2Key.substr(2), 'hex'), {data});
         const {v, r, s} = fromRpcSig(signature);
 
-        const receipt = await this.token.permit(user2, user1, value, deadline, v, r, s)
+        const {message: {owner, spender, deadline}} = data
+        const receipt = await this.token.permit(owner, spender, value, deadline, v, r, s)
         expectEvent(receipt, 'Approval', {spender: user1, value})
         expect(await this.token.allowance(user2, user1)).to.be.bignumber.equal(token('100'))
         expect(await user2BalanceTracker.delta()).to.be.bignumber.equal('0')
@@ -125,6 +114,8 @@ describe('StakingRewards', function () {
             nonce,
             data: this.token.contract.methods["transfer"](user1, token('100')).encodeABI()
         }
+
+        this.chainId = await this.token.getChainId()
 
         const data = {
             primaryType: 'ForwardRequest',

@@ -36,7 +36,7 @@ contract TrustedForwarder is Forwarder, AccessControl {
         (success, ret) = super._execute(req, domainSeparator, requestTypeHash, suffixData, sig);
     }
 
-    function relayerRole() external view returns (bytes32) {
+    function relayerRole() external pure returns (bytes32) {
         return RELAYER_ROLE;
     }
 }

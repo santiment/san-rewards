@@ -1,17 +1,17 @@
-const {BN, ether} = require('@openzeppelin/test-helpers')
+const {BN, ether, constants: {MAX_UINT256}} = require('@openzeppelin/test-helpers')
 
-module.exports.bn = (n) => new BN(n)
-module.exports.token = (n) => ether(n)
-module.exports.ZERO = new BN(0)
+const bn = (n) => new BN(n)
+const token = (n) => ether(n)
+const ZERO = new BN(0)
 
-module.exports.EIP712Domain = [
+const EIP712Domain = [
     {name: 'name', type: 'string'},
     {name: 'version', type: 'string'},
     {name: 'chainId', type: 'uint256'},
     {name: 'verifyingContract', type: 'address'},
 ]
 
-module.exports.Permit = [
+const Permit = [
     {name: 'owner', type: 'address'},
     {name: 'spender', type: 'address'},
     {name: 'value', type: 'uint256'},
@@ -19,7 +19,7 @@ module.exports.Permit = [
     {name: 'deadline', type: 'uint256'},
 ]
 
-module.exports.ForwardRequest = [
+const ForwardRequest = [
     {name: 'from', type: 'address'},
     {name: 'to', type: 'address'},
     {name: 'value', type: 'uint256'},
@@ -27,3 +27,26 @@ module.exports.ForwardRequest = [
     {name: 'nonce', type: 'uint256'},
     {name: 'data', type: 'bytes'}
 ]
+
+const buildPermit = async (token, owner, spender, value, version = '1', deadline = MAX_UINT256) => {
+    const chainId = await token.getChainId()
+    const name = await token.name()
+    const nonce = await token.nonces(owner)
+    const verifyingContract = token.address
+    return {
+        primaryType: 'Permit',
+        types: {EIP712Domain, Permit},
+        domain: {name, version, chainId, verifyingContract},
+        message: {owner, spender, value, nonce, deadline},
+    }
+}
+
+module.exports = {
+    bn,
+    token,
+    ZERO,
+    Permit,
+    ForwardRequest,
+    EIP712Domain,
+    buildPermit
+}

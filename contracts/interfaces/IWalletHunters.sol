@@ -62,6 +62,8 @@ interface IWalletHunters {
 
     function stake(address sheriff, uint256 amount) external;
 
+    function stakeWithPermit(address sheriff, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;
+
     function vote(
         address sheriff,
         uint256 requestId,
@@ -98,22 +100,22 @@ interface IWalletHunters {
     function isSheriff(address sheriff) external view returns (bool);
 
     function countVotes(uint256 requestId)
-        external
-        view
-        returns (uint256 votesFor, uint256 votesAgainst);
+    external
+    view
+    returns (uint256 votesFor, uint256 votesAgainst);
 
     function request(uint256 requestId)
-        external
-        view
-        returns (
-            address wallet,
-            address hunter,
-            uint256 reward,
-            uint256 requestTime,
-            bool votingState,
-            bool rewardPaid,
-            bool discarded
-        );
+    external
+    view
+    returns (
+        address wallet,
+        address hunter,
+        uint256 reward,
+        uint256 requestTime,
+        bool votingState,
+        bool rewardPaid,
+        bool discarded
+    );
 
     function votingDuration() external view returns (uint256);
 }
