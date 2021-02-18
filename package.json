@@ -9,6 +9,8 @@
     "verify:ropsten": "truffle run verify RewardsToken SanMock TokenMock AirdropFactory FarmingRewardsFactory StakingRewardsFactory --network ropsten",
     "ganache": "ganache-cli",
     "airdrop": "node ./scripts/cli.js airdrop ./scripts/airdrop.json",
+    "prettier:solidity": "prettier --write contracts/**/*.sol",
+    "lint": "solhint 'contracts/**/*.sol'",
     "test": "mocha --exit --recursive"
   },
   "keywords": [
@@ -26,8 +28,11 @@
     "ethereumjs-util": "^7.0.8",
     "ganache-cli": "^6.12.2",
     "mocha": "^8.2.1",
+    "prettier": "^2.2.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.5",
     "solc-0.7": "npm:solc@^0.7.6",
     "solhint": "^3.3.2",
+    "solhint-plugin-prettier": "0.0.5",
     "solidity-docgen": "^0.5.11",
     "truffle": "^5.1.64",
     "truffle-contract-size": "^2.0.1",
@@ -35,7 +40,7 @@
     "truffle-plugin-verify": "^0.5.4"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^3.4.0",
+    "@openzeppelin/contracts": "^3.4.0-solc-0.7",
     "@truffle/hdwallet-provider": "^1.2.1",
     "commander": "^7.0.0",
     "dotenv": "^8.2.0",

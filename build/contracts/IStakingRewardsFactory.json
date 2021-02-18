@@ -85,7 +85,7 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"StakingCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"StakingProlonged\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_symbol\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"_stakingToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_rewardRate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maximalStake\",\"type\":\"uint256\"}],\"name\":\"createStaking\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"staking\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"name\":\"prolongStacking\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Factory for deploying contract {StakingReward}\",\"kind\":\"dev\",\"methods\":{\"createStaking(string,string,address,uint256,uint256)\":{\"details\":\"Deploy contract {StakingReward} as ERC20 token with `_name`, `_symbol`. Return address of deployed contract.\"},\"prolongStacking(address,uint256)\":{\"details\":\"Prolong staking rewards at `staking` contract for `stakingDuration` time\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IStakingRewardsFactory.sol\":\"IStakingRewardsFactory\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IStakingRewardsFactory.sol\":{\"keccak256\":\"0x379de9e0966f336144f808de4619d461cf165e4ac180579d8cba96bf5f542169\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://2dc3a307032df02213a91f7cf05b23b224e8bf3079024849a2ecd8612a05804b\",\"dweb:/ipfs/QmXPVK2HtVF26Rou7VskNqBQ6ePmqw2sobFKEcGUpV3hkF\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"StakingCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"StakingProlonged\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_symbol\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"_stakingToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_rewardRate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maximalStake\",\"type\":\"uint256\"}],\"name\":\"createStaking\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"staking\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"}],\"name\":\"prolongStacking\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Factory for deploying contract {StakingReward}\",\"kind\":\"dev\",\"methods\":{\"createStaking(string,string,address,uint256,uint256)\":{\"details\":\"Deploy contract {StakingReward} as ERC20 token with `_name`, `_symbol`. Return address of deployed contract.\"},\"prolongStacking(address,uint256)\":{\"details\":\"Prolong staking rewards at `staking` contract for `stakingDuration` time\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IStakingRewardsFactory.sol\":\"IStakingRewardsFactory\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IStakingRewardsFactory.sol\":{\"keccak256\":\"0x6e795ae67e0ee27b501da9df9dcd20aa6d0dd17d3c8258178d09ea973bde5338\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://22f7e0d7b361321c50599d83732194f9b829dc97d9cc1487b616a79a942d51ec\",\"dweb:/ipfs/QmWJNAQvjDM2tyyArEHDnba3WcqiLV3zpmBA1Gq5BurwEw\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -93,32 +93,29 @@
   "deployedGeneratedSources": [],
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.6.0 <0.8.0;\n\n/**\n * @dev Factory for deploying contract {StakingReward}\n */\ninterface IStakingRewardsFactory {\n    event StakingCreated(address addr);\n    event StakingProlonged(address addr);\n\n    /**\n     * @dev Deploy contract {StakingReward} as ERC20 token with `_name`, `_symbol`.\n     *\n     * Return address of deployed contract.\n     */\n    function createStaking(\n        string memory _name,\n        string memory _symbol,\n        address _stakingToken,\n        uint256 _rewardRate,\n        uint256 _maximalStake\n    ) external returns (address);\n\n    /**\n     * @dev Prolong staking rewards at `staking` contract for `stakingDuration` time\n     */\n    function prolongStacking(address staking, uint256 duration) external;\n}\n",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.7.6;\n\n/**\n * @dev Factory for deploying contract {StakingReward}\n */\ninterface IStakingRewardsFactory {\n    event StakingCreated(address addr);\n    event StakingProlonged(address addr);\n\n    /**\n     * @dev Deploy contract {StakingReward} as ERC20 token with `_name`, `_symbol`.\n     *\n     * Return address of deployed contract.\n     */\n    function createStaking(\n        string memory _name,\n        string memory _symbol,\n        address _stakingToken,\n        uint256 _rewardRate,\n        uint256 _maximalStake\n    ) external returns (address);\n\n    /**\n     * @dev Prolong staking rewards at `staking` contract for `stakingDuration` time\n     */\n    function prolongStacking(address staking, uint256 duration) external;\n}\n",
   "sourcePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IStakingRewardsFactory.sol",
   "ast": {
     "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IStakingRewardsFactory.sol",
     "exportedSymbols": {
       "IStakingRewardsFactory": [
-        1981
+        3112
       ]
     },
-    "id": 1982,
+    "id": 3113,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1947,
+        "id": 3078,
         "literals": [
           "solidity",
-          ">=",
-          "0.6",
-          ".0",
-          "<",
-          "0.8",
-          ".0"
+          "^",
+          "0.7",
+          ".6"
         ],
         "nodeType": "PragmaDirective",
-        "src": "32:31:13"
+        "src": "32:23:18"
       },
       {
         "abstract": false,
@@ -126,37 +123,37 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 1948,
+          "id": 3079,
           "nodeType": "StructuredDocumentation",
-          "src": "65:62:13",
+          "src": "57:62:18",
           "text": " @dev Factory for deploying contract {StakingReward}"
         },
         "fullyImplemented": false,
-        "id": 1981,
+        "id": 3112,
         "linearizedBaseContracts": [
-          1981
+          3112
         ],
         "name": "IStakingRewardsFactory",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "anonymous": false,
-            "id": 1952,
+            "id": 3083,
             "name": "StakingCreated",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 1951,
+              "id": 3082,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1950,
+                  "id": 3081,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "addr",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1952,
-                  "src": "188:12:13",
+                  "scope": 3083,
+                  "src": "180:12:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -164,10 +161,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1949,
+                    "id": 3080,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "188:7:13",
+                    "src": "180:7:18",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -177,28 +174,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "187:14:13"
+              "src": "179:14:18"
             },
-            "src": "167:35:13"
+            "src": "159:35:18"
           },
           {
             "anonymous": false,
-            "id": 1956,
+            "id": 3087,
             "name": "StakingProlonged",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 1955,
+              "id": 3086,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1954,
+                  "id": 3085,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "addr",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1956,
-                  "src": "230:12:13",
+                  "scope": 3087,
+                  "src": "222:12:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -206,10 +203,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1953,
+                    "id": 3084,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "230:7:13",
+                    "src": "222:7:18",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -219,36 +216,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "229:14:13"
+              "src": "221:14:18"
             },
-            "src": "207:37:13"
+            "src": "199:37:18"
           },
           {
             "documentation": {
-              "id": 1957,
+              "id": 3088,
               "nodeType": "StructuredDocumentation",
-              "src": "250:146:13",
+              "src": "242:146:18",
               "text": " @dev Deploy contract {StakingReward} as ERC20 token with `_name`, `_symbol`.\n Return address of deployed contract."
             },
             "functionSelector": "e3fefbc8",
-            "id": 1972,
+            "id": 3103,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "createStaking",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1968,
+              "id": 3099,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1959,
+                  "id": 3090,
                   "mutability": "mutable",
                   "name": "_name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1972,
-                  "src": "433:19:13",
+                  "scope": 3103,
+                  "src": "425:19:18",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -256,10 +253,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 1958,
+                    "id": 3089,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "433:6:13",
+                    "src": "425:6:18",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -269,12 +266,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 1961,
+                  "id": 3092,
                   "mutability": "mutable",
                   "name": "_symbol",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1972,
-                  "src": "462:21:13",
+                  "scope": 3103,
+                  "src": "454:21:18",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -282,10 +279,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 1960,
+                    "id": 3091,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "462:6:13",
+                    "src": "454:6:18",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -295,12 +292,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 1963,
+                  "id": 3094,
                   "mutability": "mutable",
                   "name": "_stakingToken",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1972,
-                  "src": "493:21:13",
+                  "scope": 3103,
+                  "src": "485:21:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -308,10 +305,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1962,
+                    "id": 3093,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "493:7:13",
+                    "src": "485:7:18",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -322,12 +319,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 1965,
+                  "id": 3096,
                   "mutability": "mutable",
                   "name": "_rewardRate",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1972,
-                  "src": "524:19:13",
+                  "scope": 3103,
+                  "src": "516:19:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -335,10 +332,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1964,
+                    "id": 3095,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "524:7:13",
+                    "src": "516:7:18",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -348,12 +345,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 1967,
+                  "id": 3098,
                   "mutability": "mutable",
                   "name": "_maximalStake",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1972,
-                  "src": "553:21:13",
+                  "scope": 3103,
+                  "src": "545:21:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -361,10 +358,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1966,
+                    "id": 3097,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "553:7:13",
+                    "src": "545:7:18",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -373,20 +370,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "423:157:13"
+              "src": "415:157:18"
             },
             "returnParameters": {
-              "id": 1971,
+              "id": 3102,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1970,
+                  "id": 3101,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1972,
-                  "src": "599:7:13",
+                  "scope": 3103,
+                  "src": "591:7:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -394,10 +391,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1969,
+                    "id": 3100,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "599:7:13",
+                    "src": "591:7:18",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -407,40 +404,40 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "598:9:13"
+              "src": "590:9:18"
             },
-            "scope": 1981,
-            "src": "401:207:13",
+            "scope": 3112,
+            "src": "393:207:18",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "documentation": {
-              "id": 1973,
+              "id": 3104,
               "nodeType": "StructuredDocumentation",
-              "src": "614:96:13",
+              "src": "606:96:18",
               "text": " @dev Prolong staking rewards at `staking` contract for `stakingDuration` time"
             },
             "functionSelector": "a3686633",
-            "id": 1980,
+            "id": 3111,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "prolongStacking",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1978,
+              "id": 3109,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1975,
+                  "id": 3106,
                   "mutability": "mutable",
                   "name": "staking",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1980,
-                  "src": "740:15:13",
+                  "scope": 3111,
+                  "src": "732:15:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -448,10 +445,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 1974,
+                    "id": 3105,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "740:7:13",
+                    "src": "732:7:18",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -462,12 +459,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 1977,
+                  "id": 3108,
                   "mutability": "mutable",
                   "name": "duration",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1980,
-                  "src": "757:16:13",
+                  "scope": 3111,
+                  "src": "749:16:18",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -475,10 +472,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1976,
+                    "id": 3107,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "757:7:13",
+                    "src": "749:7:18",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -487,33 +484,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "739:35:13"
+              "src": "731:35:18"
             },
             "returnParameters": {
-              "id": 1979,
+              "id": 3110,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "783:0:13"
+              "src": "775:0:18"
             },
-            "scope": 1981,
-            "src": "715:69:13",
+            "scope": 3112,
+            "src": "707:69:18",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 1982,
-        "src": "128:658:13"
+        "scope": 3113,
+        "src": "120:658:18"
       }
     ],
-    "src": "32:755:13"
+    "src": "32:747:18"
   },
   "legacyAST": {
     "attributes": {
       "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IStakingRewardsFactory.sol",
       "exportedSymbols": {
         "IStakingRewardsFactory": [
-          1981
+          3112
         ]
       },
       "license": "MIT"
@@ -523,17 +520,14 @@
         "attributes": {
           "literals": [
             "solidity",
-            ">=",
-            "0.6",
-            ".0",
-            "<",
-            "0.8",
-            ".0"
+            "^",
+            "0.7",
+            ".6"
           ]
         },
-        "id": 1947,
+        "id": 3078,
         "name": "PragmaDirective",
-        "src": "32:31:13"
+        "src": "32:23:18"
       },
       {
         "attributes": {
@@ -547,19 +541,19 @@
           "contractKind": "interface",
           "fullyImplemented": false,
           "linearizedBaseContracts": [
-            1981
+            3112
           ],
           "name": "IStakingRewardsFactory",
-          "scope": 1982
+          "scope": 3113
         },
         "children": [
           {
             "attributes": {
               "text": " @dev Factory for deploying contract {StakingReward}"
             },
-            "id": 1948,
+            "id": 3079,
             "name": "StructuredDocumentation",
-            "src": "65:62:13"
+            "src": "57:62:18"
           },
           {
             "attributes": {
@@ -575,7 +569,7 @@
                       "indexed": false,
                       "mutability": "mutable",
                       "name": "addr",
-                      "scope": 1952,
+                      "scope": 3083,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -588,24 +582,24 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 1949,
+                        "id": 3080,
                         "name": "ElementaryTypeName",
-                        "src": "188:7:13"
+                        "src": "180:7:18"
                       }
                     ],
-                    "id": 1950,
+                    "id": 3081,
                     "name": "VariableDeclaration",
-                    "src": "188:12:13"
+                    "src": "180:12:18"
                   }
                 ],
-                "id": 1951,
+                "id": 3082,
                 "name": "ParameterList",
-                "src": "187:14:13"
+                "src": "179:14:18"
               }
             ],
-            "id": 1952,
+            "id": 3083,
             "name": "EventDefinition",
-            "src": "167:35:13"
+            "src": "159:35:18"
           },
           {
             "attributes": {
@@ -621,7 +615,7 @@
                       "indexed": false,
                       "mutability": "mutable",
                       "name": "addr",
-                      "scope": 1956,
+                      "scope": 3087,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -634,24 +628,24 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 1953,
+                        "id": 3084,
                         "name": "ElementaryTypeName",
-                        "src": "230:7:13"
+                        "src": "222:7:18"
                       }
                     ],
-                    "id": 1954,
+                    "id": 3085,
                     "name": "VariableDeclaration",
-                    "src": "230:12:13"
+                    "src": "222:12:18"
                   }
                 ],
-                "id": 1955,
+                "id": 3086,
                 "name": "ParameterList",
-                "src": "229:14:13"
+                "src": "221:14:18"
               }
             ],
-            "id": 1956,
+            "id": 3087,
             "name": "EventDefinition",
-            "src": "207:37:13"
+            "src": "199:37:18"
           },
           {
             "attributes": {
@@ -663,7 +657,7 @@
                 null
               ],
               "name": "createStaking",
-              "scope": 1981,
+              "scope": 3112,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -673,9 +667,9 @@
                 "attributes": {
                   "text": " @dev Deploy contract {StakingReward} as ERC20 token with `_name`, `_symbol`.\n Return address of deployed contract."
                 },
-                "id": 1957,
+                "id": 3088,
                 "name": "StructuredDocumentation",
-                "src": "250:146:13"
+                "src": "242:146:18"
               },
               {
                 "children": [
@@ -684,7 +678,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "_name",
-                      "scope": 1972,
+                      "scope": 3103,
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "type": "string",
@@ -696,21 +690,21 @@
                           "name": "string",
                           "type": "string"
                         },
-                        "id": 1958,
+                        "id": 3089,
                         "name": "ElementaryTypeName",
-                        "src": "433:6:13"
+                        "src": "425:6:18"
                       }
                     ],
-                    "id": 1959,
+                    "id": 3090,
                     "name": "VariableDeclaration",
-                    "src": "433:19:13"
+                    "src": "425:19:18"
                   },
                   {
                     "attributes": {
                       "constant": false,
                       "mutability": "mutable",
                       "name": "_symbol",
-                      "scope": 1972,
+                      "scope": 3103,
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "type": "string",
@@ -722,21 +716,21 @@
                           "name": "string",
                           "type": "string"
                         },
-                        "id": 1960,
+                        "id": 3091,
                         "name": "ElementaryTypeName",
-                        "src": "462:6:13"
+                        "src": "454:6:18"
                       }
                     ],
-                    "id": 1961,
+                    "id": 3092,
                     "name": "VariableDeclaration",
-                    "src": "462:21:13"
+                    "src": "454:21:18"
                   },
                   {
                     "attributes": {
                       "constant": false,
                       "mutability": "mutable",
                       "name": "_stakingToken",
-                      "scope": 1972,
+                      "scope": 3103,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -749,21 +743,21 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 1962,
+                        "id": 3093,
                         "name": "ElementaryTypeName",
-                        "src": "493:7:13"
+                        "src": "485:7:18"
                       }
                     ],
-                    "id": 1963,
+                    "id": 3094,
                     "name": "VariableDeclaration",
-                    "src": "493:21:13"
+                    "src": "485:21:18"
                   },
                   {
                     "attributes": {
                       "constant": false,
                       "mutability": "mutable",
                       "name": "_rewardRate",
-                      "scope": 1972,
+                      "scope": 3103,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -775,21 +769,21 @@
                           "name": "uint256",
                           "type": "uint256"
                         },
-                        "id": 1964,
+                        "id": 3095,
                         "name": "ElementaryTypeName",
-                        "src": "524:7:13"
+                        "src": "516:7:18"
                       }
                     ],
-                    "id": 1965,
+                    "id": 3096,
                     "name": "VariableDeclaration",
-                    "src": "524:19:13"
+                    "src": "516:19:18"
                   },
                   {
                     "attributes": {
                       "constant": false,
                       "mutability": "mutable",
                       "name": "_maximalStake",
-                      "scope": 1972,
+                      "scope": 3103,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -801,19 +795,19 @@
                           "name": "uint256",
                           "type": "uint256"
                         },
-                        "id": 1966,
+                        "id": 3097,
                         "name": "ElementaryTypeName",
-                        "src": "553:7:13"
+                        "src": "545:7:18"
                       }
                     ],
-                    "id": 1967,
+                    "id": 3098,
                     "name": "VariableDeclaration",
-                    "src": "553:21:13"
+                    "src": "545:21:18"
                   }
                 ],
-                "id": 1968,
+                "id": 3099,
                 "name": "ParameterList",
-                "src": "423:157:13"
+                "src": "415:157:18"
               },
               {
                 "children": [
@@ -822,7 +816,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "",
-                      "scope": 1972,
+                      "scope": 3103,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -835,24 +829,24 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 1969,
+                        "id": 3100,
                         "name": "ElementaryTypeName",
-                        "src": "599:7:13"
+                        "src": "591:7:18"
                       }
                     ],
-                    "id": 1970,
+                    "id": 3101,
                     "name": "VariableDeclaration",
-                    "src": "599:7:13"
+                    "src": "591:7:18"
                   }
                 ],
-                "id": 1971,
+                "id": 3102,
                 "name": "ParameterList",
-                "src": "598:9:13"
+                "src": "590:9:18"
               }
             ],
-            "id": 1972,
+            "id": 3103,
             "name": "FunctionDefinition",
-            "src": "401:207:13"
+            "src": "393:207:18"
           },
           {
             "attributes": {
@@ -864,7 +858,7 @@
                 null
               ],
               "name": "prolongStacking",
-              "scope": 1981,
+              "scope": 3112,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -874,9 +868,9 @@
                 "attributes": {
                   "text": " @dev Prolong staking rewards at `staking` contract for `stakingDuration` time"
                 },
-                "id": 1973,
+                "id": 3104,
                 "name": "StructuredDocumentation",
-                "src": "614:96:13"
+                "src": "606:96:18"
               },
               {
                 "children": [
@@ -885,7 +879,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "staking",
-                      "scope": 1980,
+                      "scope": 3111,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -898,21 +892,21 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 1974,
+                        "id": 3105,
                         "name": "ElementaryTypeName",
-                        "src": "740:7:13"
+                        "src": "732:7:18"
                       }
                     ],
-                    "id": 1975,
+                    "id": 3106,
                     "name": "VariableDeclaration",
-                    "src": "740:15:13"
+                    "src": "732:15:18"
                   },
                   {
                     "attributes": {
                       "constant": false,
                       "mutability": "mutable",
                       "name": "duration",
-                      "scope": 1980,
+                      "scope": 3111,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -924,19 +918,19 @@
                           "name": "uint256",
                           "type": "uint256"
                         },
-                        "id": 1976,
+                        "id": 3107,
                         "name": "ElementaryTypeName",
-                        "src": "757:7:13"
+                        "src": "749:7:18"
                       }
                     ],
-                    "id": 1977,
+                    "id": 3108,
                     "name": "VariableDeclaration",
-                    "src": "757:16:13"
+                    "src": "749:16:18"
                   }
                 ],
-                "id": 1978,
+                "id": 3109,
                 "name": "ParameterList",
-                "src": "739:35:13"
+                "src": "731:35:18"
               },
               {
                 "attributes": {
@@ -945,24 +939,24 @@
                   ]
                 },
                 "children": [],
-                "id": 1979,
+                "id": 3110,
                 "name": "ParameterList",
-                "src": "783:0:13"
+                "src": "775:0:18"
               }
             ],
-            "id": 1980,
+            "id": 3111,
             "name": "FunctionDefinition",
-            "src": "715:69:13"
+            "src": "707:69:18"
           }
         ],
-        "id": 1981,
+        "id": 3112,
         "name": "ContractDefinition",
-        "src": "128:658:13"
+        "src": "120:658:18"
       }
     ],
-    "id": 1982,
+    "id": 3113,
     "name": "SourceUnit",
-    "src": "32:755:13"
+    "src": "32:747:18"
   },
   "compiler": {
     "name": "solc",
@@ -970,7 +964,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-02-16T10:30:05.213Z",
+  "updatedAt": "2021-02-18T13:42:32.190Z",
   "devdoc": {
     "details": "Factory for deploying contract {StakingReward}",
     "kind": "dev",

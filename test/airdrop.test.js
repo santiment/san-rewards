@@ -61,7 +61,7 @@ describe('MerkleDistributor', function () {
 
         await expectRevert(
             this.airdrop.claim(userClaim.index, attacker, userClaim.amount, userClaim.proof, {from: attacker}),
-            'MerkleDistributor: Invalid proof'
+            'Invalid proof'
         )
     })
 
@@ -86,7 +86,7 @@ describe('MerkleDistributor', function () {
             // Check that can't claim twice
             await expectRevert(
                 this.airdrop.claim(claim.index, account, claim.amount, claim.proof, {from: account}),
-                'MerkleDistributor: Drop already claimed'
+                'Drop already claimed'
             )
         }
 

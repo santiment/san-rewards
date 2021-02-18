@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -30,7 +30,7 @@ contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipie
     function mint(address to, uint256 amount) external override {
         require(
             hasRole(MINTER_ROLE, _msgSender()),
-            "RewardsToken: must have minter role to mint"
+            "Must have minter role"
         );
         _mint(to, amount);
     }
@@ -43,7 +43,7 @@ contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipie
         uint256 decreasedAllowance =
             allowance(account, _msgSender()).sub(
                 amount,
-                "RewardsToken: burn amount exceeds allowance"
+                "Burn amount exceeds allowance"
             );
 
         _approve(account, _msgSender(), decreasedAllowance);
@@ -53,7 +53,7 @@ contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipie
     function pause() external override {
         require(
             hasRole(PAUSER_ROLE, _msgSender()),
-            "RewardsToken: must have pauser role"
+            "Must have pauser role"
         );
         _pause();
     }
@@ -61,7 +61,7 @@ contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipie
     function unpause() external override {
         require(
             hasRole(PAUSER_ROLE, _msgSender()),
-            "RewardsToken: must have pauser role"
+            "Must have pauser role"
         );
         _unpause();
     }
@@ -69,7 +69,7 @@ contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipie
     function setTrustedForwarder(address trustedForwarder) external override {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "RewardsToken: must have admin role"
+            "Must have admin role"
         );
         super._setTrustedForwarder(trustedForwarder);
     }

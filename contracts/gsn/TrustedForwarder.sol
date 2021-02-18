@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.7.6;
+// solhint-disable-next-line compiler-version
 pragma abicoder v2;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
-import "./Forwarded.sol";
+import "./Forwarder.sol";
 import "../RewardsToken.sol";
 
 contract TrustedForwarder is Forwarder, AccessControl {
-
     bytes32 private constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
 
     RewardsToken public immutable rewardsToken;
@@ -30,10 +30,16 @@ contract TrustedForwarder is Forwarder, AccessControl {
     ) external payable override returns (bool success, bytes memory ret) {
         require(
             hasRole(RELAYER_ROLE, _msgSender()),
-            "RewardsToken: must have relayer role"
+            "Must have relayer role"
         );
 
-        (success, ret) = super._execute(req, domainSeparator, requestTypeHash, suffixData, sig);
+        (success, ret) = super._execute(
+            req,
+            domainSeparator,
+            requestTypeHash,
+            suffixData,
+            sig
+        );
     }
 
     function relayerRole() external pure returns (bytes32) {

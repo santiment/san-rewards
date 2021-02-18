@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-version
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -69,10 +69,11 @@ contract WalletHunters is
         rewardsToken = IRewardsToken(rewardsToken_);
     }
 
-    function submitRequest(
-        address hunter,
-        uint256 reward
-    ) external override returns (uint256) {
+    function submitRequest(address hunter, uint256 reward)
+        external
+        override
+        returns (uint256)
+    {
         _requestCounter.increment();
         uint256 id = _requestCounter.current();
 
@@ -96,7 +97,14 @@ contract WalletHunters is
         emit Staked(sheriff, amount);
     }
 
-    function stakeWithPermit(address sheriff, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external override {
+    function stakeWithPermit(
+        address sheriff,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external override {
         require(sheriff == _msgSender(), "Sender must be sheriff");
         require(amount > 0, "Cannot deposit 0");
         _mint(sheriff, amount);
@@ -170,7 +178,7 @@ contract WalletHunters is
     function setTrustedForwarder(address trustedForwarder) external override {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "WalletHunters: must have admin role"
+            "Must have admin role"
         );
         super._setTrustedForwarder(trustedForwarder);
     }
@@ -195,10 +203,10 @@ contract WalletHunters is
         emit HunterRewardPaid(hunter, requestId, reward);
     }
 
-    function getHunterRewardsByIds(address hunter, uint256[] calldata requestIds)
-        external
-        override
-    {
+    function getHunterRewardsByIds(
+        address hunter,
+        uint256[] calldata requestIds
+    ) external override {
         require(hunter == _msgSender(), "Sender must be hunter");
 
         uint256 totalReward = 0;
@@ -242,10 +250,10 @@ contract WalletHunters is
         require(sheriff == _msgSender(), "Sender must be sheriff");
         uint256 totalReward = 0;
 
-        for (uint256 i = 0; i < sheriffVotes[sheriff].requests.length();) {
+        for (uint256 i = 0; i < sheriffVotes[sheriff].requests.length(); ) {
             uint256 requestId = sheriffVotes[sheriff].requests.at(i);
 
-            if(_votingState(requestId)) {
+            if (_votingState(requestId)) {
                 i = i.add(1);
                 continue;
             }
@@ -263,10 +271,10 @@ contract WalletHunters is
         }
     }
 
-    function getSheriffRewardsByIds(address sheriff, uint256[] calldata requestIds)
-        external
-        override
-    {
+    function getSheriffRewardsByIds(
+        address sheriff,
+        uint256[] calldata requestIds
+    ) external override {
         require(sheriff == _msgSender(), "Sender must be sheriff");
         uint256 totalReward = 0;
 
@@ -317,7 +325,10 @@ contract WalletHunters is
             requestId <= _requestCounter.current(),
             "Request doesn't exist"
         );
-        require(sheriffVotes[sheriff].requests.contains(requestId), "Sheriff doesn't vote");
+        require(
+            sheriffVotes[sheriff].requests.contains(requestId),
+            "Sheriff doesn't vote"
+        );
         require(!_votingState(requestId), "Voting is not finished");
 
         if (walletRequests[requestId].discarded) {
@@ -434,15 +445,25 @@ contract WalletHunters is
         return block.timestamp <= _finishTime(requestId);
     }
 
-    function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
+    function _msgSender()
+        internal
+        view
+        override(Context, BaseRelayRecipient)
+        returns (address payable)
+    {
         return BaseRelayRecipient._msgSender();
     }
 
-    function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
+    function _msgData()
+        internal
+        view
+        override(Context, BaseRelayRecipient)
+        returns (bytes memory)
+    {
         return BaseRelayRecipient._msgData();
     }
 
-    function versionRecipient() external override pure returns (string memory) {
+    function versionRecipient() external pure override returns (string memory) {
         return "2.0.0+";
     }
 

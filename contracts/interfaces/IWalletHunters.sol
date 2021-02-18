@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-version
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 
@@ -50,10 +50,9 @@ interface IWalletHunters {
     );
     event RequestDiscarded(uint256 indexed requestId, address mayor);
 
-    function submitRequest(
-        address hunter,
-        uint256 reward
-    ) external returns (uint256);
+    function submitRequest(address hunter, uint256 reward)
+        external
+        returns (uint256);
 
     function discardRequest(address mayor, uint256 requestId) external;
 
@@ -61,7 +60,14 @@ interface IWalletHunters {
 
     function stake(address sheriff, uint256 amount) external;
 
-    function stakeWithPermit(address sheriff, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;
+    function stakeWithPermit(
+        address sheriff,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external;
 
     function vote(
         address sheriff,
@@ -92,30 +98,30 @@ interface IWalletHunters {
     function hunterReward(uint256 requestId) external view returns (uint256);
 
     function sheriffReward(address sheriff, uint256 requestId)
-    external
-    view
-    returns (uint256);
+        external
+        view
+        returns (uint256);
 
     function lockedBalance(address sheriff) external view returns (uint256);
 
     function isSheriff(address sheriff) external view returns (bool);
 
     function countVotes(uint256 requestId)
-    external
-    view
-    returns (uint256 votesFor, uint256 votesAgainst);
+        external
+        view
+        returns (uint256 votesFor, uint256 votesAgainst);
 
     function request(uint256 requestId)
-    external
-    view
-    returns (
-        address hunter,
-        uint256 reward,
-        uint256 requestTime,
-        bool votingState,
-        bool rewardPaid,
-        bool discarded
-    );
+        external
+        view
+        returns (
+            address hunter,
+            uint256 reward,
+            uint256 requestTime,
+            bool votingState,
+            bool rewardPaid,
+            bool discarded
+        );
 
     function votingDuration() external view returns (uint256);
 }

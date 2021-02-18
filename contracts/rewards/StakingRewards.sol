@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/math/Math.sol";
@@ -12,7 +12,12 @@ import "../interfaces/IRewardsToken.sol";
 import "../interfaces/IProlongStaking.sol";
 import "../gsn/RelayRecipient.sol";
 
-contract StakingRewards is Ownable, BaseRewards, IProlongStaking, RelayRecipient {
+contract StakingRewards is
+    Ownable,
+    BaseRewards,
+    IProlongStaking,
+    RelayRecipient
+{
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -49,7 +54,11 @@ contract StakingRewards is Ownable, BaseRewards, IProlongStaking, RelayRecipient
             );
     }
 
-    function setTrustedForwarder(address trustedForwarder) external override onlyOwner {
+    function setTrustedForwarder(address trustedForwarder)
+        external
+        override
+        onlyOwner
+    {
         super._setTrustedForwarder(trustedForwarder);
     }
 
@@ -71,15 +80,25 @@ contract StakingRewards is Ownable, BaseRewards, IProlongStaking, RelayRecipient
         emit RewardProlonged(duration);
     }
 
-    function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
+    function _msgSender()
+        internal
+        view
+        override(Context, BaseRelayRecipient)
+        returns (address payable)
+    {
         return BaseRelayRecipient._msgSender();
     }
 
-    function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
+    function _msgData()
+        internal
+        view
+        override(Context, BaseRelayRecipient)
+        returns (bytes memory)
+    {
         return BaseRelayRecipient._msgData();
     }
 
-    function versionRecipient() external override pure returns (string memory) {
+    function versionRecipient() external pure override returns (string memory) {
         return "2.0.0+";
     }
 }

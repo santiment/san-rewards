@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
@@ -23,20 +23,20 @@ contract MerkleDistributor is IMerkleDistributor {
         uint256 amount,
         bytes32[] calldata merkleProof
     ) external override {
-        require(!isClaimed(index), "MerkleDistributor: Drop already claimed");
+        require(!isClaimed(index), "Drop already claimed");
 
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(index, account, amount));
         require(
             MerkleProof.verify(merkleProof, _merkleRoot, node),
-            "MerkleDistributor: Invalid proof"
+            "Invalid proof"
         );
 
         // Mark it claimed and send the token.
         _setClaimed(index);
         require(
             IERC20(_token).transfer(account, amount),
-            "MerkleDistributor: Transfer failed"
+            "Transfer failed"
         );
 
         emit Claimed(index, account, amount);

@@ -22,7 +22,7 @@ describe('StakingRewards', function () {
 
     it("Check minter role", async () => {
 
-        await expectRevert(this.token.mint(user1, token('1000'), {from: minter}), "RewardsToken: must have minter role to mint")
+        await expectRevert(this.token.mint(user1, token('1000'), {from: minter}), "Must have minter role")
 
         let receipt = await this.token.grantRole(await this.token.minterRole(), minter, {from: deployer})
         expectEvent(receipt, "RoleGranted", {role: await this.token.minterRole(), account: minter, sender: deployer})
@@ -39,8 +39,8 @@ describe('StakingRewards', function () {
 
     it("Check pauser role", async () => {
 
-        await expectRevert(this.token.pause({from: pauser}), "RewardsToken: must have pauser role")
-        await expectRevert(this.token.unpause({from: pauser}), "RewardsToken: must have pauser role")
+        await expectRevert(this.token.pause({from: pauser}), "Must have pauser role")
+        await expectRevert(this.token.unpause({from: pauser}), "Must have pauser role")
 
         let receipt = await this.token.grantRole(await this.token.pauserRole(), pauser, {from: deployer})
         expectEvent(receipt, "RoleGranted", {role: await this.token.pauserRole(), account: pauser, sender: deployer})

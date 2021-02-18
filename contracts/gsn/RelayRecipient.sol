@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.7.6;
 
 import "./BaseRelayRecipient.sol";
 
 abstract contract RelayRecipient is BaseRelayRecipient {
-
     event TrustedForwarderChanged(address previous, address current);
 
     function _setTrustedForwarder(address _trustedForwarder) internal {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Burnable.sol";
@@ -40,7 +40,7 @@ contract SanNFT is Context, AccessControl, ERC721Burnable {
      * - the caller must have the `MINTER_ROLE`.
      */
     function mint(address to) public virtual {
-        require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
+        require(hasRole(MINTER_ROLE, _msgSender()), "Must have minter role");
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.

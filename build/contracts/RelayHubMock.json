@@ -1,40 +1,37 @@
 {
   "contractName": "RelayHubMock",
   "abi": [],
-  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/mock/RelayHubMock.sol\":\"RelayHubMock\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/mock/RelayHubMock.sol\":{\"keccak256\":\"0x3c9f46be522efed1a96774abdb71467ee4e8229726dfbc6d9d406e33ad45c606\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://90eac58b6123f4a074c229cc103077cdf3721333540c1c12704dfecd816bfb47\",\"dweb:/ipfs/QmRSh61cLf4fJ9kn6dL9o8YpsvV4TdCU49iKuEA2T2ifHa\"]}},\"version\":1}",
-  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220a9b8b2b68fb4503697b4af120034de6b25fd163ca1f6a7dff350b0dc72ddb84364736f6c63430007060033",
-  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220a9b8b2b68fb4503697b4af120034de6b25fd163ca1f6a7dff350b0dc72ddb84364736f6c63430007060033",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/mock/RelayHubMock.sol\":\"RelayHubMock\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/mock/RelayHubMock.sol\":{\"keccak256\":\"0x500717cbecab41772eac899bc5a567fcac315ddfd7f3824381d6f1f0d279757f\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6e965eac016416704891b5a150304d9b4d54cad92ff67509df9082b8f353429b\",\"dweb:/ipfs/QmfRQiKY71gEuHecunHAXaXPAbDqM9vvqa6RwLMyxgnKbX\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212201bfa0129a983ef64f8d4db554fa7b25b9a4c823e5dcac3173ef03a7847ea09cf64736f6c63430007060033",
+  "deployedBytecode": "0x6080604052600080fdfea26469706673582212201bfa0129a983ef64f8d4db554fa7b25b9a4c823e5dcac3173ef03a7847ea09cf64736f6c63430007060033",
   "immutableReferences": {},
   "generatedSources": [],
   "deployedGeneratedSources": [],
-  "sourceMap": "65:25:4:-:0;;;;;;;;;;;;;;;;;;;",
-  "deployedSourceMap": "65:25:4:-:0;;;;;",
-  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.6.0 <0.8.0;\n\ncontract RelayHubMock {\n}\n",
+  "sourceMap": "57:24:21:-:0;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "57:24:21:-:0;;;;;",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.7.6;\n\ncontract RelayHubMock {}\n",
   "sourcePath": "/home/nailkhaf/Projects/san-games/contracts/mock/RelayHubMock.sol",
   "ast": {
     "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/mock/RelayHubMock.sol",
     "exportedSymbols": {
       "RelayHubMock": [
-        794
+        3447
       ]
     },
-    "id": 795,
+    "id": 3448,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 793,
+        "id": 3446,
         "literals": [
           "solidity",
-          ">=",
-          "0.6",
-          ".0",
-          "<",
-          "0.8",
-          ".0"
+          "^",
+          "0.7",
+          ".6"
         ],
         "nodeType": "PragmaDirective",
-        "src": "32:31:4"
+        "src": "32:23:21"
       },
       {
         "abstract": false,
@@ -42,25 +39,25 @@
         "contractDependencies": [],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "id": 794,
+        "id": 3447,
         "linearizedBaseContracts": [
-          794
+          3447
         ],
         "name": "RelayHubMock",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 795,
-        "src": "65:25:4"
+        "scope": 3448,
+        "src": "57:24:21"
       }
     ],
-    "src": "32:59:4"
+    "src": "32:50:21"
   },
   "legacyAST": {
     "attributes": {
       "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/mock/RelayHubMock.sol",
       "exportedSymbols": {
         "RelayHubMock": [
-          794
+          3447
         ]
       },
       "license": "MIT"
@@ -70,17 +67,14 @@
         "attributes": {
           "literals": [
             "solidity",
-            ">=",
-            "0.6",
-            ".0",
-            "<",
-            "0.8",
-            ".0"
+            "^",
+            "0.7",
+            ".6"
           ]
         },
-        "id": 793,
+        "id": 3446,
         "name": "PragmaDirective",
-        "src": "32:31:4"
+        "src": "32:23:21"
       },
       {
         "attributes": {
@@ -94,22 +88,22 @@
           "contractKind": "contract",
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            794
+            3447
           ],
           "name": "RelayHubMock",
           "nodes": [
             null
           ],
-          "scope": 795
+          "scope": 3448
         },
-        "id": 794,
+        "id": 3447,
         "name": "ContractDefinition",
-        "src": "65:25:4"
+        "src": "57:24:21"
       }
     ],
-    "id": 795,
+    "id": 3448,
     "name": "SourceUnit",
-    "src": "32:59:4"
+    "src": "32:50:21"
   },
   "compiler": {
     "name": "solc",
@@ -117,7 +111,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-02-17T08:02:54.587Z",
+  "updatedAt": "2021-02-18T13:42:32.202Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

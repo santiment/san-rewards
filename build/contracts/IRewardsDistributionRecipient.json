@@ -28,7 +28,7 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"}],\"name\":\"RewardAdded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"}],\"name\":\"notifyRewardAmount\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"This is an interface that `IStakingRewards` implementation can use to be started.\",\"kind\":\"dev\",\"methods\":{\"notifyRewardAmount(uint256)\":{\"details\":\"Notify about transferring `amount` reward tokens to farming contract and start or prolong farming.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsDistributionRecipient.sol\":\"IRewardsDistributionRecipient\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsDistributionRecipient.sol\":{\"keccak256\":\"0xe40436c400b5eecb132b0d23de6cdb95787d44cd42c32ef743a0d9f61e2395c7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d042cef82f791f40de03476f80d4de916fb349d79f36784df012d255ee129b09\",\"dweb:/ipfs/Qmb7JcDJMsesF5piWUgLDxTBgQEgqS3SgKWMuLbhy8G1on\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"}],\"name\":\"RewardAdded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"}],\"name\":\"notifyRewardAmount\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"This is an interface that `IStakingRewards` implementation can use to be started.\",\"kind\":\"dev\",\"methods\":{\"notifyRewardAmount(uint256)\":{\"details\":\"Notify about transferring `amount` reward tokens to farming contract and start or prolong farming.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsDistributionRecipient.sol\":\"IRewardsDistributionRecipient\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsDistributionRecipient.sol\":{\"keccak256\":\"0xcaa2e4cec661dad0feaa6e3338e0a10b7184e7fd05e06fdddc1c9d09eefc0611\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ffe438ee1a8370b1184a96a5b8b6dc7ad18f1d252e8465c442b79a9d09903d6f\",\"dweb:/ipfs/QmQjDu2Z4hYPVLgv6oJo9oVuTFNUV7zePBHWUKRaC2bDtf\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -36,32 +36,29 @@
   "deployedGeneratedSources": [],
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.6.0 <0.8.0;\n\n/**\n * @dev This is an interface that `IStakingRewards` implementation can use to be started.\n */\ninterface IRewardsDistributionRecipient {\n    event RewardAdded(uint256 reward);\n\n    /**\n     * @dev Notify about transferring `amount` reward tokens to farming contract and start or prolong farming.\n     */\n    function notifyRewardAmount(uint256 reward) external;\n}\n",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.7.6;\n\n/**\n * @dev This is an interface that `IStakingRewards` implementation can use to be started.\n */\ninterface IRewardsDistributionRecipient {\n    event RewardAdded(uint256 reward);\n\n    /**\n     * @dev Notify about transferring `amount` reward tokens to farming contract and start or prolong farming.\n     */\n    function notifyRewardAmount(uint256 reward) external;\n}\n",
   "sourcePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsDistributionRecipient.sol",
   "ast": {
     "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsDistributionRecipient.sol",
     "exportedSymbols": {
       "IRewardsDistributionRecipient": [
-        1848
+        2951
       ]
     },
-    "id": 1849,
+    "id": 2952,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 1836,
+        "id": 2939,
         "literals": [
           "solidity",
-          ">=",
-          "0.6",
-          ".0",
-          "<",
-          "0.8",
-          ".0"
+          "^",
+          "0.7",
+          ".6"
         ],
         "nodeType": "PragmaDirective",
-        "src": "32:31:10"
+        "src": "32:23:15"
       },
       {
         "abstract": false,
@@ -69,37 +66,37 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "documentation": {
-          "id": 1837,
+          "id": 2940,
           "nodeType": "StructuredDocumentation",
-          "src": "65:97:10",
+          "src": "57:97:15",
           "text": " @dev This is an interface that `IStakingRewards` implementation can use to be started."
         },
         "fullyImplemented": false,
-        "id": 1848,
+        "id": 2951,
         "linearizedBaseContracts": [
-          1848
+          2951
         ],
         "name": "IRewardsDistributionRecipient",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "anonymous": false,
-            "id": 1841,
+            "id": 2944,
             "name": "RewardAdded",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 1840,
+              "id": 2943,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1839,
+                  "id": 2942,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "reward",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1841,
-                  "src": "227:14:10",
+                  "scope": 2944,
+                  "src": "219:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -107,10 +104,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1838,
+                    "id": 2941,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "227:7:10",
+                    "src": "219:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -119,36 +116,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "226:16:10"
+              "src": "218:16:15"
             },
-            "src": "209:34:10"
+            "src": "201:34:15"
           },
           {
             "documentation": {
-              "id": 1842,
+              "id": 2945,
               "nodeType": "StructuredDocumentation",
-              "src": "249:122:10",
+              "src": "241:122:15",
               "text": " @dev Notify about transferring `amount` reward tokens to farming contract and start or prolong farming."
             },
             "functionSelector": "3c6b16ab",
-            "id": 1847,
+            "id": 2950,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "notifyRewardAmount",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1845,
+              "id": 2948,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 1844,
+                  "id": 2947,
                   "mutability": "mutable",
                   "name": "reward",
                   "nodeType": "VariableDeclaration",
-                  "scope": 1847,
-                  "src": "404:14:10",
+                  "scope": 2950,
+                  "src": "396:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -156,10 +153,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 1843,
+                    "id": 2946,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "404:7:10",
+                    "src": "396:7:15",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -168,33 +165,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "403:16:10"
+              "src": "395:16:15"
             },
             "returnParameters": {
-              "id": 1846,
+              "id": 2949,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "428:0:10"
+              "src": "420:0:15"
             },
-            "scope": 1848,
-            "src": "376:53:10",
+            "scope": 2951,
+            "src": "368:53:15",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 1849,
-        "src": "163:268:10"
+        "scope": 2952,
+        "src": "155:268:15"
       }
     ],
-    "src": "32:400:10"
+    "src": "32:392:15"
   },
   "legacyAST": {
     "attributes": {
       "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsDistributionRecipient.sol",
       "exportedSymbols": {
         "IRewardsDistributionRecipient": [
-          1848
+          2951
         ]
       },
       "license": "MIT"
@@ -204,17 +201,14 @@
         "attributes": {
           "literals": [
             "solidity",
-            ">=",
-            "0.6",
-            ".0",
-            "<",
-            "0.8",
-            ".0"
+            "^",
+            "0.7",
+            ".6"
           ]
         },
-        "id": 1836,
+        "id": 2939,
         "name": "PragmaDirective",
-        "src": "32:31:10"
+        "src": "32:23:15"
       },
       {
         "attributes": {
@@ -228,19 +222,19 @@
           "contractKind": "interface",
           "fullyImplemented": false,
           "linearizedBaseContracts": [
-            1848
+            2951
           ],
           "name": "IRewardsDistributionRecipient",
-          "scope": 1849
+          "scope": 2952
         },
         "children": [
           {
             "attributes": {
               "text": " @dev This is an interface that `IStakingRewards` implementation can use to be started."
             },
-            "id": 1837,
+            "id": 2940,
             "name": "StructuredDocumentation",
-            "src": "65:97:10"
+            "src": "57:97:15"
           },
           {
             "attributes": {
@@ -256,7 +250,7 @@
                       "indexed": false,
                       "mutability": "mutable",
                       "name": "reward",
-                      "scope": 1841,
+                      "scope": 2944,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -268,24 +262,24 @@
                           "name": "uint256",
                           "type": "uint256"
                         },
-                        "id": 1838,
+                        "id": 2941,
                         "name": "ElementaryTypeName",
-                        "src": "227:7:10"
+                        "src": "219:7:15"
                       }
                     ],
-                    "id": 1839,
+                    "id": 2942,
                     "name": "VariableDeclaration",
-                    "src": "227:14:10"
+                    "src": "219:14:15"
                   }
                 ],
-                "id": 1840,
+                "id": 2943,
                 "name": "ParameterList",
-                "src": "226:16:10"
+                "src": "218:16:15"
               }
             ],
-            "id": 1841,
+            "id": 2944,
             "name": "EventDefinition",
-            "src": "209:34:10"
+            "src": "201:34:15"
           },
           {
             "attributes": {
@@ -297,7 +291,7 @@
                 null
               ],
               "name": "notifyRewardAmount",
-              "scope": 1848,
+              "scope": 2951,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -307,9 +301,9 @@
                 "attributes": {
                   "text": " @dev Notify about transferring `amount` reward tokens to farming contract and start or prolong farming."
                 },
-                "id": 1842,
+                "id": 2945,
                 "name": "StructuredDocumentation",
-                "src": "249:122:10"
+                "src": "241:122:15"
               },
               {
                 "children": [
@@ -318,7 +312,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "reward",
-                      "scope": 1847,
+                      "scope": 2950,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -330,19 +324,19 @@
                           "name": "uint256",
                           "type": "uint256"
                         },
-                        "id": 1843,
+                        "id": 2946,
                         "name": "ElementaryTypeName",
-                        "src": "404:7:10"
+                        "src": "396:7:15"
                       }
                     ],
-                    "id": 1844,
+                    "id": 2947,
                     "name": "VariableDeclaration",
-                    "src": "404:14:10"
+                    "src": "396:14:15"
                   }
                 ],
-                "id": 1845,
+                "id": 2948,
                 "name": "ParameterList",
-                "src": "403:16:10"
+                "src": "395:16:15"
               },
               {
                 "attributes": {
@@ -351,24 +345,24 @@
                   ]
                 },
                 "children": [],
-                "id": 1846,
+                "id": 2949,
                 "name": "ParameterList",
-                "src": "428:0:10"
+                "src": "420:0:15"
               }
             ],
-            "id": 1847,
+            "id": 2950,
             "name": "FunctionDefinition",
-            "src": "376:53:10"
+            "src": "368:53:15"
           }
         ],
-        "id": 1848,
+        "id": 2951,
         "name": "ContractDefinition",
-        "src": "163:268:10"
+        "src": "155:268:15"
       }
     ],
-    "id": 1849,
+    "id": 2952,
     "name": "SourceUnit",
-    "src": "32:400:10"
+    "src": "32:392:15"
   },
   "compiler": {
     "name": "solc",
@@ -376,7 +370,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-02-16T10:30:05.212Z",
+  "updatedAt": "2021-02-18T13:42:32.183Z",
   "devdoc": {
     "details": "This is an interface that `IStakingRewards` implementation can use to be started.",
     "kind": "dev",
