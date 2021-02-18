@@ -9,8 +9,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./BaseRewards.sol";
 import "../interfaces/IRewardsDistributionRecipient.sol";
+import "../gsn/RelayRecipient.sol";
 
-contract FarmingRewards is BaseRewards, IRewardsDistributionRecipient, Ownable {
+contract FarmingRewards is BaseRewards, IRewardsDistributionRecipient, RelayRecipient, Ownable {
     using SafeERC20 for IRewardsToken;
     using SafeMath for uint256;
 
@@ -29,7 +30,7 @@ contract FarmingRewards is BaseRewards, IRewardsDistributionRecipient, Ownable {
     }
 
     function getReward(address account) public override updateReward(account) {
-        require(account == msg.sender, "Sender must be account");
+        require(account == _msgSender(), "Sender must be account");
         uint256 reward = earned(account);
         if (reward > 0) {
             _rewards[account] = 0;
@@ -50,6 +51,10 @@ contract FarmingRewards is BaseRewards, IRewardsDistributionRecipient, Ownable {
                     .mul(1e18)
                     .div(totalSupply())
             );
+    }
+
+    function setTrustedForwarder(address trustedForwarder) external override onlyOwner {
+        super._setTrustedForwarder(trustedForwarder);
     }
 
     function notifyRewardAmount(uint256 reward)
@@ -79,5 +84,17 @@ contract FarmingRewards is BaseRewards, IRewardsDistributionRecipient, Ownable {
         _lastUpdateTime = block.timestamp;
         _periodFinish = block.timestamp.add(rewardsDuration);
         emit RewardAdded(reward);
+    }
+
+    function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
+        return BaseRelayRecipient._msgSender();
+    }
+
+    function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
+        return BaseRelayRecipient._msgData();
+    }
+
+    function versionRecipient() external override pure returns (string memory) {
+        return "2.0.0+";
     }
 }

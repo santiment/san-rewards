@@ -57,6 +57,8 @@ interface IWalletHunters {
 
     function discardRequest(address mayor, uint256 requestId) external;
 
+    function setTrustedForwarder(address trustedForwarder) external;
+
     function stake(address sheriff, uint256 amount) external;
 
     function stakeWithPermit(address sheriff, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external;

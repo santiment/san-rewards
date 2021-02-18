@@ -376,21 +376,21 @@
     "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsToken.sol",
     "exportedSymbols": {
       "IERC20": [
-        6137
+        6265
       ],
       "IERC20Permit": [
-        5091
+        5219
       ],
       "IRewardsToken": [
-        2797
+        2933
       ]
     },
-    "id": 2798,
+    "id": 2934,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2741,
+        "id": 2877,
         "literals": [
           "solidity",
           ">=",
@@ -406,10 +406,10 @@
       {
         "absolutePath": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
         "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "id": 2742,
+        "id": 2878,
         "nodeType": "ImportDirective",
-        "scope": 2798,
-        "sourceUnit": 6138,
+        "scope": 2934,
+        "sourceUnit": 6266,
         "src": "65:56:15",
         "symbolAliases": [],
         "unitAlias": ""
@@ -417,10 +417,10 @@
       {
         "absolutePath": "@openzeppelin/contracts/drafts/IERC20Permit.sol",
         "file": "@openzeppelin/contracts/drafts/IERC20Permit.sol",
-        "id": 2743,
+        "id": 2879,
         "nodeType": "ImportDirective",
-        "scope": 2798,
-        "sourceUnit": 5092,
+        "scope": 2934,
+        "sourceUnit": 5220,
         "src": "122:57:15",
         "symbolAliases": [],
         "unitAlias": ""
@@ -430,83 +430,83 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 2745,
+              "id": 2881,
               "name": "IERC20",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6137,
+              "referencedDeclaration": 6265,
               "src": "287:6:15",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC20_$6137",
+                "typeIdentifier": "t_contract$_IERC20_$6265",
                 "typeString": "contract IERC20"
               }
             },
-            "id": 2746,
+            "id": 2882,
             "nodeType": "InheritanceSpecifier",
             "src": "287:6:15"
           },
           {
             "baseName": {
-              "id": 2747,
+              "id": 2883,
               "name": "IERC20Permit",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 5091,
+              "referencedDeclaration": 5219,
               "src": "295:12:15",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC20Permit_$5091",
+                "typeIdentifier": "t_contract$_IERC20Permit_$5219",
                 "typeString": "contract IERC20Permit"
               }
             },
-            "id": 2748,
+            "id": 2884,
             "nodeType": "InheritanceSpecifier",
             "src": "295:12:15"
           }
         ],
         "contractDependencies": [
-          5091,
-          6137
+          5219,
+          6265
         ],
         "contractKind": "interface",
         "documentation": {
-          "id": 2744,
+          "id": 2880,
           "nodeType": "StructuredDocumentation",
           "src": "181:78:15",
           "text": " @dev Standard ERC20 token with supports minting and burning tokens."
         },
         "fullyImplemented": false,
-        "id": 2797,
+        "id": 2933,
         "linearizedBaseContracts": [
-          2797,
-          5091,
-          6137
+          2933,
+          5219,
+          6265
         ],
         "name": "IRewardsToken",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "documentation": {
-              "id": 2749,
+              "id": 2885,
               "nodeType": "StructuredDocumentation",
               "src": "314:117:15",
               "text": " @dev Creates `amount` new tokens for `to`.\n - the caller must have the `MINTER_ROLE`."
             },
             "functionSelector": "40c10f19",
-            "id": 2756,
+            "id": 2892,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "mint",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2754,
+              "id": 2890,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2751,
+                  "id": 2887,
                   "mutability": "mutable",
                   "name": "to",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2756,
+                  "scope": 2892,
                   "src": "450:10:15",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -515,7 +515,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2750,
+                    "id": 2886,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "450:7:15",
@@ -529,11 +529,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2753,
+                  "id": 2889,
                   "mutability": "mutable",
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2756,
+                  "scope": 2892,
                   "src": "462:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -542,7 +542,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2752,
+                    "id": 2888,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "462:7:15",
@@ -557,12 +557,12 @@
               "src": "449:28:15"
             },
             "returnParameters": {
-              "id": 2755,
+              "id": 2891,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "486:0:15"
             },
-            "scope": 2797,
+            "scope": 2933,
             "src": "436:51:15",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -570,29 +570,29 @@
           },
           {
             "documentation": {
-              "id": 2757,
+              "id": 2893,
               "nodeType": "StructuredDocumentation",
               "src": "493:75:15",
               "text": " @dev Destroys `amount` tokens from the caller's balance."
             },
             "functionSelector": "42966c68",
-            "id": 2762,
+            "id": 2898,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "burn",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2760,
+              "id": 2896,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2759,
+                  "id": 2895,
                   "mutability": "mutable",
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2762,
+                  "scope": 2898,
                   "src": "587:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -601,7 +601,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2758,
+                    "id": 2894,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "587:7:15",
@@ -616,12 +616,12 @@
               "src": "586:16:15"
             },
             "returnParameters": {
-              "id": 2761,
+              "id": 2897,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "611:0:15"
             },
-            "scope": 2797,
+            "scope": 2933,
             "src": "573:39:15",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -629,29 +629,29 @@
           },
           {
             "documentation": {
-              "id": 2763,
+              "id": 2899,
               "nodeType": "StructuredDocumentation",
               "src": "618:211:15",
               "text": " @dev Destroys `amount` tokens from `account`, deducting from the caller's\n allowance.\n - the caller must have allowance for ``account``'s tokens of at least\n `amount`."
             },
             "functionSelector": "79cc6790",
-            "id": 2770,
+            "id": 2906,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "burnFrom",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2768,
+              "id": 2904,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2765,
+                  "id": 2901,
                   "mutability": "mutable",
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2770,
+                  "scope": 2906,
                   "src": "852:15:15",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -660,7 +660,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2764,
+                    "id": 2900,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "852:7:15",
@@ -674,11 +674,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 2767,
+                  "id": 2903,
                   "mutability": "mutable",
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2770,
+                  "scope": 2906,
                   "src": "869:14:15",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -687,7 +687,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 2766,
+                    "id": 2902,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "869:7:15",
@@ -702,12 +702,12 @@
               "src": "851:33:15"
             },
             "returnParameters": {
-              "id": 2769,
+              "id": 2905,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "893:0:15"
             },
-            "scope": 2797,
+            "scope": 2933,
             "src": "834:60:15",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -715,31 +715,31 @@
           },
           {
             "documentation": {
-              "id": 2771,
+              "id": 2907,
               "nodeType": "StructuredDocumentation",
               "src": "900:124:15",
               "text": " @dev Pause transferring, minting, burning tokens.\n - the caller must have the `PAUSER_ROLE`."
             },
             "functionSelector": "8456cb59",
-            "id": 2774,
+            "id": 2910,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "pause",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2772,
+              "id": 2908,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1043:2:15"
             },
             "returnParameters": {
-              "id": 2773,
+              "id": 2909,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1054:0:15"
             },
-            "scope": 2797,
+            "scope": 2933,
             "src": "1029:26:15",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -747,31 +747,31 @@
           },
           {
             "documentation": {
-              "id": 2775,
+              "id": 2911,
               "nodeType": "StructuredDocumentation",
               "src": "1061:125:15",
               "text": " @dev Resume transferring, minting, burning tokens.\n - the caller must have the `PAUSER_ROLE`."
             },
             "functionSelector": "3f4ba83a",
-            "id": 2778,
+            "id": 2914,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "unpause",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2776,
+              "id": 2912,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1207:2:15"
             },
             "returnParameters": {
-              "id": 2777,
+              "id": 2913,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1218:0:15"
             },
-            "scope": 2797,
+            "scope": 2933,
             "src": "1191:28:15",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -779,29 +779,29 @@
           },
           {
             "documentation": {
-              "id": 2779,
+              "id": 2915,
               "nodeType": "StructuredDocumentation",
               "src": "1225:132:15",
               "text": " @dev Set trusted forwarder address for gsn.\n - `trustedForwarder` can be zero address to disable gsn"
             },
             "functionSelector": "da742228",
-            "id": 2784,
+            "id": 2920,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "setTrustedForwarder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2782,
+              "id": 2918,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2781,
+                  "id": 2917,
                   "mutability": "mutable",
                   "name": "trustedForwarder",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2784,
+                  "scope": 2920,
                   "src": "1391:24:15",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -810,7 +810,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2780,
+                    "id": 2916,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1391:7:15",
@@ -826,12 +826,12 @@
               "src": "1390:26:15"
             },
             "returnParameters": {
-              "id": 2783,
+              "id": 2919,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1425:0:15"
             },
-            "scope": 2797,
+            "scope": 2933,
             "src": "1362:64:15",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -839,35 +839,35 @@
           },
           {
             "documentation": {
-              "id": 2785,
+              "id": 2921,
               "nodeType": "StructuredDocumentation",
               "src": "1432:111:15",
               "text": " @dev Return minter role unique id. Used for managing minter role at contract {AccessControl}"
             },
             "functionSelector": "f084219e",
-            "id": 2790,
+            "id": 2926,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "minterRole",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2786,
+              "id": 2922,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1567:2:15"
             },
             "returnParameters": {
-              "id": 2789,
+              "id": 2925,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2788,
+                  "id": 2924,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2790,
+                  "scope": 2926,
                   "src": "1593:7:15",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -876,7 +876,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 2787,
+                    "id": 2923,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1593:7:15",
@@ -890,7 +890,7 @@
               ],
               "src": "1592:9:15"
             },
-            "scope": 2797,
+            "scope": 2933,
             "src": "1548:54:15",
             "stateMutability": "view",
             "virtual": false,
@@ -898,35 +898,35 @@
           },
           {
             "documentation": {
-              "id": 2791,
+              "id": 2927,
               "nodeType": "StructuredDocumentation",
               "src": "1608:111:15",
               "text": " @dev Return pauser role unique id. Used for managing pauser role at contract {AccessControl}"
             },
             "functionSelector": "aaf81bf3",
-            "id": 2796,
+            "id": 2932,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "pauserRole",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 2792,
+              "id": 2928,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1743:2:15"
             },
             "returnParameters": {
-              "id": 2795,
+              "id": 2931,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2794,
+                  "id": 2930,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 2796,
+                  "scope": 2932,
                   "src": "1769:7:15",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -935,7 +935,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 2793,
+                    "id": 2929,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1769:7:15",
@@ -949,14 +949,14 @@
               ],
               "src": "1768:9:15"
             },
-            "scope": 2797,
+            "scope": 2933,
             "src": "1724:54:15",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 2798,
+        "scope": 2934,
         "src": "260:1520:15"
       }
     ],
@@ -967,13 +967,13 @@
       "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsToken.sol",
       "exportedSymbols": {
         "IERC20": [
-          6137
+          6265
         ],
         "IERC20Permit": [
-          5091
+          5219
         ],
         "IRewardsToken": [
-          2797
+          2933
         ]
       },
       "license": "MIT"
@@ -991,37 +991,37 @@
             ".0"
           ]
         },
-        "id": 2741,
+        "id": 2877,
         "name": "PragmaDirective",
         "src": "32:31:15"
       },
       {
         "attributes": {
-          "SourceUnit": 6138,
+          "SourceUnit": 6266,
           "absolutePath": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
           "file": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-          "scope": 2798,
+          "scope": 2934,
           "symbolAliases": [
             null
           ],
           "unitAlias": ""
         },
-        "id": 2742,
+        "id": 2878,
         "name": "ImportDirective",
         "src": "65:56:15"
       },
       {
         "attributes": {
-          "SourceUnit": 5092,
+          "SourceUnit": 5220,
           "absolutePath": "@openzeppelin/contracts/drafts/IERC20Permit.sol",
           "file": "@openzeppelin/contracts/drafts/IERC20Permit.sol",
-          "scope": 2798,
+          "scope": 2934,
           "symbolAliases": [
             null
           ],
           "unitAlias": ""
         },
-        "id": 2743,
+        "id": 2879,
         "name": "ImportDirective",
         "src": "122:57:15"
       },
@@ -1029,25 +1029,25 @@
         "attributes": {
           "abstract": false,
           "contractDependencies": [
-            5091,
-            6137
+            5219,
+            6265
           ],
           "contractKind": "interface",
           "fullyImplemented": false,
           "linearizedBaseContracts": [
-            2797,
-            5091,
-            6137
+            2933,
+            5219,
+            6265
           ],
           "name": "IRewardsToken",
-          "scope": 2798
+          "scope": 2934
         },
         "children": [
           {
             "attributes": {
               "text": " @dev Standard ERC20 token with supports minting and burning tokens."
             },
-            "id": 2744,
+            "id": 2880,
             "name": "StructuredDocumentation",
             "src": "181:78:15"
           },
@@ -1057,15 +1057,15 @@
               {
                 "attributes": {
                   "name": "IERC20",
-                  "referencedDeclaration": 6137,
+                  "referencedDeclaration": 6265,
                   "type": "contract IERC20"
                 },
-                "id": 2745,
+                "id": 2881,
                 "name": "UserDefinedTypeName",
                 "src": "287:6:15"
               }
             ],
-            "id": 2746,
+            "id": 2882,
             "name": "InheritanceSpecifier",
             "src": "287:6:15"
           },
@@ -1075,15 +1075,15 @@
               {
                 "attributes": {
                   "name": "IERC20Permit",
-                  "referencedDeclaration": 5091,
+                  "referencedDeclaration": 5219,
                   "type": "contract IERC20Permit"
                 },
-                "id": 2747,
+                "id": 2883,
                 "name": "UserDefinedTypeName",
                 "src": "295:12:15"
               }
             ],
-            "id": 2748,
+            "id": 2884,
             "name": "InheritanceSpecifier",
             "src": "295:12:15"
           },
@@ -1097,7 +1097,7 @@
                 null
               ],
               "name": "mint",
-              "scope": 2797,
+              "scope": 2933,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -1107,7 +1107,7 @@
                 "attributes": {
                   "text": " @dev Creates `amount` new tokens for `to`.\n - the caller must have the `MINTER_ROLE`."
                 },
-                "id": 2749,
+                "id": 2885,
                 "name": "StructuredDocumentation",
                 "src": "314:117:15"
               },
@@ -1118,7 +1118,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "to",
-                      "scope": 2756,
+                      "scope": 2892,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -1131,12 +1131,12 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2750,
+                        "id": 2886,
                         "name": "ElementaryTypeName",
                         "src": "450:7:15"
                       }
                     ],
-                    "id": 2751,
+                    "id": 2887,
                     "name": "VariableDeclaration",
                     "src": "450:10:15"
                   },
@@ -1145,7 +1145,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "amount",
-                      "scope": 2756,
+                      "scope": 2892,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -1157,17 +1157,17 @@
                           "name": "uint256",
                           "type": "uint256"
                         },
-                        "id": 2752,
+                        "id": 2888,
                         "name": "ElementaryTypeName",
                         "src": "462:7:15"
                       }
                     ],
-                    "id": 2753,
+                    "id": 2889,
                     "name": "VariableDeclaration",
                     "src": "462:14:15"
                   }
                 ],
-                "id": 2754,
+                "id": 2890,
                 "name": "ParameterList",
                 "src": "449:28:15"
               },
@@ -1178,12 +1178,12 @@
                   ]
                 },
                 "children": [],
-                "id": 2755,
+                "id": 2891,
                 "name": "ParameterList",
                 "src": "486:0:15"
               }
             ],
-            "id": 2756,
+            "id": 2892,
             "name": "FunctionDefinition",
             "src": "436:51:15"
           },
@@ -1197,7 +1197,7 @@
                 null
               ],
               "name": "burn",
-              "scope": 2797,
+              "scope": 2933,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -1207,7 +1207,7 @@
                 "attributes": {
                   "text": " @dev Destroys `amount` tokens from the caller's balance."
                 },
-                "id": 2757,
+                "id": 2893,
                 "name": "StructuredDocumentation",
                 "src": "493:75:15"
               },
@@ -1218,7 +1218,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "amount",
-                      "scope": 2762,
+                      "scope": 2898,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -1230,17 +1230,17 @@
                           "name": "uint256",
                           "type": "uint256"
                         },
-                        "id": 2758,
+                        "id": 2894,
                         "name": "ElementaryTypeName",
                         "src": "587:7:15"
                       }
                     ],
-                    "id": 2759,
+                    "id": 2895,
                     "name": "VariableDeclaration",
                     "src": "587:14:15"
                   }
                 ],
-                "id": 2760,
+                "id": 2896,
                 "name": "ParameterList",
                 "src": "586:16:15"
               },
@@ -1251,12 +1251,12 @@
                   ]
                 },
                 "children": [],
-                "id": 2761,
+                "id": 2897,
                 "name": "ParameterList",
                 "src": "611:0:15"
               }
             ],
-            "id": 2762,
+            "id": 2898,
             "name": "FunctionDefinition",
             "src": "573:39:15"
           },
@@ -1270,7 +1270,7 @@
                 null
               ],
               "name": "burnFrom",
-              "scope": 2797,
+              "scope": 2933,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -1280,7 +1280,7 @@
                 "attributes": {
                   "text": " @dev Destroys `amount` tokens from `account`, deducting from the caller's\n allowance.\n - the caller must have allowance for ``account``'s tokens of at least\n `amount`."
                 },
-                "id": 2763,
+                "id": 2899,
                 "name": "StructuredDocumentation",
                 "src": "618:211:15"
               },
@@ -1291,7 +1291,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "account",
-                      "scope": 2770,
+                      "scope": 2906,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -1304,12 +1304,12 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2764,
+                        "id": 2900,
                         "name": "ElementaryTypeName",
                         "src": "852:7:15"
                       }
                     ],
-                    "id": 2765,
+                    "id": 2901,
                     "name": "VariableDeclaration",
                     "src": "852:15:15"
                   },
@@ -1318,7 +1318,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "amount",
-                      "scope": 2770,
+                      "scope": 2906,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -1330,17 +1330,17 @@
                           "name": "uint256",
                           "type": "uint256"
                         },
-                        "id": 2766,
+                        "id": 2902,
                         "name": "ElementaryTypeName",
                         "src": "869:7:15"
                       }
                     ],
-                    "id": 2767,
+                    "id": 2903,
                     "name": "VariableDeclaration",
                     "src": "869:14:15"
                   }
                 ],
-                "id": 2768,
+                "id": 2904,
                 "name": "ParameterList",
                 "src": "851:33:15"
               },
@@ -1351,12 +1351,12 @@
                   ]
                 },
                 "children": [],
-                "id": 2769,
+                "id": 2905,
                 "name": "ParameterList",
                 "src": "893:0:15"
               }
             ],
-            "id": 2770,
+            "id": 2906,
             "name": "FunctionDefinition",
             "src": "834:60:15"
           },
@@ -1370,7 +1370,7 @@
                 null
               ],
               "name": "pause",
-              "scope": 2797,
+              "scope": 2933,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -1380,7 +1380,7 @@
                 "attributes": {
                   "text": " @dev Pause transferring, minting, burning tokens.\n - the caller must have the `PAUSER_ROLE`."
                 },
-                "id": 2771,
+                "id": 2907,
                 "name": "StructuredDocumentation",
                 "src": "900:124:15"
               },
@@ -1391,7 +1391,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2772,
+                "id": 2908,
                 "name": "ParameterList",
                 "src": "1043:2:15"
               },
@@ -1402,12 +1402,12 @@
                   ]
                 },
                 "children": [],
-                "id": 2773,
+                "id": 2909,
                 "name": "ParameterList",
                 "src": "1054:0:15"
               }
             ],
-            "id": 2774,
+            "id": 2910,
             "name": "FunctionDefinition",
             "src": "1029:26:15"
           },
@@ -1421,7 +1421,7 @@
                 null
               ],
               "name": "unpause",
-              "scope": 2797,
+              "scope": 2933,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -1431,7 +1431,7 @@
                 "attributes": {
                   "text": " @dev Resume transferring, minting, burning tokens.\n - the caller must have the `PAUSER_ROLE`."
                 },
-                "id": 2775,
+                "id": 2911,
                 "name": "StructuredDocumentation",
                 "src": "1061:125:15"
               },
@@ -1442,7 +1442,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2776,
+                "id": 2912,
                 "name": "ParameterList",
                 "src": "1207:2:15"
               },
@@ -1453,12 +1453,12 @@
                   ]
                 },
                 "children": [],
-                "id": 2777,
+                "id": 2913,
                 "name": "ParameterList",
                 "src": "1218:0:15"
               }
             ],
-            "id": 2778,
+            "id": 2914,
             "name": "FunctionDefinition",
             "src": "1191:28:15"
           },
@@ -1472,7 +1472,7 @@
                 null
               ],
               "name": "setTrustedForwarder",
-              "scope": 2797,
+              "scope": 2933,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -1482,7 +1482,7 @@
                 "attributes": {
                   "text": " @dev Set trusted forwarder address for gsn.\n - `trustedForwarder` can be zero address to disable gsn"
                 },
-                "id": 2779,
+                "id": 2915,
                 "name": "StructuredDocumentation",
                 "src": "1225:132:15"
               },
@@ -1493,7 +1493,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "trustedForwarder",
-                      "scope": 2784,
+                      "scope": 2920,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -1506,17 +1506,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2780,
+                        "id": 2916,
                         "name": "ElementaryTypeName",
                         "src": "1391:7:15"
                       }
                     ],
-                    "id": 2781,
+                    "id": 2917,
                     "name": "VariableDeclaration",
                     "src": "1391:24:15"
                   }
                 ],
-                "id": 2782,
+                "id": 2918,
                 "name": "ParameterList",
                 "src": "1390:26:15"
               },
@@ -1527,12 +1527,12 @@
                   ]
                 },
                 "children": [],
-                "id": 2783,
+                "id": 2919,
                 "name": "ParameterList",
                 "src": "1425:0:15"
               }
             ],
-            "id": 2784,
+            "id": 2920,
             "name": "FunctionDefinition",
             "src": "1362:64:15"
           },
@@ -1546,7 +1546,7 @@
                 null
               ],
               "name": "minterRole",
-              "scope": 2797,
+              "scope": 2933,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "external"
@@ -1556,7 +1556,7 @@
                 "attributes": {
                   "text": " @dev Return minter role unique id. Used for managing minter role at contract {AccessControl}"
                 },
-                "id": 2785,
+                "id": 2921,
                 "name": "StructuredDocumentation",
                 "src": "1432:111:15"
               },
@@ -1567,7 +1567,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2786,
+                "id": 2922,
                 "name": "ParameterList",
                 "src": "1567:2:15"
               },
@@ -1578,7 +1578,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "",
-                      "scope": 2790,
+                      "scope": 2926,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "bytes32",
@@ -1590,22 +1590,22 @@
                           "name": "bytes32",
                           "type": "bytes32"
                         },
-                        "id": 2787,
+                        "id": 2923,
                         "name": "ElementaryTypeName",
                         "src": "1593:7:15"
                       }
                     ],
-                    "id": 2788,
+                    "id": 2924,
                     "name": "VariableDeclaration",
                     "src": "1593:7:15"
                   }
                 ],
-                "id": 2789,
+                "id": 2925,
                 "name": "ParameterList",
                 "src": "1592:9:15"
               }
             ],
-            "id": 2790,
+            "id": 2926,
             "name": "FunctionDefinition",
             "src": "1548:54:15"
           },
@@ -1619,7 +1619,7 @@
                 null
               ],
               "name": "pauserRole",
-              "scope": 2797,
+              "scope": 2933,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "external"
@@ -1629,7 +1629,7 @@
                 "attributes": {
                   "text": " @dev Return pauser role unique id. Used for managing pauser role at contract {AccessControl}"
                 },
-                "id": 2791,
+                "id": 2927,
                 "name": "StructuredDocumentation",
                 "src": "1608:111:15"
               },
@@ -1640,7 +1640,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2792,
+                "id": 2928,
                 "name": "ParameterList",
                 "src": "1743:2:15"
               },
@@ -1651,7 +1651,7 @@
                       "constant": false,
                       "mutability": "mutable",
                       "name": "",
-                      "scope": 2796,
+                      "scope": 2932,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "bytes32",
@@ -1663,32 +1663,32 @@
                           "name": "bytes32",
                           "type": "bytes32"
                         },
-                        "id": 2793,
+                        "id": 2929,
                         "name": "ElementaryTypeName",
                         "src": "1769:7:15"
                       }
                     ],
-                    "id": 2794,
+                    "id": 2930,
                     "name": "VariableDeclaration",
                     "src": "1769:7:15"
                   }
                 ],
-                "id": 2795,
+                "id": 2931,
                 "name": "ParameterList",
                 "src": "1768:9:15"
               }
             ],
-            "id": 2796,
+            "id": 2932,
             "name": "FunctionDefinition",
             "src": "1724:54:15"
           }
         ],
-        "id": 2797,
+        "id": 2933,
         "name": "ContractDefinition",
         "src": "260:1520:15"
       }
     ],
-    "id": 2798,
+    "id": 2934,
     "name": "SourceUnit",
     "src": "32:1749:15"
   },
@@ -1698,7 +1698,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-02-17T17:50:09.749Z",
+  "updatedAt": "2021-02-18T13:18:33.406Z",
   "devdoc": {
     "details": "Standard ERC20 token with supports minting and burning tokens.",
     "kind": "dev",

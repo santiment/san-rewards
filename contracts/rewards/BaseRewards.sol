@@ -58,7 +58,7 @@ abstract contract BaseRewards is IStakingRewards, AccountingToken {
         override
         updateReward(account)
     {
-        require(account == msg.sender, "Sender must be account");
+        require(account == _msgSender(), "Sender must be account");
         require(amount > 0, "Cannot stake 0");
         require(
             balanceOf(account).add(amount) <= _maximalStake,
@@ -70,7 +70,7 @@ abstract contract BaseRewards is IStakingRewards, AccountingToken {
     }
 
     function exit(address account) external override {
-        require(account == msg.sender, "Sender must be account");
+        require(account == _msgSender(), "Sender must be account");
         withdraw(account, balanceOf(account));
         getReward(account);
     }
@@ -80,7 +80,7 @@ abstract contract BaseRewards is IStakingRewards, AccountingToken {
         override
         updateReward(account)
     {
-        require(account == msg.sender, "Sender must be account");
+        require(account == _msgSender(), "Sender must be account");
         require(amount > 0, "Cannot withdraw 0");
         _burn(account, amount);
         stakingToken.safeTransfer(account, amount);

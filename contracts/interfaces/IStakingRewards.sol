@@ -6,6 +6,8 @@ interface IStakingRewards {
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
 
+    function setTrustedForwarder(address trustedForwarder) external;
+
     function stake(address account, uint256 amount) external;
 
     function getReward(address account) external;

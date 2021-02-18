@@ -11,12 +11,14 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "../interfaces/IWalletHunters.sol";
 import "../interfaces/IRewardsToken.sol";
 import "../utils/AccountingToken.sol";
+import "../gsn/RelayRecipient.sol";
 
 contract WalletHunters is
     IWalletHunters,
     Context,
     AccessControl,
-    AccountingToken
+    AccountingToken,
+    RelayRecipient
 {
     using Counters for Counters.Counter;
     using SafeMath for uint256;
@@ -163,6 +165,14 @@ contract WalletHunters is
         require(_msgSender() == sheriff, "Sender must be sheriff");
         withdraw(sheriff, balanceOf(sheriff));
         getSheriffRewards(sheriff);
+    }
+
+    function setTrustedForwarder(address trustedForwarder) external override {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
+            "WalletHunters: must have admin role"
+        );
+        super._setTrustedForwarder(trustedForwarder);
     }
 
     function getHunterReward(address hunter, uint256 requestId)
@@ -422,6 +432,18 @@ contract WalletHunters is
     function _votingState(uint256 requestId) internal view returns (bool) {
         // solhint-disable-next-line not-rely-on-time
         return block.timestamp <= _finishTime(requestId);
+    }
+
+    function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
+        return BaseRelayRecipient._msgSender();
+    }
+
+    function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
+        return BaseRelayRecipient._msgData();
+    }
+
+    function versionRecipient() external override pure returns (string memory) {
+        return "2.0.0+";
     }
 
     function _getSheriffVotes(

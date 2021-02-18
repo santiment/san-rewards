@@ -144,37 +144,37 @@
     "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/airdrop/AirdropFactory.sol",
     "exportedSymbols": {
       "Address": [
-        6646
+        6774
       ],
       "AirdropFactory": [
         358
       ],
       "Context": [
-        6669
+        6797
       ],
       "IAirdropFactory": [
-        2534
+        2670
       ],
       "IERC20": [
-        6137
+        6265
       ],
       "IERC20Permit": [
-        5091
+        5219
       ],
       "IMerkleDistributor": [
-        2682
+        2818
       ],
       "IRewardsToken": [
-        2797
+        2933
       ],
       "MerkleDistributor": [
         543
       ],
       "MerkleProof": [
-        4760
+        4888
       ],
       "Ownable": [
-        4573
+        4701
       ]
     },
     "id": 359,
@@ -201,7 +201,7 @@
         "id": 279,
         "nodeType": "ImportDirective",
         "scope": 359,
-        "sourceUnit": 4574,
+        "sourceUnit": 4702,
         "src": "65:52:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -212,7 +212,7 @@
         "id": 280,
         "nodeType": "ImportDirective",
         "scope": 359,
-        "sourceUnit": 6647,
+        "sourceUnit": 6775,
         "src": "118:51:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -234,7 +234,7 @@
         "id": 282,
         "nodeType": "ImportDirective",
         "scope": 359,
-        "sourceUnit": 2798,
+        "sourceUnit": 2934,
         "src": "205:41:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -245,7 +245,7 @@
         "id": 283,
         "nodeType": "ImportDirective",
         "scope": 359,
-        "sourceUnit": 2535,
+        "sourceUnit": 2671,
         "src": "247:43:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -258,10 +258,10 @@
               "id": 284,
               "name": "IAirdropFactory",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2534,
+              "referencedDeclaration": 2670,
               "src": "319:15:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IAirdropFactory_$2534",
+                "typeIdentifier": "t_contract$_IAirdropFactory_$2670",
                 "typeString": "contract IAirdropFactory"
               }
             },
@@ -274,10 +274,10 @@
               "id": 286,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4573,
+              "referencedDeclaration": 4701,
               "src": "336:7:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$4573",
+                "typeIdentifier": "t_contract$_Ownable_$4701",
                 "typeString": "contract Ownable"
               }
             },
@@ -288,18 +288,18 @@
         ],
         "contractDependencies": [
           543,
-          2534,
-          4573,
-          6669
+          2670,
+          4701,
+          6797
         ],
         "contractKind": "contract",
         "fullyImplemented": true,
         "id": 358,
         "linearizedBaseContracts": [
           358,
-          4573,
-          6669,
-          2534
+          4701,
+          6797,
+          2670
         ],
         "name": "AirdropFactory",
         "nodeType": "ContractDefinition",
@@ -310,10 +310,10 @@
               "id": 288,
               "name": "Address",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 6646,
+              "referencedDeclaration": 6774,
               "src": "356:7:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Address_$6646",
+                "typeIdentifier": "t_contract$_Address_$6774",
                 "typeString": "library Address"
               }
             },
@@ -343,17 +343,17 @@
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_IRewardsToken_$2797",
+              "typeIdentifier": "t_contract$_IRewardsToken_$2933",
               "typeString": "contract IRewardsToken"
             },
             "typeName": {
               "id": 291,
               "name": "IRewardsToken",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2797,
+              "referencedDeclaration": 2933,
               "src": "382:13:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IRewardsToken_$2797",
+                "typeIdentifier": "t_contract$_IRewardsToken_$2933",
                 "typeString": "contract IRewardsToken"
               }
             },
@@ -391,7 +391,7 @@
                           "lValueRequested": false,
                           "memberName": "isContract",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 6370,
+                          "referencedDeclaration": 6498,
                           "src": "485:24:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$bound_to$_t_address_$",
@@ -489,7 +489,7 @@
                       "referencedDeclaration": 292,
                       "src": "555:12:1",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IRewardsToken_$2797",
+                        "typeIdentifier": "t_contract$_IRewardsToken_$2933",
                         "typeString": "contract IRewardsToken"
                       }
                     },
@@ -521,10 +521,10 @@
                         "name": "IRewardsToken",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2797,
+                        "referencedDeclaration": 2933,
                         "src": "570:13:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_IRewardsToken_$2797_$",
+                          "typeIdentifier": "t_type$_t_contract$_IRewardsToken_$2933_$",
                           "typeString": "type(contract IRewardsToken)"
                         }
                       },
@@ -539,13 +539,13 @@
                       "src": "570:28:1",
                       "tryCall": false,
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IRewardsToken_$2797",
+                        "typeIdentifier": "t_contract$_IRewardsToken_$2933",
                         "typeString": "contract IRewardsToken"
                       }
                     },
                     "src": "555:43:1",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IRewardsToken_$2797",
+                      "typeIdentifier": "t_contract$_IRewardsToken_$2933",
                       "typeString": "contract IRewardsToken"
                     }
                   },
@@ -609,7 +609,7 @@
           },
           {
             "baseFunctions": [
-              2533
+              2669
             ],
             "body": {
               "id": 356,
@@ -662,7 +662,7 @@
                             "referencedDeclaration": 292,
                             "src": "831:12:1",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_IRewardsToken_$2797",
+                              "typeIdentifier": "t_contract$_IRewardsToken_$2933",
                               "typeString": "contract IRewardsToken"
                             }
                           }
@@ -670,7 +670,7 @@
                         "expression": {
                           "argumentTypes": [
                             {
-                              "typeIdentifier": "t_contract$_IRewardsToken_$2797",
+                              "typeIdentifier": "t_contract$_IRewardsToken_$2933",
                               "typeString": "contract IRewardsToken"
                             }
                           ],
@@ -864,7 +864,7 @@
                         "referencedDeclaration": 292,
                         "src": "867:12:1",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IRewardsToken_$2797",
+                          "typeIdentifier": "t_contract$_IRewardsToken_$2933",
                           "typeString": "contract IRewardsToken"
                         }
                       },
@@ -875,7 +875,7 @@
                       "lValueRequested": false,
                       "memberName": "mint",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2756,
+                      "referencedDeclaration": 2892,
                       "src": "867:17:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -972,7 +972,7 @@
                       "name": "AirdropCreated",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2523,
+                      "referencedDeclaration": 2659,
                       "src": "924:14:1",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
@@ -1074,7 +1074,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4522,
+                  "referencedDeclaration": 4650,
                   "src": "711:9:1",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -1204,37 +1204,37 @@
       "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/airdrop/AirdropFactory.sol",
       "exportedSymbols": {
         "Address": [
-          6646
+          6774
         ],
         "AirdropFactory": [
           358
         ],
         "Context": [
-          6669
+          6797
         ],
         "IAirdropFactory": [
-          2534
+          2670
         ],
         "IERC20": [
-          6137
+          6265
         ],
         "IERC20Permit": [
-          5091
+          5219
         ],
         "IMerkleDistributor": [
-          2682
+          2818
         ],
         "IRewardsToken": [
-          2797
+          2933
         ],
         "MerkleDistributor": [
           543
         ],
         "MerkleProof": [
-          4760
+          4888
         ],
         "Ownable": [
-          4573
+          4701
         ]
       },
       "license": "MIT"
@@ -1258,7 +1258,7 @@
       },
       {
         "attributes": {
-          "SourceUnit": 4574,
+          "SourceUnit": 4702,
           "absolutePath": "@openzeppelin/contracts/access/Ownable.sol",
           "file": "@openzeppelin/contracts/access/Ownable.sol",
           "scope": 359,
@@ -1273,7 +1273,7 @@
       },
       {
         "attributes": {
-          "SourceUnit": 6647,
+          "SourceUnit": 6775,
           "absolutePath": "@openzeppelin/contracts/utils/Address.sol",
           "file": "@openzeppelin/contracts/utils/Address.sol",
           "scope": 359,
@@ -1303,7 +1303,7 @@
       },
       {
         "attributes": {
-          "SourceUnit": 2798,
+          "SourceUnit": 2934,
           "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IRewardsToken.sol",
           "file": "../interfaces/IRewardsToken.sol",
           "scope": 359,
@@ -1318,7 +1318,7 @@
       },
       {
         "attributes": {
-          "SourceUnit": 2535,
+          "SourceUnit": 2671,
           "absolutePath": "/home/nailkhaf/Projects/san-games/contracts/interfaces/IAirdropFactory.sol",
           "file": "../interfaces/IAirdropFactory.sol",
           "scope": 359,
@@ -1336,17 +1336,17 @@
           "abstract": false,
           "contractDependencies": [
             543,
-            2534,
-            4573,
-            6669
+            2670,
+            4701,
+            6797
           ],
           "contractKind": "contract",
           "fullyImplemented": true,
           "linearizedBaseContracts": [
             358,
-            4573,
-            6669,
-            2534
+            4701,
+            6797,
+            2670
           ],
           "name": "AirdropFactory",
           "scope": 359
@@ -1358,7 +1358,7 @@
               {
                 "attributes": {
                   "name": "IAirdropFactory",
-                  "referencedDeclaration": 2534,
+                  "referencedDeclaration": 2670,
                   "type": "contract IAirdropFactory"
                 },
                 "id": 284,
@@ -1376,7 +1376,7 @@
               {
                 "attributes": {
                   "name": "Ownable",
-                  "referencedDeclaration": 4573,
+                  "referencedDeclaration": 4701,
                   "type": "contract Ownable"
                 },
                 "id": 286,
@@ -1393,7 +1393,7 @@
               {
                 "attributes": {
                   "name": "Address",
-                  "referencedDeclaration": 6646,
+                  "referencedDeclaration": 6774,
                   "type": "library Address"
                 },
                 "id": 288,
@@ -1431,7 +1431,7 @@
               {
                 "attributes": {
                   "name": "IRewardsToken",
-                  "referencedDeclaration": 2797,
+                  "referencedDeclaration": 2933,
                   "type": "contract IRewardsToken"
                 },
                 "id": 291,
@@ -1574,7 +1574,7 @@
                                   "isPure": false,
                                   "lValueRequested": false,
                                   "member_name": "isContract",
-                                  "referencedDeclaration": 6370,
+                                  "referencedDeclaration": 6498,
                                   "type": "function (address) view returns (bool)"
                                 },
                                 "children": [
@@ -1677,7 +1677,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2797,
+                                  "referencedDeclaration": 2933,
                                   "type": "type(contract IRewardsToken)",
                                   "value": "IRewardsToken"
                                 },
@@ -1726,7 +1726,7 @@
           {
             "attributes": {
               "baseFunctions": [
-                2533
+                2669
               ],
               "functionSelector": "8fa97cfd",
               "implemented": true,
@@ -1850,7 +1850,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 4522,
+                      "referencedDeclaration": 4650,
                       "type": "modifier ()",
                       "value": "onlyOwner"
                     },
@@ -1967,7 +1967,7 @@
                                 "attributes": {
                                   "argumentTypes": [
                                     {
-                                      "typeIdentifier": "t_contract$_IRewardsToken_$2797",
+                                      "typeIdentifier": "t_contract$_IRewardsToken_$2933",
                                       "typeString": "contract IRewardsToken"
                                     }
                                   ],
@@ -2066,7 +2066,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "mint",
-                              "referencedDeclaration": 2756,
+                              "referencedDeclaration": 2892,
                               "type": "function (address,uint256) external"
                             },
                             "children": [
@@ -2200,7 +2200,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2523,
+                              "referencedDeclaration": 2659,
                               "type": "function (address)",
                               "value": "AirdropCreated"
                             },
@@ -2376,7 +2376,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-02-17T17:50:09.710Z",
+  "updatedAt": "2021-02-18T13:18:33.301Z",
   "devdoc": {
     "kind": "dev",
     "methods": {
