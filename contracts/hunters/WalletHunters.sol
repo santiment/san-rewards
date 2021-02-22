@@ -25,7 +25,8 @@ contract WalletHunters is
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    uint256 public constant SUPER_MAJORITY = 67;
+    uint256 public constant MAX_PERCENT = 10000; // 100%
+    uint256 public constant SUPER_MAJORITY = 6700; // 67%
 
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
 
@@ -240,8 +241,8 @@ contract WalletHunters is
             "Voting duration too long"
         );
         require(
-            _sheriffsRewardShare > 0 && _sheriffsRewardShare < 100,
-            "Voting duration too long"
+            _sheriffsRewardShare > 0 && _sheriffsRewardShare < MAX_PERCENT,
+            "Sheriff share too much"
         );
 
         configuration.votingDuration = _votingDuration;
@@ -274,8 +275,8 @@ contract WalletHunters is
             return
                 walletRequests[requestId]
                     .reward
-                    .mul(100 - walletRequests[requestId].sheriffsRewardShare)
-                    .div(100);
+                    .mul(MAX_PERCENT - walletRequests[requestId].sheriffsRewardShare)
+                    .div(MAX_PERCENT);
         } else {
             return 0;
         }
@@ -311,7 +312,7 @@ contract WalletHunters is
                     .mul(votes)
                     .div(totalVotes)
                     .mul(walletRequests[requestId].sheriffsRewardShare)
-                    .div(100);
+                    .div(MAX_PERCENT);
         } else {
             return walletRequests[requestId].fixedSheriffReward;
         }
@@ -398,7 +399,7 @@ contract WalletHunters is
             return false;
         }
         return
-            requestVotings[requestId].votesFor.mul(100).div(totalVotes) >
+            requestVotings[requestId].votesFor.mul(MAX_PERCENT).div(totalVotes) >
             SUPER_MAJORITY;
     }
 

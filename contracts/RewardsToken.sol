@@ -14,11 +14,14 @@ import "./gsn/RelayRecipient.sol";
 import "./gsn/BaseRelayRecipient.sol";
 import "./utils/AccountingToken.sol";
 
+// increase accuracy for percent calculations
+
 contract RewardsToken is ERC20Pausable, ERC20Snapshot, ERC20Permit, RelayRecipient, AccessControl {
     using SafeMath for uint256;
 
-    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 private constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant SNAPSHOTER_ROLE = keccak256("SNAPSHOTER_ROLE");
 
     string private constant ERC20_NAME = "Santiment Rewards Share Token";
     string private constant ERC20_SYMBOL = "SRHT";
@@ -36,6 +39,7 @@ contract RewardsToken is ERC20Pausable, ERC20Snapshot, ERC20Permit, RelayRecipie
 
         _setupRole(MINTER_ROLE, _msgSender());
         _setupRole(PAUSER_ROLE, _msgSender());
+        _setupRole(SNAPSHOTER_ROLE, _msgSender());
     }
 
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
@@ -48,6 +52,10 @@ contract RewardsToken is ERC20Pausable, ERC20Snapshot, ERC20Permit, RelayRecipie
 
     function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
+    }
+
+    function snapshot() external onlyRole(SNAPSHOTER_ROLE) returns (uint256) {
+        return _snapshot();
     }
 
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -76,14 +84,6 @@ contract RewardsToken is ERC20Pausable, ERC20Snapshot, ERC20Permit, RelayRecipie
         // ERC20._beforeTokenTransfer will be invoked twice with epmty block
         ERC20Pausable._beforeTokenTransfer(from, to, amount);
         ERC20Snapshot._beforeTokenTransfer(from, to, amount);
-    }
-
-    function minterRole() external pure returns (bytes32) {
-        return MINTER_ROLE;
-    }
-
-    function pauserRole() external pure returns (bytes32) {
-        return PAUSER_ROLE;
     }
 
     function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
