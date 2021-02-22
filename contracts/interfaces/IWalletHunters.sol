@@ -2,9 +2,6 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 interface IWalletHunters {
     enum Vote {AGAINST, FOR}
 

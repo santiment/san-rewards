@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Pausable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Snapshot.sol";
-import "@openzeppelin/contracts/drafts/ERC20Permit.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20SnapshotUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/drafts/ERC20PermitUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "./interfaces/IRewardsToken.sol";
 import "./gsn/RelayRecipient.sol";
 import "./gsn/BaseRelayRecipient.sol";
 import "./utils/AccountingToken.sol";
+import "./interfaces/IERC20Snapshot.sol";
+import "./interfaces/IERC20Mintable.sol";
+import "./interfaces/IERC20Pausable.sol";
 
-// increase accuracy for percent calculations
-
-contract RewardsToken is ERC20Pausable, ERC20Snapshot, ERC20Permit, RelayRecipient, AccessControl {
+contract RewardsToken is IERC20Snapshot, IERC20Pausable, IERC20Mintable, ERC20PausableUpgradeable, ERC20SnapshotUpgradeable, ERC20PermitUpgradeable,
+RelayRecipient, AccessControlUpgradeable {
     using SafeMath for uint256;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -34,28 +37,55 @@ contract RewardsToken is ERC20Pausable, ERC20Snapshot, ERC20Permit, RelayRecipie
         _;
     }
 
-    constructor() ERC20(ERC20_NAME, ERC20_SYMBOL) ERC20Permit(ERC20_NAME) {
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-
-        _setupRole(MINTER_ROLE, _msgSender());
-        _setupRole(PAUSER_ROLE, _msgSender());
-        _setupRole(SNAPSHOTER_ROLE, _msgSender());
+    function initialize(address admin) external initializer {
+        __RewardsToken_init(admin);
     }
 
-    function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
+    function __RewardsToken_init(address admin) internal initializer {
+        __ERC20Pausable_init();
+        __ERC20Snapshot_init();
+        __ERC20Permit_init(ERC20_NAME);
+        __ERC20_init(ERC20_NAME, ERC20_SYMBOL);
+        __RelayRecipient_init();
+        __AccessControl_init();
+
+        __RewardsToken_init_unchained(admin);
+    }
+
+    function __RewardsToken_init_unchained(address admin) internal initializer {
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+
+        _setupRole(MINTER_ROLE, admin);
+        _setupRole(PAUSER_ROLE, admin);
+        _setupRole(SNAPSHOTER_ROLE, admin);
+    }
+
+    function mint(address to, uint256 amount) external override onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 
-    function pause() external onlyRole(PAUSER_ROLE) {
+    function pause() external override onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    function unpause() external onlyRole(PAUSER_ROLE) {
+    function unpause() external override onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 
-    function snapshot() external onlyRole(SNAPSHOTER_ROLE) returns (uint256) {
+    function paused() public view override(PausableUpgradeable, IERC20Pausable) returns (bool) {
+        return PausableUpgradeable.paused();
+    }
+
+    function snapshot() external onlyRole(SNAPSHOTER_ROLE) override returns (uint256) {
         return _snapshot();
+    }
+
+    function balanceOfAt(address account, uint256 snapshotId) public view override(IERC20Snapshot, ERC20SnapshotUpgradeable) returns (uint256) {
+        return ERC20SnapshotUpgradeable.balanceOfAt(account, snapshotId);
+    }
+
+    function totalSupplyAt(uint256 snapshotId) public view override(IERC20Snapshot, ERC20SnapshotUpgradeable) returns(uint256) {
+        return ERC20SnapshotUpgradeable.totalSupplyAt(snapshotId);
     }
 
     function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -80,17 +110,17 @@ contract RewardsToken is ERC20Pausable, ERC20Snapshot, ERC20Permit, RelayRecipie
         revert("Forbidden");
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20Pausable, ERC20Snapshot, ERC20) {
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20PausableUpgradeable, ERC20SnapshotUpgradeable, ERC20Upgradeable) {
         // ERC20._beforeTokenTransfer will be invoked twice with epmty block
-        ERC20Pausable._beforeTokenTransfer(from, to, amount);
-        ERC20Snapshot._beforeTokenTransfer(from, to, amount);
+        ERC20PausableUpgradeable._beforeTokenTransfer(from, to, amount);
+        ERC20SnapshotUpgradeable._beforeTokenTransfer(from, to, amount);
     }
 
-    function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
+    function _msgSender() internal view override(ContextUpgradeable, BaseRelayRecipient) returns (address payable) {
         return BaseRelayRecipient._msgSender();
     }
 
-    function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
+    function _msgData() internal view override(ContextUpgradeable, BaseRelayRecipient) returns (bytes memory) {
         return BaseRelayRecipient._msgData();
     }
 

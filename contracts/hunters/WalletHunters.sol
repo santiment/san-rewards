@@ -2,42 +2,48 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "../interfaces/IWalletHunters.sol";
-import "../utils/AccountingToken.sol";
+import "../utils/AccountingTokenUpgradeable.sol";
 import "../gsn/RelayRecipient.sol";
 import "../interfaces/IERC20Mintable.sol";
 
 contract WalletHunters is
     IWalletHunters,
-    AccountingToken,
+    AccountingTokenUpgradeable,
     RelayRecipient,
-    AccessControl
+    AccessControlUpgradeable
 {
-    using Counters for Counters.Counter;
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20Mintable;
-    using SafeERC20 for IERC20;
-    using EnumerableSet for EnumerableSet.UintSet;
+    using CountersUpgradeable for CountersUpgradeable.Counter;
+    using SafeMathUpgradeable for uint256;
+    using SafeERC20Upgradeable for IERC20Mintable;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
+    using AddressUpgradeable for address;
 
     uint256 public constant MAX_PERCENT = 10000; // 100%
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
 
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
+    string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
+    string private constant ERC20_SYMBOL = "WHST";
 
-    IERC20 public immutable stakingToken;
-    IERC20Mintable public immutable rewardsToken;
+    IERC20Upgradeable public stakingToken;
+    IERC20Mintable public rewardsToken;
 
     Configuration public configuration;
-    Counters.Counter public requestCounter;
+    CountersUpgradeable.Counter public requestCounter;
     mapping(uint256 => WalletRequest) private walletRequests;
     mapping(uint256 => RequestVoting) private requestVotings;
-    mapping(address => EnumerableSet.UintSet) private activeRequests;
+    mapping(address => EnumerableSetUpgradeable.UintSet) private activeRequests;
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
@@ -50,7 +56,8 @@ contract WalletHunters is
         _;
     }
 
-    constructor(
+    function initialize(
+        address admin_,
         address stakingToken_,
         address rewardsToken_,
         uint256 votingDuration_,
@@ -58,11 +65,62 @@ contract WalletHunters is
         uint256 fixedSheriffReward_,
         uint256 minimalVotesForRequest_,
         uint256 minimalDepositForSheriff_
-    ) AccountingToken("Wallet Hunters, Sheriff Token", "WHST") {
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _setupRole(MAYOR_ROLE, _msgSender());
+    ) external initializer {
+        __WalletHunters_init(
+            admin_,
+            stakingToken_,
+            rewardsToken_,
+            votingDuration_,
+            sheriffsRewardShare_,
+            fixedSheriffReward_,
+            minimalVotesForRequest_,
+            minimalDepositForSheriff_
+        );
+    }
 
-        stakingToken = IERC20(stakingToken_);
+    function __WalletHunters_init(
+        address admin_,
+        address stakingToken_,
+        address rewardsToken_,
+        uint256 votingDuration_,
+        uint256 sheriffsRewardShare_,
+        uint256 fixedSheriffReward_,
+        uint256 minimalVotesForRequest_,
+        uint256 minimalDepositForSheriff_
+    ) internal initializer {
+        __AccountingToken_init(ERC20_NAME, ERC20_SYMBOL);
+        __RelayRecipient_init();
+        __AccessControl_init();
+
+        __WalletHunters_init_unchained(
+            admin_,
+            stakingToken_,
+            rewardsToken_,
+            votingDuration_,
+            sheriffsRewardShare_,
+            fixedSheriffReward_,
+            minimalVotesForRequest_,
+            minimalDepositForSheriff_
+        );
+    }
+
+    function __WalletHunters_init_unchained(
+        address admin,
+        address stakingToken_,
+        address rewardsToken_,
+        uint256 votingDuration_,
+        uint256 sheriffsRewardShare_,
+        uint256 fixedSheriffReward_,
+        uint256 minimalVotesForRequest_,
+        uint256 minimalDepositForSheriff_
+    ) internal initializer {
+        require(rewardsToken_.isContract(), "RewardsToken must be contract");
+        require(stakingToken_.isContract(), "SnapshotToken must be contract");
+
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _setupRole(MAYOR_ROLE, admin);
+
+        stakingToken = IERC20Upgradeable(stakingToken_);
         rewardsToken = IERC20Mintable(rewardsToken_);
 
         _updateConfiguration(
@@ -411,7 +469,7 @@ contract WalletHunters is
     function _msgSender()
         internal
         view
-        override(Context, BaseRelayRecipient)
+        override(ContextUpgradeable, BaseRelayRecipient)
         returns (address payable)
     {
         return BaseRelayRecipient._msgSender();
@@ -420,7 +478,7 @@ contract WalletHunters is
     function _msgData()
         internal
         view
-        override(Context, BaseRelayRecipient)
+        override(ContextUpgradeable, BaseRelayRecipient)
         returns (bytes memory)
     {
         return BaseRelayRecipient._msgData();

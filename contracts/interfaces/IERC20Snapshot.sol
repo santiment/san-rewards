@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/drafts/IERC20Permit.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 /**
  * @dev Standard ERC20 token with supports snapshots.
  */
-interface IERC20Snapshot is IERC20 {
+interface IERC20Snapshot is IERC20Upgradeable {
 
     function snapshot() external returns (uint256);
 
