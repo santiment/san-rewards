@@ -9,5 +9,7 @@ contract SanMock is ERC20Mock {
     constructor(uint256 totalSupply)
         ERC20Mock("Santiment", "SAN", totalSupply)
     // solhint-disable-next-line no-empty-blocks
-    {}
+    {
+
+    }
 }

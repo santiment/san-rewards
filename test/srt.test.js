@@ -11,7 +11,7 @@ const {token} = require("./utils");
 const RewardsToken = contract.fromArtifact('RewardsToken')
 const TrustedForwarded = contract.fromArtifact('TrustedForwarder')
 
-describe('StakingRewards', function () {
+describe.skip('StakingRewards', function () {
     const [deployer, minter, pauser, user1, user2, relayer] = accounts
     const [deployerKey, minterKey, pauserKey, user1Key, user2Key, relayerKey] = privateKeys
 

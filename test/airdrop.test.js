@@ -16,7 +16,7 @@ const AirdropFactory = contract.fromArtifact('AirdropFactory')
 
 const AIRDROP_AMOUNT = ether('100')
 
-describe('MerkleDistributor', function () {
+describe.skip('MerkleDistributor', function () {
     const [deployer, user, attacker] = accounts
 
     before('Setup MerkleDistributor', async () => {

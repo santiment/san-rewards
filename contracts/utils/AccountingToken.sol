@@ -10,7 +10,9 @@ contract AccountingToken is ERC20 {
     constructor(string memory name_, string memory symbol_)
         ERC20(name_, symbol_)
     // solhint-disable-next-line no-empty-blocks
-    {}
+    {
+
+    }
 
     // Do not need transfer of this token
     function _transfer(

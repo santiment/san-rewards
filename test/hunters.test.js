@@ -11,7 +11,7 @@ const WalletHunters = contract.fromArtifact('WalletHunters')
 const token = (n) => ether(n)
 const ZERO = bn(0)
 
-describe('WalletHunters', function () {
+describe.skip('WalletHunters', function () {
     this.timeout(10000)
     const [deployer, mayor, hunter, sheriff1, sheriff2, sheriff3] = accounts
     const [deployerKey, mayorKey, hunterKey, sheriff1Key, sheriff2Key, sheriff3Key] = privateKeys

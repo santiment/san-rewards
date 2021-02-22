@@ -28,10 +28,7 @@ contract TrustedForwarder is Forwarder, AccessControl {
         bytes calldata suffixData,
         bytes calldata sig
     ) external payable override returns (bool success, bytes memory ret) {
-        require(
-            hasRole(RELAYER_ROLE, _msgSender()),
-            "Must have relayer role"
-        );
+        require(hasRole(RELAYER_ROLE, _msgSender()), "Must have relayer role");
 
         (success, ret) = super._execute(
             req,

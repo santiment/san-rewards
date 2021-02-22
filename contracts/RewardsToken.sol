@@ -4,21 +4,32 @@ pragma solidity ^0.7.6;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20Snapshot.sol";
 import "@openzeppelin/contracts/drafts/ERC20Permit.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./interfaces/IRewardsToken.sol";
 import "./gsn/RelayRecipient.sol";
 import "./gsn/BaseRelayRecipient.sol";
+import "./utils/AccountingToken.sol";
 
-contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipient, AccessControl {
+contract RewardsToken is ERC20Pausable, ERC20Snapshot, ERC20Permit, RelayRecipient, AccessControl {
     using SafeMath for uint256;
 
     bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 private constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    string private constant ERC20_NAME = "Santiment Rewards Token";
-    string private constant ERC20_SYMBOL = "SRT";
+    string private constant ERC20_NAME = "Santiment Rewards Share Token";
+    string private constant ERC20_SYMBOL = "SRHT";
+
+    modifier onlyRole(bytes32 role) {
+        require(
+            hasRole(role, _msgSender()),
+            "Must have appropriate role"
+        );
+        _;
+    }
 
     constructor() ERC20(ERC20_NAME, ERC20_SYMBOL) ERC20Permit(ERC20_NAME) {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -27,62 +38,51 @@ contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipie
         _setupRole(PAUSER_ROLE, _msgSender());
     }
 
-    function mint(address to, uint256 amount) external override {
-        require(
-            hasRole(MINTER_ROLE, _msgSender()),
-            "Must have minter role"
-        );
+    function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 
-    function burn(uint256 amount) external override {
-        _burn(_msgSender(), amount);
-    }
-
-    function burnFrom(address account, uint256 amount) external override {
-        uint256 decreasedAllowance =
-            allowance(account, _msgSender()).sub(
-                amount,
-                "Burn amount exceeds allowance"
-            );
-
-        _approve(account, _msgSender(), decreasedAllowance);
-        _burn(account, amount);
-    }
-
-    function pause() external override {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "Must have pauser role"
-        );
+    function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    function unpause() external override {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "Must have pauser role"
-        );
+    function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 
-    function setTrustedForwarder(address trustedForwarder) external override {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "Must have admin role"
-        );
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         super._setTrustedForwarder(trustedForwarder);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20Pausable, ERC20) {
-        ERC20Pausable._beforeTokenTransfer(from, to, amount);
+    // Do not need transfer of this token
+    function _transfer(
+        address,
+        address,
+        uint256
+    ) internal pure override {
+        revert("Forbidden");
     }
 
-    function minterRole() external pure override returns (bytes32) {
+    // Do not need allowance of this token
+    function _approve(
+        address,
+        address,
+        uint256
+    ) internal pure override {
+        revert("Forbidden");
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20Pausable, ERC20Snapshot, ERC20) {
+        // ERC20._beforeTokenTransfer will be invoked twice with epmty block
+        ERC20Pausable._beforeTokenTransfer(from, to, amount);
+        ERC20Snapshot._beforeTokenTransfer(from, to, amount);
+    }
+
+    function minterRole() external pure returns (bytes32) {
         return MINTER_ROLE;
     }
 
-    function pauserRole() external pure override returns (bytes32) {
+    function pauserRole() external pure returns (bytes32) {
         return PAUSER_ROLE;
     }
 
@@ -95,7 +95,8 @@ contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipie
     }
 
     function getChainId() external view returns (uint256 chainId) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        this;
+        // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         // solhint-disable-next-line no-inline-assembly
         assembly {
             chainId := chainid()

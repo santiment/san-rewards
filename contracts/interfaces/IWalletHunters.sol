@@ -3,6 +3,7 @@
 pragma solidity ^0.7.6;
 
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IWalletHunters {
     enum Vote {AGAINST, FOR}
@@ -10,24 +11,31 @@ interface IWalletHunters {
     struct WalletRequest {
         address hunter;
         uint256 reward;
-        uint256 requestTime;
+        uint256 finishTime;
         bool rewardPaid;
         bool discarded;
+        uint256 sheriffsRewardShare;
+        uint256 fixedSheriffReward;
     }
 
     struct RequestVoting {
         uint256 votesFor;
         uint256 votesAgainst;
+        mapping(address => SheriffVote) votes;
     }
 
     struct SheriffVote {
         uint256 amount;
         bool voteFor;
+        bool rewardPaid;
     }
 
-    struct SheriffVotes {
-        EnumerableSet.UintSet requests;
-        mapping(uint256 => SheriffVote) votes;
+    struct Configuration {
+        uint256 votingDuration;
+        uint256 sheriffsRewardShare;
+        uint256 fixedSheriffReward;
+        uint256 minimalVotesForRequest;
+        uint256 minimalDepositForSheriff;
     }
 
     event NewWalletRequest(
@@ -49,6 +57,21 @@ interface IWalletHunters {
         uint256 reward
     );
     event RequestDiscarded(uint256 indexed requestId, address mayor);
+    event ConfigurationChanged(
+        uint256 votingDuration,
+        uint256 sheriffsRewardShare,
+        uint256 fixedSheriffReward,
+        uint256 minimalVotesForRequest,
+        uint256 minimalDepositForSheriff
+    );
+
+    function updateConfiguration(
+        uint256 votingDuration,
+        uint256 sheriffsRewardShare,
+        uint256 fixedSheriffReward,
+        uint256 minimalVotesForRequest,
+        uint256 minimalDepositForSheriff
+    ) external;
 
     function submitRequest(address hunter, uint256 reward)
         external
@@ -59,15 +82,6 @@ interface IWalletHunters {
     function setTrustedForwarder(address trustedForwarder) external;
 
     function stake(address sheriff, uint256 amount) external;
-
-    function stakeWithPermit(
-        address sheriff,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
 
     function vote(
         address sheriff,
@@ -81,19 +95,7 @@ interface IWalletHunters {
 
     function getHunterReward(address hunter, uint256 requestId) external;
 
-    function getHunterRewardsByIds(
-        address hunter,
-        uint256[] calldata requestIds
-    ) external;
-
-    function getSheriffReward(address sheriff, uint256 requestId) external;
-
     function getSheriffRewards(address sheriff) external;
-
-    function getSheriffRewardsByIds(
-        address sheriff,
-        uint256[] calldata requestIds
-    ) external;
 
     function hunterReward(uint256 requestId) external view returns (uint256);
 
@@ -110,18 +112,4 @@ interface IWalletHunters {
         external
         view
         returns (uint256 votesFor, uint256 votesAgainst);
-
-    function request(uint256 requestId)
-        external
-        view
-        returns (
-            address hunter,
-            uint256 reward,
-            uint256 requestTime,
-            bool votingState,
-            bool rewardPaid,
-            bool discarded
-        );
-
-    function votingDuration() external view returns (uint256);
 }

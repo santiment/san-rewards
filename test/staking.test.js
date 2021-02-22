@@ -9,7 +9,7 @@ const SanMock = contract.fromArtifact('SanMock')
 const StakingRewards = contract.fromArtifact('StakingRewards')
 const StakingRewardsFactory = contract.fromArtifact('StakingRewardsFactory')
 
-describe('StakingRewards', function () {
+describe.skip('StakingRewards', function () {
     const [deployer, staker1, staker2] = accounts
     const stakingDuration = time.duration.days(60)
     const staker1SanBalance = token('1000')
