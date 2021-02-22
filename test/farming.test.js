@@ -1,13 +1,13 @@
-const {accounts, contract} = require('@openzeppelin/test-environment')
-const {constants, expectEvent, expectRevert, time} = require('@openzeppelin/test-helpers')
-const {expect} = require('chai')
-
-const {token, bn, ZERO} = require("./utils");
-
-const RewardsToken = contract.fromArtifact('RewardsToken')
-const SanMock = contract.fromArtifact('SanMock')
-const FarmingRewards = contract.fromArtifact('FarmingRewards')
-const FarmingRewardsFactory = contract.fromArtifact('FarmingRewardsFactory')
+// const {accounts, contract} = require('@openzeppelin/test-environment')
+// const {constants, expectEvent, expectRevert, time} = require('@openzeppelin/test-helpers')
+// const {expect} = require('chai')
+//
+// const {token, bn, ZERO} = require("./utils");
+//
+// const RewardsToken = contract.fromArtifact('RewardsToken')
+// const SanMock = contract.fromArtifact('SanMock')
+// const FarmingRewards = contract.fromArtifact('FarmingRewards')
+// const FarmingRewardsFactory = contract.fromArtifact('FarmingRewardsFactory')
 
 describe.skip('FarmingRewards', function () {
     const [deployer, staker1, staker2] = accounts

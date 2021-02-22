@@ -1,15 +1,15 @@
-const {accounts, contract, privateKeys} = require('@openzeppelin/test-environment')
-const {BN, expectEvent, expectRevert, ether, time} = require('@openzeppelin/test-helpers')
-const {expect} = require('chai')
-const {fromRpcSig} = require('ethereumjs-util');
-const ethSigUtil = require('eth-sig-util');
-const {buildPermit, bn} = require("./utils");
-
-const RewardsToken = contract.fromArtifact('RewardsToken')
-const WalletHunters = contract.fromArtifact('WalletHunters')
-
-const token = (n) => ether(n)
-const ZERO = bn(0)
+// const {accounts, contract, privateKeys} = require('@openzeppelin/test-environment')
+// const {BN, expectEvent, expectRevert, ether, time} = require('@openzeppelin/test-helpers')
+// const {expect} = require('chai')
+// const {fromRpcSig} = require('ethereumjs-util');
+// const ethSigUtil = require('eth-sig-util');
+// const {buildPermit, bn} = require("./utils");
+//
+// const RewardsToken = contract.fromArtifact('RewardsToken')
+// const WalletHunters = contract.fromArtifact('WalletHunters')
+//
+// const token = (n) => ether(n)
+// const ZERO = bn(0)
 
 describe.skip('WalletHunters', function () {
     this.timeout(10000)
