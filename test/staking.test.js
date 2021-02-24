@@ -1,3 +1,4 @@
+/*
 const {accounts, contract} = require('@openzeppelin/test-environment')
 const {constants, expectEvent, expectRevert, time} = require('@openzeppelin/test-helpers')
 const {expect} = require('chai')
@@ -143,3 +144,4 @@ describe.skip('StakingRewards', function () {
         expect(await this.rewardsToken.balanceOf(staker2)).to.be.bignumber.lt(token(`650001`))
     })
 })
+*/

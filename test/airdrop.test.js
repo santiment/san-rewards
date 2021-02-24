@@ -3,18 +3,19 @@
  * https://github.com/Uniswap/merkle-distributor/blob/7cb6e85737f7dbe279aa597a3c81c63bf8ba7f63/test/MerkleDistributor.spec.ts
  */
 
-// const {accounts, contract} = require('@openzeppelin/test-environment')
-//
-// const {BN, expectEvent, expectRevert, ether} = require('@openzeppelin/test-helpers')
-//
-// const {expect} = require('chai')
-// const {createDistribution} = require('../src/create-distribution')
-//
-// const RewardsToken = contract.fromArtifact('RewardsToken')
-// const MerkleDistributor = contract.fromArtifact('MerkleDistributor')
-// const AirdropFactory = contract.fromArtifact('AirdropFactory')
-//
-// const AIRDROP_AMOUNT = ether('100')
+/*
+const {accounts, contract} = require('@openzeppelin/test-environment')
+
+const {BN, expectEvent, expectRevert, ether} = require('@openzeppelin/test-helpers')
+
+const {expect} = require('chai')
+const {createDistribution} = require('../src/create-distribution')
+
+const RewardsToken = contract.fromArtifact('RewardsToken')
+const MerkleDistributor = contract.fromArtifact('MerkleDistributor')
+const AirdropFactory = contract.fromArtifact('AirdropFactory')
+
+const AIRDROP_AMOUNT = ether('100')
 
 describe.skip('MerkleDistributor', function () {
     const [deployer, user, attacker] = accounts
@@ -94,3 +95,4 @@ describe.skip('MerkleDistributor', function () {
         expect(balance).to.be.bignumber.equal(AIRDROP_AMOUNT.mul(new BN(accounts.length / 2)))
     })
 })
+*/

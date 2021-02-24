@@ -1,15 +1,16 @@
-// const {web3, accounts, privateKeys, contract} = require('@openzeppelin/test-environment')
-// const {send, balance, expectEvent, expectRevert, constants} = require('@openzeppelin/test-helpers')
-// const {expect} = require('chai')
-// const {fromRpcSig, bufferToHex} = require('ethereumjs-util');
-// const ethSigUtil = require('eth-sig-util');
-// const {TypedDataUtils} = require('eth-sig-util');
-// const {EIP712Domain, buildPermit, ForwardRequest} = require("./utils");
-//
-// const {token} = require("./utils");
-//
-// const RewardsToken = contract.fromArtifact('RewardsToken')
-// const TrustedForwarded = contract.fromArtifact('TrustedForwarder')
+/*
+const {web3, accounts, privateKeys, contract} = require('@openzeppelin/test-environment')
+const {send, balance, expectEvent, expectRevert, constants} = require('@openzeppelin/test-helpers')
+const {expect} = require('chai')
+const {fromRpcSig, bufferToHex} = require('ethereumjs-util');
+const ethSigUtil = require('eth-sig-util');
+const {TypedDataUtils} = require('eth-sig-util');
+const {EIP712Domain, buildPermit, ForwardRequest} = require("./utils");
+
+const {token} = require("./utils");
+
+const RewardsToken = contract.fromArtifact('RewardsToken')
+const TrustedForwarded = contract.fromArtifact('TrustedForwarder')
 
 describe.skip('StakingRewards', function () {
     const [deployer, minter, pauser, user1, user2, relayer] = accounts
@@ -162,3 +163,4 @@ describe.skip('StakingRewards', function () {
         expect(await user2BalanceTracker.delta()).to.be.bignumber.equal('0')
     })
 })
+*/
