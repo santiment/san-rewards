@@ -29,9 +29,9 @@ contract("RewardsDistributor", async function (accounts) {
         await expectRevert(this.rewards.lastRewardId(), "No rewards")
     })
 
-    const rewardIds = [0, 1, 2]
+    const rewardIds = [0, 1, 2].map(it => bn(it))
 
-    rewardIds.map(it => bn(it)).forEach(rewardId => {
+    rewardIds.forEach(rewardId => {
 
         it(`Mint user tokens #${rewardId}`, async () => {
             const [user1Tokens, user2Tokens, user3Tokens] = [token('1000'), token('5000'), token('10000')]

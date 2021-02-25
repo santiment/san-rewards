@@ -29,6 +29,36 @@ contract WalletHunters is
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
     using AddressUpgradeable for address;
 
+    struct WalletRequest {
+        address hunter;
+        uint256 reward;
+        uint256 finishTime;
+        uint256 sheriffsRewardShare;
+        uint256 fixedSheriffReward;
+        bool rewardPaid;
+        bool discarded;
+    }
+
+    struct RequestVoting {
+        uint256 votesFor;
+        uint256 votesAgainst;
+        mapping(address => SheriffVote) votes;
+    }
+
+    struct SheriffVote {
+        uint256 amount;
+        bool voteFor;
+        bool rewardPaid;
+    }
+
+    struct Configuration {
+        uint256 votingDuration;
+        uint256 sheriffsRewardShare;
+        uint256 fixedSheriffReward;
+        uint256 minimalVotesForRequest;
+        uint256 minimalDepositForSheriff;
+    }
+
     uint256 public constant MAX_PERCENT = 10000; // 100%
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
 
@@ -41,9 +71,36 @@ contract WalletHunters is
 
     Configuration public configuration;
     CountersUpgradeable.Counter public requestCounter;
-    mapping(uint256 => WalletRequest) private walletRequests;
+    mapping(uint256 => WalletRequest) public walletRequests;
     mapping(uint256 => RequestVoting) private requestVotings;
     mapping(address => EnumerableSetUpgradeable.UintSet) private activeRequests;
+
+    event NewWalletRequest(
+        uint256 indexed requestId,
+        address indexed hunter,
+        uint256 reward
+    );
+    event Staked(address indexed sheriff, uint256 amount);
+    event Withdrawn(address indexed sheriff, uint256 amount);
+    event Voted(address indexed sheriff, uint256 amount, Vote kind);
+    event HunterRewardPaid(
+        address indexed hunter,
+        uint256 indexed requestId,
+        uint256 reward
+    );
+    event SheriffRewardPaid(
+        address indexed sheriff,
+        uint256 indexed requestId,
+        uint256 reward
+    );
+    event RequestDiscarded(uint256 indexed requestId, address mayor);
+    event ConfigurationChanged(
+        uint256 votingDuration,
+        uint256 sheriffsRewardShare,
+        uint256 fixedSheriffReward,
+        uint256 minimalVotesForRequest,
+        uint256 minimalDepositForSheriff
+    );
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
@@ -140,7 +197,7 @@ contract WalletHunters is
         requestCounter.increment();
         uint256 id = requestCounter.current();
 
-        IWalletHunters.WalletRequest storage _request = walletRequests[id];
+        WalletRequest storage _request = walletRequests[id];
 
         _request.hunter = hunter;
         _request.reward = reward;
@@ -170,6 +227,7 @@ contract WalletHunters is
         Vote kind
     ) external override validateRequestId(requestId) {
         require(sheriff == _msgSender(), "Sender must be sheriff");
+        require(walletRequests[requestId].hunter != sheriff, "Sheriff can't be hunter");
         require(isSheriff(sheriff), "Sender is not sheriff");
         require(_votingState(requestId), "Voting is finished");
 
@@ -378,34 +436,10 @@ contract WalletHunters is
 
     function setTrustedForwarder(address trustedForwarder)
         external
-        override
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         super._setTrustedForwarder(trustedForwarder);
     }
-
-    //    function request(uint256 requestId)
-    //        external
-    //        view
-    //        override
-    //        validateRequestId(requestId)
-    //        returns (
-    //            address hunter,
-    //            uint256 reward,
-    //            uint256 finishTime,
-    //            bool votingState,
-    //            bool rewardPaid,
-    //            bool discarded
-    //        )
-    //    {
-    //        hunter = walletRequests[requestId].hunter;
-    //        reward = walletRequests[requestId].reward;
-    //        finishTime = walletRequests[requestId].finishTime;
-    //        // solhint-disable-next-line not-rely-on-time
-    //        votingState = block.timestamp <= finishTime;
-    //        rewardPaid = walletRequests[requestId].rewardPaid;
-    //        discarded = walletRequests[requestId].discarded;
-    //    }
 
     function countVotes(uint256 requestId)
         external
