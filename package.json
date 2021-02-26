@@ -6,7 +6,7 @@
     "compile": "truffle compile --all",
     "migrate": "truffle migrate --network development",
     "migrate:ropsten": "truffle migrate --network ropsten",
-    "verify:ropsten": "truffle run verify RewardsToken SanMock TokenMock AirdropFactory FarmingRewardsFactory StakingRewardsFactory --network ropsten",
+    "verify:ropsten": "truffle run verify SanMock RewardsDistributor --network ropsten",
     "ganache": "ganache-cli",
     "airdrop": "node ./scripts/cli.js airdrop ./scripts/airdrop.json",
     "prettier:solidity": "prettier --write contracts/**/*.sol",
