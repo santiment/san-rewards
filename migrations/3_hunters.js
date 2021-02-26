@@ -15,9 +15,9 @@ module.exports = async (deployer, network, accounts) => {
 
     const votingDuration = bn(24 * 60 * 60) // 1 day
     const sheriffsRewardShare = bn(20 * 100) // 20%
-    const fixedSheriffReward = bn(100).mul(bn(10).pow(bn(18)))
-    const minimalVotesForRequest = bn(3000).mul(bn(10).pow(bn(18)))
-    const minimalDepositForSheriff = bn(1000) .mul(bn(10).pow(bn(18)))
+    const fixedSheriffReward = bn(10).mul(bn(10).pow(bn(18)))
+    const minimalVotesForRequest = bn(150).mul(bn(10).pow(bn(18)))
+    const minimalDepositForSheriff = bn(50) .mul(bn(10).pow(bn(18)))
 
     await deployProxy(WalletHunters, [
         owner,

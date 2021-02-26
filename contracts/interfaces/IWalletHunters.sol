@@ -21,11 +21,20 @@ interface IWalletHunters {
 
     function withdraw(address sheriff, uint256 amount) external;
 
-    function exit(address sheriff) external;
+    function exit(address sheriff, uint256[] calldata requestIds) external;
 
-    function getHunterReward(address hunter, uint256 requestId) external;
+    function activeRequestsLength(address user) external view returns (uint256);
 
-    function getSheriffRewards(address sheriff) external;
+    function activeRequest(address user, uint256 index)
+        external
+        view
+        returns (uint256);
+
+    function claimHunterReward(address hunter, uint256[] calldata requestIds)
+        external;
+
+    function claimSheriffRewards(address sheriff, uint256[] calldata requestIds)
+        external;
 
     function updateConfiguration(
         uint256 votingDuration,
@@ -35,12 +44,20 @@ interface IWalletHunters {
         uint256 minimalDepositForSheriff
     ) external;
 
-    function hunterReward(uint256 requestId) external view returns (uint256);
+    function hunterReward(address hunter, uint256 requestId)
+        external
+        view
+        returns (uint256);
 
     function sheriffReward(address sheriff, uint256 requestId)
         external
         view
         returns (uint256);
+
+    function getVote(address sheriff, uint256 requestId)
+        external
+        view
+        returns (uint256 votes, bool voteFor);
 
     function lockedBalance(address sheriff) external view returns (uint256);
 

@@ -7,19 +7,16 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20SnapshotUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/drafts/ERC20PermitUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "./interfaces/IRewardsToken.sol";
-import "./gsn/RelayRecipient.sol";
-import "./gsn/BaseRelayRecipient.sol";
 import "./utils/AccountingToken.sol";
 import "./interfaces/IERC20Snapshot.sol";
 import "./interfaces/IERC20Mintable.sol";
 import "./interfaces/IERC20Pausable.sol";
+import "./gsn/RelayRecipientUpgradeable.sol";
 
-contract RewardsToken is IERC20Snapshot, IERC20Pausable, IERC20Mintable, ERC20PausableUpgradeable, ERC20SnapshotUpgradeable, ERC20PermitUpgradeable,
-RelayRecipient, AccessControlUpgradeable {
+contract RewardsToken is IERC20Snapshot, IERC20Pausable, IERC20Mintable, ERC20PausableUpgradeable, ERC20SnapshotUpgradeable, RelayRecipientUpgradeable, AccessControlUpgradeable {
     using SafeMath for uint256;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -44,9 +41,8 @@ RelayRecipient, AccessControlUpgradeable {
     function __RewardsToken_init(address admin) internal initializer {
         __ERC20Pausable_init();
         __ERC20Snapshot_init();
-        __ERC20Permit_init(ERC20_NAME);
         __ERC20_init(ERC20_NAME, ERC20_SYMBOL);
-        __RelayRecipient_init();
+        __RelayRecipientUpgradeable_init();
         __AccessControl_init();
 
         __RewardsToken_init_unchained(admin);
@@ -110,30 +106,17 @@ RelayRecipient, AccessControlUpgradeable {
         revert("Forbidden");
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20PausableUpgradeable, ERC20SnapshotUpgradeable, ERC20Upgradeable) {
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20PausableUpgradeable, ERC20SnapshotUpgradeable) {
         // ERC20._beforeTokenTransfer will be invoked twice with epmty block
         ERC20PausableUpgradeable._beforeTokenTransfer(from, to, amount);
         ERC20SnapshotUpgradeable._beforeTokenTransfer(from, to, amount);
     }
 
-    function _msgSender() internal view override(ContextUpgradeable, BaseRelayRecipient) returns (address payable) {
-        return BaseRelayRecipient._msgSender();
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771ContextUpgradeable) returns (address payable) {
+        return ERC2771ContextUpgradeable._msgSender();
     }
 
-    function _msgData() internal view override(ContextUpgradeable, BaseRelayRecipient) returns (bytes memory) {
-        return BaseRelayRecipient._msgData();
-    }
-
-    function getChainId() external view returns (uint256 chainId) {
-        this;
-        // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            chainId := chainid()
-        }
-    }
-
-    function versionRecipient() external override pure returns (string memory) {
-        return "2.0.0+";
+    function _msgData() internal view override(ContextUpgradeable, ERC2771ContextUpgradeable) returns (bytes memory) {
+        return ERC2771ContextUpgradeable._msgData();
     }
 }

@@ -5,7 +5,7 @@ const SanMock = artifacts.require("SanMock")
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
-    const rewardsToken = await RewardsToken.deployed();
+    const rewardsToken = await RewardsToken.deployed()
     const sanMock = await SanMock.deployed()
 
     await deployer.deploy(

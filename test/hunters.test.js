@@ -2,11 +2,12 @@ const {expectEvent, expectRevert, ether, time} = require('@openzeppelin/test-hel
 const {expect} = require('chai')
 const {fromRpcSig} = require('ethereumjs-util');
 const ethSigUtil = require('eth-sig-util');
-const {buildPermit, bn, token, ZERO} = require("./utils");
+const {bn, token, ZERO, ForwardRequest, EIP712Domain} = require("./utils");
 
 const RewardsToken = artifacts.require("RewardsToken")
 const SanMock = artifacts.require("SanMock")
 const WalletHunters = artifacts.require("WalletHunters")
+const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 contract('WalletHunters', function (accounts) {
     const [deployer, mayor, hunter, sheriff1, sheriff2, sheriff3] = accounts
@@ -15,14 +16,15 @@ contract('WalletHunters', function (accounts) {
     // const [deployerKey, mayorKey, hunterKey, sheriff1Key, sheriff2Key, sheriff3Key] = privateKeys
     const votingDuration = bn(24 * 60 * 60) // 1 day
     const sheriffsRewardShare = bn(20 * 100) // 20%
-    const fixedSheriffReward = bn(100).mul(bn(10).pow(bn(18)))
-    const minimalVotesForRequest = bn(3000).mul(bn(10).pow(bn(18)))
-    const minimalDepositForSheriff = bn(1000) .mul(bn(10).pow(bn(18)))
+    const fixedSheriffReward = bn(10).mul(bn(10).pow(bn(18)))
+    const minimalVotesForRequest = bn(150).mul(bn(10).pow(bn(18)))
+    const minimalDepositForSheriff = bn(50) .mul(bn(10).pow(bn(18)))
 
     before(async () => {
         this.rewardsToken = await RewardsToken.deployed()
         this.sanToken = await SanMock.deployed()
         this.hunters = await WalletHunters.deployed()
+        this.forwarder = await TrustedForwarder.deployed()
     })
 
     it(`Check access roles after deploy`, async () => {
@@ -42,6 +44,18 @@ contract('WalletHunters', function (accounts) {
         expect(configuration.minimalVotesForRequest).to.be.bignumber.equal(minimalVotesForRequest)
         expect(configuration.minimalDepositForSheriff).to.be.bignumber.equal(minimalDepositForSheriff)
     })
+
+    // it("Grant relayer role", async () => {
+    //     expect(await this.hunters.isTrustedForwarder(forwarder.address)).to.be.true
+    //
+    //     let receipt = await this.forwarder.grantRole(await this.forwarder.RELAYER_ROLE(), relayer, {from: deployer})
+    //     expectEvent(receipt, "RoleGranted", {
+    //         role: await this.forwarder.relayerRole(),
+    //         account: relayer,
+    //         sender: deployer
+    //     })
+    //     expect(await this.forwarder.hasRole(await this.forwarder.relayerRole(), relayer)).to.be.true
+    // })
 
     it(`Mint staking tokens`, async () => {
         // fetch before balances
@@ -97,7 +111,6 @@ contract('WalletHunters', function (accounts) {
             expect(request.finishTime).to.be.bignumber.gte(await time.latest())
             expect(request.sheriffsRewardShare).to.be.bignumber.equal(sheriffsRewardShare)
             expect(request.fixedSheriffReward).to.be.bignumber.equal(fixedSheriffReward)
-            expect(request.rewardPaid).to.be.false
             expect(request.discarded).to.be.false
         })
 
@@ -109,7 +122,7 @@ contract('WalletHunters', function (accounts) {
                 const receipt = await this.hunters.vote(sheriff, requestId, kind, {from: sheriff})
                 expectEvent(receipt, "Voted", {sheriff, amount: votes, kind: kind})
 
-                await expectRevert(this.hunters.vote(sheriff, requestId, kind, {from: sheriff}), "Sheriff is already voted")
+                await expectRevert(this.hunters.vote(sheriff, requestId, kind, {from: sheriff}), "User is already participated")
             }
 
             const votes = await this.hunters.countVotes(requestId)
@@ -132,15 +145,15 @@ contract('WalletHunters', function (accounts) {
         it(`Withdraw hunter reward #${requestId}`, async () => {
             const balanceBefore = await this.rewardsToken.balanceOf(hunter)
 
-            const actualReward = await this.hunters.hunterReward(requestId)
+            const actualReward = await this.hunters.hunterReward(hunter, requestId)
             let maxPercent = await this.hunters.MAX_PERCENT();
             expect(actualReward).to.be.bignumber.equal(reward.mul(maxPercent.sub(sheriffsRewardShare)).div(maxPercent))
 
-            const receipt = await this.hunters.getHunterReward(hunter, requestId, {from: hunter})
-            expectEvent(receipt, "HunterRewardPaid", {hunter, requestId, reward: actualReward})
+            const receipt = await this.hunters.claimHunterReward(hunter, [requestId], {from: hunter})
+            expectEvent(receipt, "HunterRewardPaid", {hunter, totalReward: actualReward})
 
             expect(await this.rewardsToken.balanceOf(hunter)).to.be.bignumber.equal(balanceBefore.add(actualReward))
-            expect(await this.hunters.hunterReward(requestId)).to.be.bignumber.equal(ZERO)
+            await expectRevert(this.hunters.hunterReward(hunter, requestId), 'Already rewarded')
         })
 
         it(`Withdraw sheriff reward #${requestId}`, async () => {
@@ -152,8 +165,8 @@ contract('WalletHunters', function (accounts) {
             expect(await actualReward(sheriff3)).to.be.bignumber.equal(sheriff3Rewards[requestId.toNumber() - 1])
 
             const withdrawReward = async (sheriff) => {
-                const receipt = await this.hunters.getSheriffRewards(sheriff, {from: sheriff})
-                expectEvent(receipt, "SheriffRewardPaid", {sheriff, requestId})
+                const receipt = await this.hunters.claimSheriffRewards(sheriff, [requestId], {from: sheriff})
+                expectEvent(receipt, "SheriffRewardPaid", {sheriff})
             }
 
             const balanceBefore = await this.rewardsToken.balanceOf(sheriff1)
@@ -185,8 +198,12 @@ contract('WalletHunters', function (accounts) {
     })
 
     it("Exit sheriff", async () => {
-
-        await this.hunters.exit(sheriff3, {from: sheriff3})
+        const requestIds = []
+        const amountRequests = await this.hunters.activeRequestsLength(sheriff3)
+        for (let i = 0; i < amountRequests; i++) {
+            requestIds.push(await this.hunters.activeRequest(sheriff3, bn(i)))
+        }
+        await this.hunters.exit(sheriff3, requestIds, {from: sheriff3})
 
         expect(await this.hunters.balanceOf(sheriff3)).to.be.bignumber.equal(ZERO)
 
@@ -194,3 +211,38 @@ contract('WalletHunters', function (accounts) {
         expect(await this.rewardsToken.balanceOf(sheriff3)).to.be.bignumber.equal(bn('10909090909090909090908'))
     })
 })
+
+// async function relay(forwarder, from, to, calldata) {
+//
+//     const nonce = await forwarder.getNonce(from).then(nonce => nonce.toString())
+//     const chainId = await forwarder.getChainId()
+//
+//     const request = {
+//         from,
+//         to,
+//         value: 0,
+//         gas: 1e6,
+//         nonce,
+//         data: calldata
+//         // data: this.token.contract.methods["transfer"](user1, token('100')).encodeABI()
+//     }
+//
+//     const data = {
+//         primaryType: 'ForwardRequest',
+//         types: {EIP712Domain, ForwardRequest},
+//         domain: {name: 'MinimalForwarder', version: '0.0.1', chainId, verifyingContract: forwarder.address},
+//         message: request
+//     }
+//
+//     const hexKey = user2Key.substr(2)
+//     const signature = ethSigUtil.signTypedData_v4(Buffer.from(hexKey, 'hex'), {data});
+//
+//     const args = [
+//         request,
+//         signature
+//     ]
+//
+//     await forwarder.verify(...args)
+//
+//     return await forwarder.execute(...args, {from: relayer})
+// }
