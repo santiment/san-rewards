@@ -104,6 +104,7 @@ contract WalletHunters is
     }
 
     modifier validateRequestId(uint256 requestId) {
+        require(requestId > 0, "Request id is 0");
         require(requestId <= requestCounter.current(), "Request doesn't exist");
         require(!walletRequests[requestId].discarded, "Request is discarded");
         _;
@@ -387,6 +388,7 @@ contract WalletHunters is
         override
         returns (uint256)
     {
+        require(requestId > 0, "Request id is 0");
         require(requestId <= requestCounter.current(), "Request doesn't exist");
         require(
             hunter == walletRequests[requestId].hunter,
@@ -418,6 +420,7 @@ contract WalletHunters is
         override
         returns (uint256)
     {
+        require(requestId > 0, "Request id is 0");
         require(requestId <= requestCounter.current(), "Request doesn't exist");
         require(
             requestVotings[requestId].votes[sheriff].amount > 0,

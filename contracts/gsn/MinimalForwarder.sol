@@ -5,12 +5,14 @@ pragma abicoder v2;
 
 import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/drafts/EIP712.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 /*
  * @dev Simple minimal forwarder to be used together with an ERC2771 compatible contract. See {ERC2771Context}.
  */
 contract MinimalForwarder is EIP712 {
     using ECDSA for bytes32;
+    using Address for address;
 
     struct ForwardRequest {
         address from;
@@ -70,18 +72,15 @@ contract MinimalForwarder is EIP712 {
         _nonces[req.from] = req.nonce + 1;
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) =
-            req.to.call{gas: req.gas, value: req.value}(
-                abi.encodePacked(req.data, req.from)
-            );
+        bytes memory returndata = req.to.functionCall(abi.encodePacked(req.data, req.from));
         // Validate that the relayer has sent enough gas for the call.
         // See https://ronan.eth.link/blog/ethereum-gas-dangers/
         assert(gasleft() > req.gas / 63);
 
-        return (success, returndata);
+        return (true, returndata);
     }
 
-    function getChainId() private view returns (uint256 chainId) {
+    function getChainId() public view returns (uint256 chainId) {
         this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         // solhint-disable-next-line no-inline-assembly
         assembly {
