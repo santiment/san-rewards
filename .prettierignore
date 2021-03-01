@@ -1,3 +1,2 @@
-contracts/gsn/Forwarder.sol
-contracts/gsn/BaseRelayRecipient.sol
 contracts/Migrations.sol
+contracts/gsn/ERC2771ContextUpgradeable.sol

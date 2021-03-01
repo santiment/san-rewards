@@ -72,7 +72,8 @@ contract MinimalForwarder is EIP712 {
         _nonces[req.from] = req.nonce + 1;
 
         // solhint-disable-next-line avoid-low-level-calls
-        bytes memory returndata = req.to.functionCall(abi.encodePacked(req.data, req.from));
+        bytes memory returndata =
+            req.to.functionCall(abi.encodePacked(req.data, req.from));
         // Validate that the relayer has sent enough gas for the call.
         // See https://ronan.eth.link/blog/ethereum-gas-dangers/
         assert(gasleft() > req.gas / 63);

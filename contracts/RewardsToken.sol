@@ -16,7 +16,15 @@ import "./interfaces/IERC20Mintable.sol";
 import "./interfaces/IERC20Pausable.sol";
 import "./gsn/RelayRecipientUpgradeable.sol";
 
-contract RewardsToken is IERC20Snapshot, IERC20Pausable, IERC20Mintable, ERC20PausableUpgradeable, ERC20SnapshotUpgradeable, RelayRecipientUpgradeable, AccessControlUpgradeable {
+contract RewardsToken is
+    IERC20Snapshot,
+    IERC20Pausable,
+    IERC20Mintable,
+    ERC20PausableUpgradeable,
+    ERC20SnapshotUpgradeable,
+    RelayRecipientUpgradeable,
+    AccessControlUpgradeable
+{
     using SafeMath for uint256;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -27,10 +35,7 @@ contract RewardsToken is IERC20Snapshot, IERC20Pausable, IERC20Mintable, ERC20Pa
     string private constant ERC20_SYMBOL = "SRHT";
 
     modifier onlyRole(bytes32 role) {
-        require(
-            hasRole(role, _msgSender()),
-            "Must have appropriate role"
-        );
+        require(hasRole(role, _msgSender()), "Must have appropriate role");
         _;
     }
 
@@ -56,7 +61,11 @@ contract RewardsToken is IERC20Snapshot, IERC20Pausable, IERC20Mintable, ERC20Pa
         _setupRole(SNAPSHOTER_ROLE, admin);
     }
 
-    function mint(address to, uint256 amount) external override onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 amount)
+        external
+        override
+        onlyRole(MINTER_ROLE)
+    {
         _mint(to, amount);
     }
 
@@ -68,23 +77,46 @@ contract RewardsToken is IERC20Snapshot, IERC20Pausable, IERC20Mintable, ERC20Pa
         _unpause();
     }
 
-    function paused() public view override(PausableUpgradeable, IERC20Pausable) returns (bool) {
+    function paused()
+        public
+        view
+        override(PausableUpgradeable, IERC20Pausable)
+        returns (bool)
+    {
         return PausableUpgradeable.paused();
     }
 
-    function snapshot() external onlyRole(SNAPSHOTER_ROLE) override returns (uint256) {
+    function snapshot()
+        external
+        override
+        onlyRole(SNAPSHOTER_ROLE)
+        returns (uint256)
+    {
         return _snapshot();
     }
 
-    function balanceOfAt(address account, uint256 snapshotId) public view override(IERC20Snapshot, ERC20SnapshotUpgradeable) returns (uint256) {
+    function balanceOfAt(address account, uint256 snapshotId)
+        public
+        view
+        override(IERC20Snapshot, ERC20SnapshotUpgradeable)
+        returns (uint256)
+    {
         return ERC20SnapshotUpgradeable.balanceOfAt(account, snapshotId);
     }
 
-    function totalSupplyAt(uint256 snapshotId) public view override(IERC20Snapshot, ERC20SnapshotUpgradeable) returns(uint256) {
+    function totalSupplyAt(uint256 snapshotId)
+        public
+        view
+        override(IERC20Snapshot, ERC20SnapshotUpgradeable)
+        returns (uint256)
+    {
         return ERC20SnapshotUpgradeable.totalSupplyAt(snapshotId);
     }
 
-    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTrustedForwarder(address trustedForwarder)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         super._setTrustedForwarder(trustedForwarder);
     }
 
@@ -106,17 +138,31 @@ contract RewardsToken is IERC20Snapshot, IERC20Pausable, IERC20Mintable, ERC20Pa
         revert("Forbidden");
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20PausableUpgradeable, ERC20SnapshotUpgradeable) {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20PausableUpgradeable, ERC20SnapshotUpgradeable) {
         // ERC20._beforeTokenTransfer will be invoked twice with epmty block
         ERC20PausableUpgradeable._beforeTokenTransfer(from, to, amount);
         ERC20SnapshotUpgradeable._beforeTokenTransfer(from, to, amount);
     }
 
-    function _msgSender() internal view override(ContextUpgradeable, ERC2771ContextUpgradeable) returns (address payable) {
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (address payable)
+    {
         return ERC2771ContextUpgradeable._msgSender();
     }
 
-    function _msgData() internal view override(ContextUpgradeable, ERC2771ContextUpgradeable) returns (bytes memory) {
+    function _msgData()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (bytes memory)
+    {
         return ERC2771ContextUpgradeable._msgData();
     }
 }

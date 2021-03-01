@@ -15,6 +15,8 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
+    uint256 public constant RATE_DECIMALS = 4;
+
     struct Reward {
         uint256 totalReward;
         uint256 totalShare;
@@ -30,7 +32,11 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
     mapping(uint256 => mapping(address => bool)) paidUsers;
 
     event RewardDistributed(uint256 indexed rewardId, uint256 totalReward);
-    event RewardPaid(address indexed user, uint256 indexed rewardId, uint256 reward);
+    event RewardPaid(
+        address indexed user,
+        uint256 indexed rewardId,
+        uint256 reward
+    );
 
     modifier verifyRewardId(uint256 rewardId) {
         require(rewardId.add(1) <= rewards.length, "Invalid reward id");
@@ -45,10 +51,68 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
         snapshotToken = IERC20Snapshot(snapshotToken_);
     }
 
-    function distributeReward(uint256 totalReward) external onlyOwner override returns (uint256 rewardId) {
+    function distributeRewardWithRate(uint256 rate)
+        external
+        override
+        onlyOwner
+        returns (uint256 rewardId)
+    {
         address owner = _msgSender();
 
-        uint256 toSnapshotId = snapshotToken.snapshot();
+        (uint256 totalShare, uint256 fromSnapshotId, uint256 toSnapshotId) =
+            _nextSnapshot();
+        require(totalShare > 0, "Nobody to distribute");
+
+        uint256 totalReward = _calculateTotalReward(rate, totalShare);
+        require(totalReward > 0, "Nothing to distribute");
+
+        Reward storage _reward = rewards.push();
+        _reward.toSnapshotId = toSnapshotId;
+        _reward.fromSnapshotId = fromSnapshotId;
+        _reward.totalShare = totalShare;
+        _reward.totalReward = totalReward;
+
+        rewardId = rewards.length - 1;
+
+        rewardsToken.safeTransferFrom(owner, address(this), totalReward);
+
+        emit RewardDistributed(rewardId, totalReward);
+    }
+
+    function distributeReward(uint256 totalReward)
+        external
+        override
+        onlyOwner
+        returns (uint256 rewardId)
+    {
+        address owner = _msgSender();
+
+        (uint256 totalShare, uint256 fromSnapshotId, uint256 toSnapshotId) =
+            _nextSnapshot();
+        require(totalShare > 0, "Nobody to distribute");
+
+        Reward storage _reward = rewards.push();
+        _reward.toSnapshotId = toSnapshotId;
+        _reward.fromSnapshotId = fromSnapshotId;
+        _reward.totalShare = totalShare;
+        _reward.totalReward = totalReward;
+
+        rewardId = rewards.length - 1;
+
+        rewardsToken.safeTransferFrom(owner, address(this), totalReward);
+
+        emit RewardDistributed(rewardId, totalReward);
+    }
+
+    function _nextSnapshot()
+        internal
+        returns (
+            uint256 totalShare,
+            uint256 fromSnapshotId,
+            uint256 toSnapshotId
+        )
+    {
+        toSnapshotId = snapshotToken.snapshot();
 
         uint256 fromTotalSupply = 0;
         if (lastSnapshotId != 0) {
@@ -57,24 +121,24 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
 
         uint256 toTotalSupply = snapshotToken.totalSupplyAt(toSnapshotId);
 
-        uint256 totalShare = toTotalSupply.sub(fromTotalSupply);
-        require(totalShare > 0, "Nobody to distribute");
-
-        Reward storage _reward = rewards.push();
-        _reward.toSnapshotId = toSnapshotId;
-        _reward.fromSnapshotId = lastSnapshotId;
-        _reward.totalReward = totalReward;
-        _reward.totalShare = totalShare;
-
+        totalShare = toTotalSupply.sub(fromTotalSupply);
+        fromSnapshotId = lastSnapshotId;
         lastSnapshotId = toSnapshotId;
-        rewardId = rewards.length - 1;
-
-        rewardsToken.safeTransferFrom(owner, address(this), totalReward);
-
-        emit RewardDistributed(rewardId, totalReward);
     }
 
-    function getReward(address user, uint256 rewardId) external override verifyRewardId(rewardId) {
+    function _calculateTotalReward(uint256 rate, uint256 totalShare)
+        internal
+        pure
+        returns (uint256)
+    {
+        return totalShare.mul(rate).div(RATE_DECIMALS);
+    }
+
+    function getReward(address user, uint256 rewardId)
+        external
+        override
+        verifyRewardId(rewardId)
+    {
         require(user == _msgSender(), "Sender must be user");
 
         uint256 _userReward = userReward(user, rewardId);
@@ -84,31 +148,45 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
         emit RewardPaid(user, rewardId, _userReward);
     }
 
-    function userReward(address user, uint256 rewardId) public view override verifyRewardId(rewardId) returns (uint256) {
+    function userReward(address user, uint256 rewardId)
+        public
+        view
+        override
+        verifyRewardId(rewardId)
+        returns (uint256)
+    {
         Reward storage _reward = rewards[rewardId];
         require(!paidUsers[rewardId][user], "Already paid");
 
         uint256 fromBalance = 0;
         if (_reward.fromSnapshotId != 0) {
-            fromBalance = snapshotToken.balanceOfAt(user, _reward.fromSnapshotId);
+            fromBalance = snapshotToken.balanceOfAt(
+                user,
+                _reward.fromSnapshotId
+            );
         }
 
-        uint256 toBalance = snapshotToken.balanceOfAt(user, _reward.toSnapshotId);
+        uint256 toBalance =
+            snapshotToken.balanceOfAt(user, _reward.toSnapshotId);
         uint256 share = toBalance.sub(fromBalance);
 
         require(share > 0, "No reward for user");
 
-        return share
-            .mul(10000)
-            .div(_reward.totalShare)
-            .mul(_reward.totalReward)
-            .div(10000);
+        return
+            share
+                .mul(10000)
+                .div(_reward.totalShare)
+                .mul(_reward.totalReward)
+                .div(10000);
     }
 
-    function reward(uint256 rewardId) external view override verifyRewardId(rewardId) returns (
-        uint256 totalReward,
-        uint256 totalShare
-    ) {
+    function reward(uint256 rewardId)
+        external
+        view
+        override
+        verifyRewardId(rewardId)
+        returns (uint256 totalReward, uint256 totalShare)
+    {
         Reward storage _reward = rewards[rewardId];
         totalReward = _reward.totalReward;
         totalShare = _reward.totalShare;

@@ -6,7 +6,9 @@ interface IRewardsDistributor {
         external
         returns (uint256 rewardId);
 
-    // TODO distribute reward with rate
+    function distributeRewardWithRate(uint256 rate)
+        external
+        returns (uint256 rewardId);
 
     function getReward(address user, uint256 rewardId) external;
 
