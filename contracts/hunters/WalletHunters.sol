@@ -300,9 +300,9 @@ contract WalletHunters is
             uint256 requestId = requestIds[i];
 
             uint256 reward = hunterReward(hunter, requestId);
-            totalReward = totalReward.add(reward);
-
             activeRequests[hunter].remove(requestId);
+
+            totalReward = totalReward.add(reward);
         }
 
         if (totalReward > 0) {
@@ -323,9 +323,9 @@ contract WalletHunters is
             uint256 requestId = requestIds[i];
 
             uint256 reward = sheriffReward(sheriff, requestId);
-            totalReward = totalReward.add(reward);
-
             activeRequests[sheriff].remove(requestId);
+
+            totalReward = totalReward.add(reward);
         }
 
         if (totalReward > 0) {

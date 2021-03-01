@@ -10,7 +10,9 @@ interface IRewardsDistributor {
         external
         returns (uint256 rewardId);
 
-    function getReward(address user, uint256 rewardId) external;
+    function claimRewards(address user, uint256[] calldata rewardIds) external;
+
+    function claimReward(address user, uint256 rewardId) external;
 
     function userReward(address user, uint256 rewardId)
         external

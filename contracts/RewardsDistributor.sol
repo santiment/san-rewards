@@ -1,21 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import "./interfaces/IRewardsDistributor.sol";
 import "./interfaces/IERC20Snapshot.sol";
+import "./gsn/RelayRecipientUpgradeable.sol";
 
-contract RewardsDistributor is IRewardsDistributor, Ownable {
-    using Address for address;
-    using SafeERC20 for IERC20;
-    using SafeMath for uint256;
+contract RewardsDistributor is
+    IRewardsDistributor,
+    AccessControlUpgradeable,
+    RelayRecipientUpgradeable
+{
+    using AddressUpgradeable for address;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using SafeMathUpgradeable for uint256;
 
-    uint256 public constant RATE_DECIMALS = 4;
+    bytes32 public constant DISTRIBUTOR_ROLE = keccak256("MAYOR_ROLE");
+    uint256 public constant MATH_PRECISION = 10000;
 
     struct Reward {
         uint256 totalReward;
@@ -24,37 +29,68 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
         uint256 toSnapshotId;
     }
 
-    IERC20 public immutable rewardsToken;
-    IERC20Snapshot public immutable snapshotToken;
+    IERC20Upgradeable public rewardsToken;
+    IERC20Snapshot public snapshotToken;
 
     uint256 public lastSnapshotId;
     Reward[] private rewards;
-    mapping(uint256 => mapping(address => bool)) paidUsers;
+    mapping(uint256 => mapping(address => bool)) private paidUsers;
 
     event RewardDistributed(uint256 indexed rewardId, uint256 totalReward);
-    event RewardPaid(
-        address indexed user,
-        uint256 indexed rewardId,
-        uint256 reward
-    );
+    event RewardPaid(address indexed user, uint256 reward);
 
     modifier verifyRewardId(uint256 rewardId) {
         require(rewardId.add(1) <= rewards.length, "Invalid reward id");
         _;
     }
 
-    constructor(address rewardsToken_, address snapshotToken_) {
+    function initialize(
+        address admin,
+        address rewardsToken_,
+        address snapshotToken_
+    ) external initializer {
+        __RewardsDistributor_init(admin, rewardsToken_, snapshotToken_);
+    }
+
+    function __RewardsDistributor_init(
+        address admin,
+        address rewardsToken_,
+        address snapshotToken_
+    ) internal initializer {
+        __RelayRecipientUpgradeable_init();
+        __AccessControl_init();
+
+        __RewardsDistributor_init_unchained(
+            admin,
+            rewardsToken_,
+            snapshotToken_
+        );
+    }
+
+    function __RewardsDistributor_init_unchained(
+        address admin,
+        address rewardsToken_,
+        address snapshotToken_
+    ) internal initializer {
         require(rewardsToken_.isContract(), "RewardsToken must be contract");
         require(snapshotToken_.isContract(), "SnapshotToken must be contract");
 
-        rewardsToken = IERC20(rewardsToken_);
+        rewardsToken = IERC20Upgradeable(rewardsToken_);
         snapshotToken = IERC20Snapshot(snapshotToken_);
+
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _setupRole(DISTRIBUTOR_ROLE, admin);
+    }
+
+    modifier onlyRole(bytes32 role) {
+        require(hasRole(role, _msgSender()), "Must have appropriate role");
+        _;
     }
 
     function distributeRewardWithRate(uint256 rate)
         external
         override
-        onlyOwner
+        onlyRole(DISTRIBUTOR_ROLE)
         returns (uint256 rewardId)
     {
         address owner = _msgSender();
@@ -82,7 +118,7 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
     function distributeReward(uint256 totalReward)
         external
         override
-        onlyOwner
+        onlyRole(DISTRIBUTOR_ROLE)
         returns (uint256 rewardId)
     {
         address owner = _msgSender();
@@ -131,10 +167,33 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
         pure
         returns (uint256)
     {
-        return totalShare.mul(rate).div(RATE_DECIMALS);
+        return totalShare.mul(rate).div(MATH_PRECISION);
     }
 
-    function getReward(address user, uint256 rewardId)
+    function claimRewards(address user, uint256[] calldata rewardIds)
+        external
+        override
+    {
+        require(user == _msgSender(), "Sender must be user");
+        uint256 totalReward = 0;
+
+        for (uint256 i = 0; i < rewardIds.length; i = i.add(1)) {
+            uint256 rewardId = rewardIds[i];
+            require(rewardId.add(1) <= rewards.length, "Invalid reward id");
+            uint256 _userReward = userReward(user, rewardId);
+            paidUsers[rewardId][user] = true;
+
+            totalReward = totalReward.add(_userReward);
+        }
+
+        if (totalReward > 0) {
+            rewardsToken.safeTransfer(user, totalReward);
+        }
+
+        emit RewardPaid(user, totalReward);
+    }
+
+    function claimReward(address user, uint256 rewardId)
         external
         override
         verifyRewardId(rewardId)
@@ -145,7 +204,7 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
         paidUsers[rewardId][user] = true;
 
         rewardsToken.safeTransfer(user, _userReward);
-        emit RewardPaid(user, rewardId, _userReward);
+        emit RewardPaid(user, _userReward);
     }
 
     function userReward(address user, uint256 rewardId)
@@ -170,14 +229,16 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
             snapshotToken.balanceOfAt(user, _reward.toSnapshotId);
         uint256 share = toBalance.sub(fromBalance);
 
-        require(share > 0, "No reward for user");
-
-        return
-            share
-                .mul(10000)
-                .div(_reward.totalShare)
-                .mul(_reward.totalReward)
-                .div(10000);
+        if (share == 0) {
+            return 0;
+        } else {
+            return
+                share
+                    .mul(MATH_PRECISION)
+                    .div(_reward.totalShare)
+                    .mul(_reward.totalReward)
+                    .div(MATH_PRECISION);
+        }
     }
 
     function reward(uint256 rewardId)
@@ -194,5 +255,23 @@ contract RewardsDistributor is IRewardsDistributor, Ownable {
 
     function lastRewardId() external view override returns (uint256) {
         return rewards.length.sub(1, "No rewards");
+    }
+
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (address payable)
+    {
+        return ERC2771ContextUpgradeable._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (bytes memory)
+    {
+        return ERC2771ContextUpgradeable._msgData();
     }
 }

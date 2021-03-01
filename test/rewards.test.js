@@ -18,7 +18,7 @@ contract("RewardsDistributor", async function (accounts) {
 
     it("Check access roles after deploy", async () => {
         expect(await this.token.hasRole(await this.token.SNAPSHOTER_ROLE(), this.rewards.address)).to.be.true
-        expect(await this.rewards.owner()).to.be.equal(deployer)
+        expect(await this.rewards.hasRole(await this.rewards.DISTRIBUTOR_ROLE(), deployer)).to.be.true
     })
 
     it("Check distributor state", async () => {
@@ -72,9 +72,9 @@ contract("RewardsDistributor", async function (accounts) {
             const beforeUser3 = await this.sanToken.balanceOf(user3);
 
             const claim = async (user, expectedReward) => {
-                let receipt = await this.rewards.getReward(user, rewardId, {from: user})
-                expectEvent(receipt, 'RewardPaid', {user, rewardId, reward: expectedReward})
-                await expectRevert(this.rewards.getReward(user, rewardId, {from: user}), "Already paid")
+                let receipt = await this.rewards.claimReward(user, rewardId, {from: user})
+                expectEvent(receipt, 'RewardPaid', {user, reward: expectedReward})
+                await expectRevert(this.rewards.claimReward(user, rewardId, {from: user}), "Already paid")
             }
 
             await claim(user1, token('625'))
