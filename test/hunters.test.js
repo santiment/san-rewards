@@ -1,10 +1,8 @@
 const {balance, expectEvent, expectRevert, ether, time} = require('@openzeppelin/test-helpers')
 const {expect} = require('chai')
-const {fromRpcSig} = require('ethereumjs-util')
-const ethSigUtil = require('eth-sig-util')
 const Wallet = require('ethereumjs-wallet').default;
 
-const {bn, token, ZERO, ForwardRequest, EIP712Domain} = require("./utils")
+const {bn, token, ZERO, relay} = require("./utils")
 
 const RewardsToken = artifacts.require("RewardsToken")
 const SanMock = artifacts.require("SanMock")
@@ -237,38 +235,3 @@ contract('WalletHunters', function (accounts) {
         expect(await this.rewardsToken.balanceOf(sheriff3)).to.be.bignumber.equal(bn('10909090909090909090908'))
     })
 })
-
-async function relay(forwarder, relayer, fromWallet, to, calldata) {
-
-    const from = fromWallet.getAddressString()
-
-    const nonce = await forwarder.getNonce(from).then(nonce => nonce.toString())
-    const chainId = await forwarder.getChainId()
-
-    const request = {
-        from,
-        to,
-        value: 0,
-        gas: 1e6,
-        nonce,
-        data: calldata
-    }
-
-    const data = {
-        primaryType: 'ForwardRequest',
-        types: {EIP712Domain, ForwardRequest},
-        domain: {name: 'MinimalForwarder', version: '0.0.1', chainId, verifyingContract: forwarder.address},
-        message: request
-    }
-
-    const signature = ethSigUtil.signTypedData_v4(fromWallet.getPrivateKey(), {data})
-
-    const args = [
-        request,
-        signature
-    ]
-
-    await forwarder.verify(...args)
-
-    return await forwarder.execute(...args, {from: relayer})
-}

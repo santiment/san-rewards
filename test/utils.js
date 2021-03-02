@@ -1,4 +1,5 @@
 const {BN, ether, constants: {MAX_UINT256}} = require('@openzeppelin/test-helpers')
+const ethSigUtil = require('eth-sig-util')
 
 const bn = (n) => new BN(n)
 const token = (n) => ether(n)
@@ -41,6 +42,41 @@ const buildPermit = async (token, owner, spender, value, version = '1', deadline
     }
 }
 
+async function relay(forwarder, relayer, fromWallet, to, calldata) {
+
+    const from = fromWallet.getAddressString()
+
+    const nonce = await forwarder.getNonce(from).then(nonce => nonce.toString())
+    const chainId = await forwarder.getChainId()
+
+    const request = {
+        from,
+        to,
+        value: 0,
+        gas: 1e6,
+        nonce,
+        data: calldata
+    }
+
+    const data = {
+        primaryType: 'ForwardRequest',
+        types: {EIP712Domain, ForwardRequest},
+        domain: {name: 'MinimalForwarder', version: '0.0.1', chainId, verifyingContract: forwarder.address},
+        message: request
+    }
+
+    const signature = ethSigUtil.signTypedData_v4(fromWallet.getPrivateKey(), {data})
+
+    const args = [
+        request,
+        signature
+    ]
+
+    await forwarder.verify(...args)
+
+    return await forwarder.execute(...args, {from: relayer})
+}
+
 module.exports = {
     bn,
     token,
@@ -48,5 +84,6 @@ module.exports = {
     Permit,
     ForwardRequest,
     EIP712Domain,
-    buildPermit
+    buildPermit,
+    relay
 }

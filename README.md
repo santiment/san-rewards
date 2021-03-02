@@ -1,6 +1,3 @@
-
-
-
 Starting migrations...
 ======================
 > Network name:    'ropsten'

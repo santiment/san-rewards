@@ -1,19 +1,25 @@
 const {expect} = require('chai')
 const {expectEvent, expectRevert} = require('@openzeppelin/test-helpers')
+const Wallet = require('ethereumjs-wallet').default;
+const TrustedForwarder = artifacts.require("TrustedForwarder")
 
-const {token, bn} = require("./utils")
+const {token, bn, relay} = require("./utils")
 
 const RewardsDistributor = artifacts.require("RewardsDistributor")
 const RewardsToken = artifacts.require("RewardsToken")
 const SanMock = artifacts.require("SanMock")
 
 contract("RewardsDistributor", async function (accounts) {
-    const [deployer, user1, user2, user3] = accounts
+    const [deployer, relayer, user1, user2] = accounts
+    const user3Wallet = Wallet.generate()
+    const user3 = user3Wallet.getAddressString()
+
 
     before(async () => {
         this.rewards = await RewardsDistributor.deployed()
         this.token = await RewardsToken.deployed()
         this.sanToken = await SanMock.deployed()
+        this.forwarder = await TrustedForwarder.deployed()
     })
 
     it("Check access roles after deploy", async () => {
@@ -27,6 +33,18 @@ contract("RewardsDistributor", async function (accounts) {
         expect(await this.rewards.lastSnapshotId()).to.be.bignumber.equal(bn(0))
         await expectRevert(this.rewards.reward(0), "Invalid reward id")
         await expectRevert(this.rewards.lastRewardId(), "No rewards")
+    })
+
+    it("Grant relayer role", async () => {
+        expect(await this.rewards.isTrustedForwarder(forwarder.address)).to.be.true
+
+        let receipt = await this.forwarder.grantRole(await this.forwarder.RELAYER_ROLE(), relayer, {from: deployer})
+        expectEvent(receipt, "RoleGranted", {
+            role: await this.forwarder.RELAYER_ROLE(),
+            account: relayer,
+            sender: deployer
+        })
+        expect(await this.forwarder.hasRole(await this.forwarder.RELAYER_ROLE(), relayer)).to.be.true
     })
 
     const rewardIds = [0, 1, 2].map(it => bn(it))
@@ -48,7 +66,7 @@ contract("RewardsDistributor", async function (accounts) {
             expect(await this.token.balanceOf(user3)).to.be.bignumber.equal(beforeUser3.add(user3Tokens))
         })
 
-        it(`Distribute first reward #${rewardId}`, async () => {
+        it(`Distribute reward #${rewardId}`, async () => {
             const totalReward = token('10000')
             await this.sanToken.approve(this.rewards.address, totalReward)
             let receipt = await this.rewards.distributeReward(totalReward, {from: deployer})
@@ -79,7 +97,13 @@ contract("RewardsDistributor", async function (accounts) {
 
             await claim(user1, token('625'))
             await claim(user2, token('3125'))
-            await claim(user3, token('6250'))
+
+            const calldata = this.rewards.contract.methods["claimReward"](user3, rewardId).encodeABI()
+            let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata)
+            await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
+                reward: token('6250')
+            })
+
 
             expect(await this.sanToken.balanceOf(user1)).to.be.bignumber.equal(beforeUser1.add(token('625')))
             expect(await this.sanToken.balanceOf(user2)).to.be.bignumber.equal(beforeUser2.add(token('3125')))

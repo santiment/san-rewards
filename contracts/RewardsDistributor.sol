@@ -207,6 +207,13 @@ contract RewardsDistributor is
         emit RewardPaid(user, _userReward);
     }
 
+    function setTrustedForwarder(address trustedForwarder)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        super._setTrustedForwarder(trustedForwarder);
+    }
+
     function userReward(address user, uint256 rewardId)
         public
         view
