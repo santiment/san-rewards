@@ -1,6 +1,7 @@
-const {utils: {BN, isAddress}} = require('web3')
+const {BigNumber, utils} = require('ethers')
 const BalanceTree = require('./balance-tree')
-const zero = new BN(0)
+
+const {isAddress} = utils
 
 module.exports.createDistribution = (balances) => {
 
@@ -9,8 +10,8 @@ module.exports.createDistribution = (balances) => {
             throw new Error(`Found invalid address: ${account}`)
         }
         if (memo[account]) throw new Error(`Duplicate address: ${account}`)
-        const parsedNum = new BN(earnings, 10)
-        if (parsedNum.lte(zero)) throw new Error(`Invalid amount for account: ${account}`)
+        const parsedNum = BigNumber.from(earnings)
+        if (parsedNum.lte(0)) throw new Error(`Invalid amount for account: ${account}`)
 
         memo[account] = {amount: parsedNum}
         return memo
@@ -28,7 +29,7 @@ module.exports.createDistribution = (balances) => {
         const {amount} = dataByAddress[address]
         memo[address] = {
             index,
-            amount: amount.toString(10),
+            amount: amount.toString(),
             proof: tree.getProof(index, address, amount),
         }
         return memo
@@ -36,12 +37,12 @@ module.exports.createDistribution = (balances) => {
 
     const tokenTotal = sortedAddresses.reduce(
         (memo, key) => memo.add(dataByAddress[key].amount),
-        new BN(0)
+        BigNumber.from(0)
     )
 
     return {
         merkleRoot: tree.getHexRoot(),
-        tokenTotal: tokenTotal.toString(10),
+        tokenTotal: tokenTotal.toString(),
         claims,
     }
 }
