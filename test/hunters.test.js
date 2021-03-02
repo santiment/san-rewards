@@ -120,21 +120,21 @@ contract('WalletHunters', function (accounts) {
             expect(request.fixedSheriffReward).to.be.bignumber.equal(fixedSheriffReward)
             expect(request.discarded).to.be.false
             expect(await hunterBalanceTracker.delta()).to.be.bignumber.equal('0')
+            expect(await this.hunters.requestCounter()).to.be.bignumber.equal(requestId)
         })
 
         it(`Voting #${requestId}`, async () => {
             const sheriffVotes = [true, false, true]
-            for (const {sheriff, votes, vote} of sheriffs.map((sheriff, index) => ({
+            for (const {sheriff, votes, voteFor} of sheriffs.map((sheriff, index) => ({
                 sheriff,
                 votes: sheriffsTokens[index],
-                vote: sheriffVotes[index]
+                voteFor: sheriffVotes[index]
             }))) {
 
-                const kind = bn(vote ? 1 : 0)
-                const receipt = await this.hunters.vote(sheriff, requestId, kind, {from: sheriff})
-                expectEvent(receipt, "Voted", {sheriff, amount: votes, kind: kind})
+                const receipt = await this.hunters.vote(sheriff, requestId, voteFor, {from: sheriff})
+                expectEvent(receipt, "Voted", {sheriff, amount: votes, voteFor})
 
-                await expectRevert(this.hunters.vote(sheriff, requestId, kind, {from: sheriff}), "User is already participated")
+                await expectRevert(this.hunters.vote(sheriff, requestId, voteFor, {from: sheriff}), "User is already participated")
             }
 
             const votes = await this.hunters.countVotes(requestId)

@@ -3,7 +3,6 @@
 pragma solidity ^0.7.6;
 
 interface IWalletHunters {
-    enum Vote {AGAINST, FOR}
 
     function submitRequest(address hunter, uint256 reward)
         external
@@ -16,7 +15,7 @@ interface IWalletHunters {
     function vote(
         address sheriff,
         uint256 requestId,
-        Vote kind
+        bool voteFor
     ) external;
 
     function withdraw(address sheriff, uint256 amount) external;

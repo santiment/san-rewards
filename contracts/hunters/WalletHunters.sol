@@ -83,9 +83,9 @@ contract WalletHunters is
     event Withdrawn(address indexed sheriff, uint256 amount);
     event Voted(
         uint256 indexed requestId,
-        address indexed sheriff,
+        address sheriff,
         uint256 amount,
-        Vote kind
+        bool voteFor
     );
     event HunterRewardPaid(address indexed hunter, uint256 totalReward);
     event SheriffRewardPaid(address indexed sheriff, uint256 totalReward);
@@ -223,7 +223,7 @@ contract WalletHunters is
     function vote(
         address sheriff,
         uint256 requestId,
-        Vote kind
+        bool voteFor
     ) external override validateRequestId(requestId) {
         require(sheriff == _msgSender(), "Sender must be sheriff");
         require(
@@ -241,7 +241,7 @@ contract WalletHunters is
         );
         requestVotings[requestId].votes[sheriff].amount = amount;
 
-        if (kind == Vote.FOR) {
+        if (voteFor) {
             requestVotings[requestId].votes[sheriff].voteFor = true;
             requestVotings[requestId].votesFor = requestVotings[requestId]
                 .votesFor
@@ -253,7 +253,7 @@ contract WalletHunters is
                 .add(amount);
         }
 
-        emit Voted(requestId, sheriff, amount, kind);
+        emit Voted(requestId, sheriff, amount, voteFor);
     }
 
     function discardRequest(address mayor, uint256 requestId)
