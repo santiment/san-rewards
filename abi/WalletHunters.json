@@ -5,8 +5,8 @@
             "implementation": null
         },
         "ropsten-3": {
-            "address": null,
-            "implementation": null
+            "address": "0x96D9067E3A1DA6aDB1328CE9AF2cCc912490b8Bd",
+            "implementation": "0x12099eEC374Da9e68CA4ef0682a7DC9f5cBcA898"
         }
     },
     "abi": [
