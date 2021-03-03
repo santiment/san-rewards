@@ -30,7 +30,7 @@ contract MinimalForwarder is EIP712 {
 
     mapping(address => uint256) private _nonces;
 
-    constructor() EIP712("MinimalForwarder", "0.0.1") {}
+    constructor() EIP712("MinimalForwarder", "1.0.0") {}
 
     function getNonce(address from) public view returns (uint256) {
         return _nonces[from];
@@ -74,9 +74,6 @@ contract MinimalForwarder is EIP712 {
         // solhint-disable-next-line avoid-low-level-calls
         bytes memory returndata =
             req.to.functionCall(abi.encodePacked(req.data, req.from));
-        // Validate that the relayer has sent enough gas for the call.
-        // See https://ronan.eth.link/blog/ethereum-gas-dangers/
-        assert(gasleft() > req.gas / 63);
 
         return (true, returndata);
     }

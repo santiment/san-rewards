@@ -1,7 +1,7 @@
 {
     "networks": {
         "development": {
-            "address": "0x3d54f54Bfd0Bf0B995D9f858ee29543D98071eE0"
+            "address": "0x91d819F3159E3D6ffe9aF5B89456cC40dE713F2e"
         }
     },
     "abi": [
@@ -595,6 +595,16 @@
                 {
                     "internalType": "uint256",
                     "name": "totalShare",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "fromSnapshotId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "toSnapshotId",
                     "type": "uint256"
                 }
             ],

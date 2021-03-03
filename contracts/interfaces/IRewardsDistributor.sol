@@ -22,5 +22,10 @@ interface IRewardsDistributor {
     function reward(uint256 rewardId)
         external
         view
-        returns (uint256 totalReward, uint256 totalShare);
+        returns (
+            uint256 totalReward,
+            uint256 totalShare,
+            uint256 fromSnapshotId,
+            uint256 toSnapshotId
+        );
 }

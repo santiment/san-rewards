@@ -1,13 +1,13 @@
 const {expect} = require('chai')
 const {expectEvent, expectRevert} = require('@openzeppelin/test-helpers')
 const Wallet = require('ethereumjs-wallet').default;
-const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 const {token, bn, relay} = require("./utils")
 
 const RewardsDistributor = artifacts.require("RewardsDistributor")
 const RewardsToken = artifacts.require("RewardsToken")
 const SanMock = artifacts.require("SanMock")
+const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 contract("RewardsDistributor", async function (accounts) {
     const [deployer, relayer, user1, user2] = accounts
@@ -30,8 +30,9 @@ contract("RewardsDistributor", async function (accounts) {
         expect(await this.rewards.rewardsToken()).to.be.equal(this.sanToken.address)
         expect(await this.rewards.snapshotToken()).to.be.equal(this.token.address)
         expect(await this.rewards.lastSnapshotId()).to.be.bignumber.equal(bn(0))
-        await expectRevert(this.rewards.reward(0), "Reward id is 0")
         expect(await this.rewards.rewardsCounter()).to.be.bignumber.equal(bn(0))
+        await expectRevert(this.rewards.reward(0), "Reward id is 0")
+        await expectRevert(this.rewards.reward(1), "Reward doesn't exist")
     })
 
     it("Grant relayer role", async () => {
@@ -58,6 +59,8 @@ contract("RewardsDistributor", async function (accounts) {
             const beforeUser2 = await this.token.balanceOf(user2);
             const beforeUser3 = await this.token.balanceOf(user3);
 
+            await expectRevert(this.rewards.distributeReward(totalReward, {from: deployer}), "Nobody to distribute")
+
             await this.token.mint(user1, user1Tokens, {from: deployer})
             await this.token.mint(user2, user2Tokens, {from: deployer})
             await this.token.mint(user3, user3Tokens, {from: deployer})
@@ -78,6 +81,9 @@ contract("RewardsDistributor", async function (accounts) {
                 const rate = totalReward.mul(precision).div(totalTokens)
                 receipt = await this.rewards.distributeRewardWithRate(rate, {from: deployer})
             } else {
+                await expectRevert(this.rewards.distributeReward(totalReward.add(bn(1)), {from: user1}), "Must have appropriate role")
+                await expectRevert(this.rewards.distributeReward(totalReward.add(bn(1)), {from: deployer}), "ERC20: transfer amount exceeds allowance.")
+
                 receipt = await this.rewards.distributeReward(totalReward, {from: deployer})
             }
 
@@ -86,9 +92,12 @@ contract("RewardsDistributor", async function (accounts) {
             expect(await this.sanToken.balanceOf(this.rewards.address)).to.be.bignumber.equal(totalReward.add(balanceBefore))
             expect((await this.rewards.reward(rewardId))['totalReward']).to.be.bignumber.equal(totalReward)
             expect((await this.rewards.reward(rewardId))['totalShare']).to.be.bignumber.equal(totalTokens)
+            // expect((await this.rewards.reward(rewardId))['fromSnapshotId']).to.be.bignumber.equal(totalTokens)
+            // expect((await this.rewards.reward(rewardId))['toSnapshotId']).to.be.bignumber.equal(totalTokens)
         })
 
         it(`Check user rewards #${rewardId}`, async () => {
+            await expectRevert(this.rewards.userReward(user1, rewardId.add(bn(1))), "Reward doesn't exist")
             expect(await this.rewards.userReward(user1, rewardId)).to.be.bignumber.equal(token('625'))
             expect(await this.rewards.userReward(user2, rewardId)).to.be.bignumber.equal(token('3125'))
             expect(await this.rewards.userReward(user3, rewardId)).to.be.bignumber.equal(token('6250'))
@@ -112,11 +121,16 @@ contract("RewardsDistributor", async function (accounts) {
         })
     })
 
-    it("Claim all user rewards", async () => {
+    it("Claim all user rewards through relay", async () => {
         let expectedReward = token('6250').mul(bn(rewardIds.length));
         const beforeUser3 = await this.sanToken.balanceOf(user3)
 
-        const calldata = this.rewards.contract.methods["claimRewards"](user3, rewardIds.map(it => it.toString(10))).encodeABI()
+        const rewardIdsStr = rewardIds.map(it => it.toString(10)).reverse();
+
+        let calldata = this.rewards.contract.methods["claimRewards"](user2, rewardIdsStr).encodeABI()
+        await expectRevert(relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata), "Sender must be user")
+
+        calldata = this.rewards.contract.methods["claimRewards"](user3, rewardIdsStr).encodeABI()
         let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata)
         await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
             reward: beforeUser3.add(expectedReward)

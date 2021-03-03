@@ -35,7 +35,7 @@ contract RewardsDistributor is
     IERC20Snapshot public snapshotToken;
 
     uint256 public lastSnapshotId;
-    mapping(uint256 => Reward) rewards;
+    mapping(uint256 => Reward) private rewards;
     CountersUpgradeable.Counter public rewardsCounter;
     mapping(uint256 => mapping(address => bool)) private paidUsers;
 
@@ -198,10 +198,7 @@ contract RewardsDistributor is
         emit RewardPaid(user, totalReward);
     }
 
-    function claimReward(address user, uint256 rewardId)
-        external
-        override
-    {
+    function claimReward(address user, uint256 rewardId) external override {
         require(user == _msgSender(), "Sender must be user");
 
         uint256 _userReward = userReward(user, rewardId);
@@ -257,11 +254,18 @@ contract RewardsDistributor is
         view
         override
         verifyRewardId(rewardId)
-        returns (uint256 totalReward, uint256 totalShare)
+        returns (
+            uint256 totalReward,
+            uint256 totalShare,
+            uint256 fromSnapshotId,
+            uint256 toSnapshotId
+        )
     {
         Reward storage _reward = rewards[rewardId];
         totalReward = _reward.totalReward;
         totalShare = _reward.totalShare;
+        fromSnapshotId = _reward.fromSnapshotId;
+        toSnapshotId = _reward.toSnapshotId;
     }
 
     function _msgSender()

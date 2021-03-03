@@ -61,7 +61,7 @@ async function relay(forwarder, relayer, fromWallet, to, calldata) {
     const data = {
         primaryType: 'ForwardRequest',
         types: {EIP712Domain, ForwardRequest},
-        domain: {name: 'MinimalForwarder', version: '0.0.1', chainId, verifyingContract: forwarder.address},
+        domain: {name: 'MinimalForwarder', version: '1.0.0', chainId, verifyingContract: forwarder.address},
         message: request
     }
 

@@ -3,7 +3,6 @@
 pragma solidity ^0.7.6;
 
 interface IWalletHunters {
-
     function submitRequest(address hunter, uint256 reward)
         external
         returns (uint256);
