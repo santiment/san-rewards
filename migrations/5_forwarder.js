@@ -1,3 +1,5 @@
+const {saveContract} = require("./utils")
+
 const TrustedForwarder = artifacts.require("TrustedForwarder")
 const RewardsToken = artifacts.require("RewardsToken")
 const RewardsDistributor = artifacts.require("RewardsDistributor")
@@ -11,6 +13,7 @@ module.exports = async (deployer, network, accounts) => {
     const rewardsDistributor = await RewardsDistributor.deployed()
 
     const forwarder = await deployer.deploy(TrustedForwarder, {from: owner})
+    await saveContract("TrustedForwarder", forwarder.abi, network, forwarder.address)
 
     await rewardsToken.setTrustedForwarder(forwarder.address, {from: owner})
     await hunters.setTrustedForwarder(forwarder.address, {from: owner})

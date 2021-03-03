@@ -1,12 +1,7 @@
 {
     "networks": {
-        "mainnet-1": {
-            "address": null,
-            "implementation": null
-        },
-        "ropsten-3": {
-            "address": "0xBAE28AaF83C0D00A2e2Ef7A99527c01a1de3776c",
-            "implementation": "0xa72b8423e47745Fe5b659B0EBf1280e9797B7EE2"
+        "development": {
+            "address": "0xE0707CB604F3495544e0041ed6379110c53870E3"
         }
     },
     "abi": [
@@ -27,7 +22,8 @@
                 }
             ],
             "name": "RewardDistributed",
-            "type": "event"
+            "type": "event",
+            "signature": "0xeaf3d57629d9b1ce95715ccd98d6f5bf48023be1d5a06e09f64ab7f6d8be01d5"
         },
         {
             "anonymous": false,
@@ -46,7 +42,8 @@
                 }
             ],
             "name": "RewardPaid",
-            "type": "event"
+            "type": "event",
+            "signature": "0xe2403640ba68fed3a2f88b7557551d1993f84b99bb10ff833f0cf8db0c5e0486"
         },
         {
             "anonymous": false,
@@ -71,7 +68,8 @@
                 }
             ],
             "name": "RoleAdminChanged",
-            "type": "event"
+            "type": "event",
+            "signature": "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff"
         },
         {
             "anonymous": false,
@@ -96,7 +94,8 @@
                 }
             ],
             "name": "RoleGranted",
-            "type": "event"
+            "type": "event",
+            "signature": "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d"
         },
         {
             "anonymous": false,
@@ -121,7 +120,8 @@
                 }
             ],
             "name": "RoleRevoked",
-            "type": "event"
+            "type": "event",
+            "signature": "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b"
         },
         {
             "anonymous": false,
@@ -140,7 +140,8 @@
                 }
             ],
             "name": "TrustedForwarderChanged",
-            "type": "event"
+            "type": "event",
+            "signature": "0x06dff7401eb7fb04d241246ade7f817c7ad512b1bed61c18aedd9bc51eec0475"
         },
         {
             "inputs": [],
@@ -153,7 +154,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xa217fddf"
         },
         {
             "inputs": [],
@@ -166,7 +169,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xf0bd87cc"
         },
         {
             "inputs": [],
@@ -179,7 +184,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xd91b99e8"
         },
         {
             "inputs": [
@@ -198,7 +205,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x248a9ca3"
         },
         {
             "inputs": [
@@ -222,7 +231,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x9010d07c"
         },
         {
             "inputs": [
@@ -241,7 +252,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xca15c873"
         },
         {
             "inputs": [
@@ -259,7 +272,8 @@
             "name": "grantRole",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x2f2ff15d"
         },
         {
             "inputs": [
@@ -283,7 +297,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x91d14854"
         },
         {
             "inputs": [
@@ -302,7 +318,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x572b6c05"
         },
         {
             "inputs": [],
@@ -315,7 +333,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x837afbc0"
         },
         {
             "inputs": [
@@ -333,7 +353,8 @@
             "name": "renounceRole",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x36568abe"
         },
         {
             "inputs": [
@@ -351,7 +372,8 @@
             "name": "revokeRole",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0xd547741f"
         },
         {
             "inputs": [],
@@ -364,7 +386,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xd1af0c7d"
         },
         {
             "inputs": [],
@@ -377,7 +401,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xd01cfc2d"
         },
         {
             "inputs": [],
@@ -390,7 +416,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x7da0a877"
         },
         {
             "inputs": [
@@ -413,7 +441,8 @@
             "name": "initialize",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0xc0c53b8b"
         },
         {
             "inputs": [
@@ -432,7 +461,8 @@
                 }
             ],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x2c0b26fd"
         },
         {
             "inputs": [
@@ -451,7 +481,8 @@
                 }
             ],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x940a4e45"
         },
         {
             "inputs": [
@@ -469,7 +500,8 @@
             "name": "claimRewards",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x05231dea"
         },
         {
             "inputs": [
@@ -487,7 +519,22 @@
             "name": "claimReward",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x174e31c4"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "trustedForwarder",
+                    "type": "address"
+                }
+            ],
+            "name": "setTrustedForwarder",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function",
+            "signature": "0xda742228"
         },
         {
             "inputs": [
@@ -511,7 +558,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x378c53bf"
         },
         {
             "inputs": [
@@ -535,7 +584,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xa9fb763c"
         },
         {
             "inputs": [],
@@ -548,7 +599,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xf52790bc"
         }
     ]
 }

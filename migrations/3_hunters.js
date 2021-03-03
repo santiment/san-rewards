@@ -1,3 +1,4 @@
+const {saveContract} = require("./utils")
 const web3 = require('web3');
 const {deployProxy} = require('@openzeppelin/truffle-upgrades');
 
@@ -19,7 +20,7 @@ module.exports = async (deployer, network, accounts) => {
     const minimalVotesForRequest = bn(150).mul(bn(10).pow(bn(18)))
     const minimalDepositForSheriff = bn(50) .mul(bn(10).pow(bn(18)))
 
-    await deployProxy(WalletHunters, [
+    const hunters = await deployProxy(WalletHunters, [
         owner,
         sanMock.address,
         rewardsToken.address,
@@ -29,6 +30,8 @@ module.exports = async (deployer, network, accounts) => {
         minimalVotesForRequest,
         minimalDepositForSheriff
     ], {deployer})
+
+    await saveContract("WalletHunters", hunters.abi, network, hunters.address)
 
     await rewardsToken.grantRole(await rewardsToken.MINTER_ROLE(), WalletHunters.address, {from: owner})
 }

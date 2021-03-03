@@ -1,12 +1,7 @@
 {
     "networks": {
-        "mainnet-1": {
-            "address": null,
-            "implementation": null
-        },
-        "ropsten-3": {
-            "address": "0x9843bb7D53a1F4268732F7e2BD238E72aAC0b419",
-            "implementation": "0x576e90d8441e98d952C2003c4B83098c5A4ec9F2"
+        "development": {
+            "address": "0xfBC69204F44069AFBd73fb040e85CcAf473690e7"
         }
     },
     "abi": [
@@ -33,7 +28,8 @@
                 }
             ],
             "name": "Approval",
-            "type": "event"
+            "type": "event",
+            "signature": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
         },
         {
             "anonymous": false,
@@ -46,7 +42,8 @@
                 }
             ],
             "name": "Paused",
-            "type": "event"
+            "type": "event",
+            "signature": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
         },
         {
             "anonymous": false,
@@ -71,7 +68,8 @@
                 }
             ],
             "name": "RoleAdminChanged",
-            "type": "event"
+            "type": "event",
+            "signature": "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff"
         },
         {
             "anonymous": false,
@@ -96,7 +94,8 @@
                 }
             ],
             "name": "RoleGranted",
-            "type": "event"
+            "type": "event",
+            "signature": "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d"
         },
         {
             "anonymous": false,
@@ -121,7 +120,8 @@
                 }
             ],
             "name": "RoleRevoked",
-            "type": "event"
+            "type": "event",
+            "signature": "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b"
         },
         {
             "anonymous": false,
@@ -134,7 +134,8 @@
                 }
             ],
             "name": "Snapshot",
-            "type": "event"
+            "type": "event",
+            "signature": "0x8030e83b04d87bef53480e26263266d6ca66863aa8506aca6f2559d18aa1cb67"
         },
         {
             "anonymous": false,
@@ -159,7 +160,8 @@
                 }
             ],
             "name": "Transfer",
-            "type": "event"
+            "type": "event",
+            "signature": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
         },
         {
             "anonymous": false,
@@ -178,7 +180,8 @@
                 }
             ],
             "name": "TrustedForwarderChanged",
-            "type": "event"
+            "type": "event",
+            "signature": "0x06dff7401eb7fb04d241246ade7f817c7ad512b1bed61c18aedd9bc51eec0475"
         },
         {
             "anonymous": false,
@@ -191,7 +194,8 @@
                 }
             ],
             "name": "Unpaused",
-            "type": "event"
+            "type": "event",
+            "signature": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
         },
         {
             "inputs": [],
@@ -204,7 +208,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xa217fddf"
         },
         {
             "inputs": [],
@@ -217,7 +223,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xd5391393"
         },
         {
             "inputs": [],
@@ -230,7 +238,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xe63ab1e9"
         },
         {
             "inputs": [],
@@ -243,7 +253,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x5fc64af7"
         },
         {
             "inputs": [
@@ -267,7 +279,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xdd62ed3e"
         },
         {
             "inputs": [
@@ -291,7 +305,8 @@
                 }
             ],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x095ea7b3"
         },
         {
             "inputs": [
@@ -310,7 +325,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x70a08231"
         },
         {
             "inputs": [],
@@ -323,7 +340,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x313ce567"
         },
         {
             "inputs": [
@@ -347,7 +366,8 @@
                 }
             ],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0xa457c2d7"
         },
         {
             "inputs": [
@@ -366,7 +386,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x248a9ca3"
         },
         {
             "inputs": [
@@ -390,7 +412,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x9010d07c"
         },
         {
             "inputs": [
@@ -409,7 +433,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0xca15c873"
         },
         {
             "inputs": [
@@ -427,7 +453,8 @@
             "name": "grantRole",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x2f2ff15d"
         },
         {
             "inputs": [
@@ -451,7 +478,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x91d14854"
         },
         {
             "inputs": [
@@ -475,7 +504,8 @@
                 }
             ],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x39509351"
         },
         {
             "inputs": [
@@ -494,7 +524,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x572b6c05"
         },
         {
             "inputs": [],
@@ -507,7 +539,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x06fdde03"
         },
         {
             "inputs": [
@@ -525,7 +559,8 @@
             "name": "renounceRole",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x36568abe"
         },
         {
             "inputs": [
@@ -543,7 +578,8 @@
             "name": "revokeRole",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0xd547741f"
         },
         {
             "inputs": [],
@@ -556,7 +592,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x95d89b41"
         },
         {
             "inputs": [],
@@ -569,7 +607,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x18160ddd"
         },
         {
             "inputs": [
@@ -593,7 +633,8 @@
                 }
             ],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0xa9059cbb"
         },
         {
             "inputs": [
@@ -622,7 +663,8 @@
                 }
             ],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x23b872dd"
         },
         {
             "inputs": [],
@@ -635,7 +677,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x7da0a877"
         },
         {
             "inputs": [
@@ -648,7 +692,8 @@
             "name": "initialize",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0xc4d66de8"
         },
         {
             "inputs": [
@@ -666,21 +711,24 @@
             "name": "mint",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x40c10f19"
         },
         {
             "inputs": [],
             "name": "pause",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x8456cb59"
         },
         {
             "inputs": [],
             "name": "unpause",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x3f4ba83a"
         },
         {
             "inputs": [],
@@ -693,7 +741,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x5c975abb"
         },
         {
             "inputs": [],
@@ -706,7 +756,8 @@
                 }
             ],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0x9711715a"
         },
         {
             "inputs": [
@@ -730,7 +781,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x4ee2cd7e"
         },
         {
             "inputs": [
@@ -749,7 +802,9 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
+            "type": "function",
+            "constant": true,
+            "signature": "0x981b24d0"
         },
         {
             "inputs": [
@@ -762,7 +817,8 @@
             "name": "setTrustedForwarder",
             "outputs": [],
             "stateMutability": "nonpayable",
-            "type": "function"
+            "type": "function",
+            "signature": "0xda742228"
         }
     ]
 }
