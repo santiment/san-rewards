@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 import "./interfaces/IRewardsDistributor.sol";
 import "./interfaces/IERC20Snapshot.sol";
@@ -15,6 +16,7 @@ contract RewardsDistributor is
     AccessControlUpgradeable,
     RelayRecipientUpgradeable
 {
+    using CountersUpgradeable for CountersUpgradeable.Counter;
     using AddressUpgradeable for address;
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
@@ -33,14 +35,16 @@ contract RewardsDistributor is
     IERC20Snapshot public snapshotToken;
 
     uint256 public lastSnapshotId;
-    Reward[] private rewards;
+    mapping(uint256 => Reward) rewards;
+    CountersUpgradeable.Counter public rewardsCounter;
     mapping(uint256 => mapping(address => bool)) private paidUsers;
 
     event RewardDistributed(uint256 indexed rewardId, uint256 totalReward);
     event RewardPaid(address indexed user, uint256 reward);
 
     modifier verifyRewardId(uint256 rewardId) {
-        require(rewardId.add(1) <= rewards.length, "Invalid reward id");
+        require(rewardId > 0, "Reward id is 0");
+        require(rewardId <= rewardsCounter.current(), "Reward doesn't exist");
         _;
     }
 
@@ -93,6 +97,7 @@ contract RewardsDistributor is
         onlyRole(DISTRIBUTOR_ROLE)
         returns (uint256 rewardId)
     {
+        rewardsCounter.increment();
         address owner = _msgSender();
 
         (uint256 totalShare, uint256 fromSnapshotId, uint256 toSnapshotId) =
@@ -102,13 +107,13 @@ contract RewardsDistributor is
         uint256 totalReward = _calculateTotalReward(rate, totalShare);
         require(totalReward > 0, "Nothing to distribute");
 
-        Reward storage _reward = rewards.push();
+        rewardId = rewardsCounter.current();
+
+        Reward storage _reward = rewards[rewardId];
         _reward.toSnapshotId = toSnapshotId;
         _reward.fromSnapshotId = fromSnapshotId;
         _reward.totalShare = totalShare;
         _reward.totalReward = totalReward;
-
-        rewardId = rewards.length - 1;
 
         rewardsToken.safeTransferFrom(owner, address(this), totalReward);
 
@@ -121,19 +126,20 @@ contract RewardsDistributor is
         onlyRole(DISTRIBUTOR_ROLE)
         returns (uint256 rewardId)
     {
+        rewardsCounter.increment();
         address owner = _msgSender();
 
         (uint256 totalShare, uint256 fromSnapshotId, uint256 toSnapshotId) =
             _nextSnapshot();
         require(totalShare > 0, "Nobody to distribute");
 
-        Reward storage _reward = rewards.push();
+        rewardId = rewardsCounter.current();
+
+        Reward storage _reward = rewards[rewardId];
         _reward.toSnapshotId = toSnapshotId;
         _reward.fromSnapshotId = fromSnapshotId;
         _reward.totalShare = totalShare;
         _reward.totalReward = totalReward;
-
-        rewardId = rewards.length - 1;
 
         rewardsToken.safeTransferFrom(owner, address(this), totalReward);
 
@@ -179,7 +185,6 @@ contract RewardsDistributor is
 
         for (uint256 i = 0; i < rewardIds.length; i = i.add(1)) {
             uint256 rewardId = rewardIds[i];
-            require(rewardId.add(1) <= rewards.length, "Invalid reward id");
             uint256 _userReward = userReward(user, rewardId);
             paidUsers[rewardId][user] = true;
 
@@ -196,7 +201,6 @@ contract RewardsDistributor is
     function claimReward(address user, uint256 rewardId)
         external
         override
-        verifyRewardId(rewardId)
     {
         require(user == _msgSender(), "Sender must be user");
 
@@ -258,10 +262,6 @@ contract RewardsDistributor is
         Reward storage _reward = rewards[rewardId];
         totalReward = _reward.totalReward;
         totalShare = _reward.totalShare;
-    }
-
-    function lastRewardId() external view override returns (uint256) {
-        return rewards.length.sub(1, "No rewards");
     }
 
     function _msgSender()

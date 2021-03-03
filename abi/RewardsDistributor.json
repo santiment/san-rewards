@@ -1,7 +1,7 @@
 {
     "networks": {
         "development": {
-            "address": "0xE0707CB604F3495544e0041ed6379110c53870E3"
+            "address": "0x3d54f54Bfd0Bf0B995D9f858ee29543D98071eE0"
         }
     },
     "abi": [
@@ -377,6 +377,21 @@
         },
         {
             "inputs": [],
+            "name": "rewardsCounter",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_value",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x205b0914"
+        },
+        {
+            "inputs": [],
             "name": "rewardsToken",
             "outputs": [
                 {
@@ -587,21 +602,6 @@
             "type": "function",
             "constant": true,
             "signature": "0xa9fb763c"
-        },
-        {
-            "inputs": [],
-            "name": "lastRewardId",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0xf52790bc"
         }
     ]
 }

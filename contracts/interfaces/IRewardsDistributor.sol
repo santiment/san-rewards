@@ -23,6 +23,4 @@ interface IRewardsDistributor {
         external
         view
         returns (uint256 totalReward, uint256 totalShare);
-
-    function lastRewardId() external view returns (uint256);
 }

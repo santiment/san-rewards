@@ -1,7 +1,7 @@
 {
     "networks": {
         "development": {
-            "address": "0xbab64A63e4B1A1D85328784c896378dB2f72F71E"
+            "address": "0xCEaB40173DBA81C46486d7B50CF9Fbf10eB0E176"
         }
     },
     "abi": [

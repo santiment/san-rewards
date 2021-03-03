@@ -14,7 +14,6 @@ contract("RewardsDistributor", async function (accounts) {
     const user3Wallet = Wallet.generate()
     const user3 = user3Wallet.getAddressString()
 
-
     before(async () => {
         this.rewards = await RewardsDistributor.deployed()
         this.token = await RewardsToken.deployed()
@@ -31,8 +30,8 @@ contract("RewardsDistributor", async function (accounts) {
         expect(await this.rewards.rewardsToken()).to.be.equal(this.sanToken.address)
         expect(await this.rewards.snapshotToken()).to.be.equal(this.token.address)
         expect(await this.rewards.lastSnapshotId()).to.be.bignumber.equal(bn(0))
-        await expectRevert(this.rewards.reward(0), "Invalid reward id")
-        await expectRevert(this.rewards.lastRewardId(), "No rewards")
+        await expectRevert(this.rewards.reward(0), "Reward id is 0")
+        expect(await this.rewards.rewardsCounter()).to.be.bignumber.equal(bn(0))
     })
 
     it("Grant relayer role", async () => {
@@ -47,12 +46,14 @@ contract("RewardsDistributor", async function (accounts) {
         expect(await this.forwarder.hasRole(await this.forwarder.RELAYER_ROLE(), relayer)).to.be.true
     })
 
-    const rewardIds = [0, 1, 2].map(it => bn(it))
+    const rewardIds = [1, 2, 3].map(it => bn(it))
+    const [user1Tokens, user2Tokens, user3Tokens] = [token('1000'), token('5000'), token('10000')]
+    const totalTokens = user1Tokens.add(user2Tokens).add(user3Tokens)
+    const totalReward = token('10000')
 
     rewardIds.forEach(rewardId => {
 
         it(`Mint user tokens #${rewardId}`, async () => {
-            const [user1Tokens, user2Tokens, user3Tokens] = [token('1000'), token('5000'), token('10000')]
             const beforeUser1 = await this.token.balanceOf(user1);
             const beforeUser2 = await this.token.balanceOf(user2);
             const beforeUser3 = await this.token.balanceOf(user3);
@@ -67,15 +68,24 @@ contract("RewardsDistributor", async function (accounts) {
         })
 
         it(`Distribute reward #${rewardId}`, async () => {
-            const totalReward = token('10000')
+            const balanceBefore = await this.sanToken.balanceOf(this.rewards.address)
+
             await this.sanToken.approve(this.rewards.address, totalReward)
-            let receipt = await this.rewards.distributeReward(totalReward, {from: deployer})
+
+            let receipt
+            if (rewardId === 1) {
+                const precision = await this.rewards.MATH_PRECISION()
+                const rate = totalReward.mul(precision).div(totalTokens)
+                receipt = await this.rewards.distributeRewardWithRate(rate, {from: deployer})
+            } else {
+                receipt = await this.rewards.distributeReward(totalReward, {from: deployer})
+            }
 
             expectEvent(receipt, 'RewardDistributed', {rewardId, totalReward})
-            expect(await this.rewards.lastRewardId()).to.be.bignumber.equal(rewardId)
-            expect(await this.sanToken.balanceOf(this.rewards.address)).to.be.bignumber.equal(totalReward)
+            expect(await this.rewards.rewardsCounter()).to.be.bignumber.equal(rewardId)
+            expect(await this.sanToken.balanceOf(this.rewards.address)).to.be.bignumber.equal(totalReward.add(balanceBefore))
             expect((await this.rewards.reward(rewardId))['totalReward']).to.be.bignumber.equal(totalReward)
-            expect((await this.rewards.reward(rewardId))['totalShare']).to.be.bignumber.equal(token('16000'))
+            expect((await this.rewards.reward(rewardId))['totalShare']).to.be.bignumber.equal(totalTokens)
         })
 
         it(`Check user rewards #${rewardId}`, async () => {
@@ -87,7 +97,6 @@ contract("RewardsDistributor", async function (accounts) {
         it(`Claim user rewards #${rewardId}`, async () => {
             const beforeUser1 = await this.sanToken.balanceOf(user1);
             const beforeUser2 = await this.sanToken.balanceOf(user2);
-            const beforeUser3 = await this.sanToken.balanceOf(user3);
 
             const claim = async (user, expectedReward) => {
                 let receipt = await this.rewards.claimReward(user, rewardId, {from: user})
@@ -98,16 +107,21 @@ contract("RewardsDistributor", async function (accounts) {
             await claim(user1, token('625'))
             await claim(user2, token('3125'))
 
-            const calldata = this.rewards.contract.methods["claimReward"](user3, rewardId).encodeABI()
-            let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata)
-            await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
-                reward: token('6250')
-            })
-
-
             expect(await this.sanToken.balanceOf(user1)).to.be.bignumber.equal(beforeUser1.add(token('625')))
             expect(await this.sanToken.balanceOf(user2)).to.be.bignumber.equal(beforeUser2.add(token('3125')))
-            expect(await this.sanToken.balanceOf(user3)).to.be.bignumber.equal(beforeUser3.add(token('6250')))
         })
+    })
+
+    it("Claim all user rewards", async () => {
+        let expectedReward = token('6250').mul(bn(rewardIds.length));
+        const beforeUser3 = await this.sanToken.balanceOf(user3)
+
+        const calldata = this.rewards.contract.methods["claimRewards"](user3, rewardIds.map(it => it.toString(10))).encodeABI()
+        let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata)
+        await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
+            reward: beforeUser3.add(expectedReward)
+        })
+
+        expect(await this.sanToken.balanceOf(user3)).to.be.bignumber.equal(beforeUser3.add(expectedReward))
     })
 })
