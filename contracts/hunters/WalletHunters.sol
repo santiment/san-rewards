@@ -275,7 +275,6 @@ contract WalletHunters is
         external
         override
     {
-        require(_msgSender() == sheriff, "Sender must be sheriff");
         claimSheriffRewards(sheriff, requestIds);
         withdraw(sheriff, balanceOf(sheriff));
     }
@@ -522,12 +521,19 @@ contract WalletHunters is
             ) > SUPER_MAJORITY;
     }
 
-    function votingState(uint256 requestId) public view override returns (bool) {
+    function votingState(uint256 requestId)
+        public
+        view
+        override
+        returns (bool)
+    {
         require(requestId > 0, "Request id is 0");
         require(requestId <= requestCounter.current(), "Request doesn't exist");
 
         // solhint-disable-next-line not-rely-on-time
-        return block.timestamp <= walletRequests[requestId].finishTime && !walletRequests[requestId].discarded;
+        return
+            block.timestamp <= walletRequests[requestId].finishTime &&
+            !walletRequests[requestId].discarded;
     }
 
     function _msgSender()

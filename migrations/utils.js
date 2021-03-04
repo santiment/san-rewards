@@ -18,6 +18,7 @@ module.exports.isTestnet = (network) => [...testnet].includes(network)
 module.exports.isMainnet = (network) => mainnet === network
 
 module.exports.saveContract = async (contractName, abi, network, address) => {
+    if (!module.exports.isTestnet(network) && !module.exports.isMainnet(network)) return
     const fileName = `./abi/${contractName}.json`
 
     let jsonContract = ""

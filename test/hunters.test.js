@@ -86,6 +86,9 @@ contract('WalletHunters', function (accounts) {
             await this.sanToken.approve(this.hunters.address, amount, {from: sheriff})
             let receipt = await this.hunters.stake(sheriff, amount, {from: sheriff})
             expectEvent(receipt, "Staked", {sheriff, amount})
+            await expectRevert(this.hunters.stake(sheriff, amount, {from: sheriff}), "ERC20: transfer amount exceeds balance")
+            await expectRevert(this.hunters.stake(sheriff, 0, {from: sheriff}), "Cannot deposit 0")
+            await expectRevert(this.hunters.stake(deployer, 0, {from: sheriff}), "Sender must be sheriff")
         }
 
         // check sheriff state after
@@ -138,11 +141,13 @@ contract('WalletHunters', function (accounts) {
             expect(vote['votes']).to.be.bignumber.equal(votes)
 
             await expectRevert(this.hunters.vote(sheriff, requestId, voteFor, {from: sheriff}), "User is already participated")
+            await expectRevert(this.hunters.vote(deployer, requestId, voteFor, {from: sheriff}), "Sender must be sheriff")
         }
 
         const votes = await this.hunters.countVotes(requestId)
         expect(votes["votesFor"]).to.be.bignumber.equal(token("11000"))
         expect(votes["votesAgainst"]).to.be.bignumber.equal(token("5000"))
+        await expectRevert(this.hunters.vote(deployer, requestId, true, {from: deployer}), "Sender is not sheriff")
     }
 
     walletRequests.forEach(({requestId, reward}, requestIndex) => {
@@ -185,6 +190,9 @@ contract('WalletHunters', function (accounts) {
             const withdrawReward = async (sheriff) => {
                 const receipt = await this.hunters.claimSheriffRewards(sheriff, [requestId], {from: sheriff})
                 expectEvent(receipt, "SheriffRewardPaid", {sheriff})
+
+                await expectRevert(this.hunters.claimSheriffRewards(sheriff, [requestId], {from: sheriff}), "Already rewarded")
+                await expectRevert(this.hunters.claimSheriffRewards(sheriff, [requestId], {from: deployer}), "Sender must be sheriff")
             }
 
             const balanceBefore = await this.rewardsToken.balanceOf(sheriff1)
@@ -209,6 +217,7 @@ contract('WalletHunters', function (accounts) {
         expect(await this.hunters.votingState(discardedRequestId)).to.be.true
         let receipt = await this.hunters.discardRequest(discardedRequestId, {from: mayor})
         expectEvent(receipt, 'RequestDiscarded', {requestId: discardedRequestId})
+        await expectRevert(this.hunters.discardRequest(discardedRequestId, {from: mayor}), "Voting is finished")
 
         const request = await this.hunters.walletRequests(discardedRequestId)
         expect(request.discarded).to.be.true
@@ -245,6 +254,7 @@ contract('WalletHunters', function (accounts) {
         const calldata = this.hunters.contract.methods["claimHunterReward"](hunter, requestIds).encodeABI()
         let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
         await expectEvent.inTransaction(receipt.tx, this.hunters, "HunterRewardPaid", {totalReward: actualReward})
+        await expectRevert(relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata), "Already rewarded")
 
         expect(await this.rewardsToken.balanceOf(hunter)).to.be.bignumber.equal(balanceBefore.add(actualReward))
         expect(await hunterBalanceTracker.delta()).to.be.bignumber.equal('0')
@@ -255,6 +265,9 @@ contract('WalletHunters', function (accounts) {
             const balance = await this.hunters.balanceOf(sheriff)
             const receipt = await this.hunters.withdraw(sheriff, balance, {from: sheriff})
             expectEvent(receipt, "Withdrawn", {sheriff, amount: balance})
+            await expectRevert(this.hunters.withdraw(sheriff, balance, {from: sheriff}), "Withdraw exceeds balance")
+            await expectRevert(this.hunters.withdraw(sheriff, ZERO, {from: sheriff}), "Cannot withdraw 0")
+            await expectRevert(this.hunters.withdraw(sheriff, ZERO, {from: deployer}), "Sender must be sheriff")
         }
 
         await withdraw(sheriff1)
@@ -277,6 +290,7 @@ contract('WalletHunters', function (accounts) {
             requestIds.push(await this.hunters.activeRequest(sheriff3, bn(i)))
         }
         await this.hunters.exit(sheriff3, requestIds, {from: sheriff3})
+        await expectRevert(this.hunters.exit(sheriff3, [], {from: sheriff3}), "Cannot withdraw 0")
 
         expect(await this.hunters.balanceOf(sheriff3)).to.be.bignumber.equal(ZERO)
 
