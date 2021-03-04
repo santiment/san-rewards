@@ -1,5 +1,8 @@
 {
     "networks": {
+        "ropsten": {
+            "address": "0x86d3E6B5cCc5Dd269C4BEE84cf148D93cE7f2817"
+        }
     },
     "abi": [
         {
