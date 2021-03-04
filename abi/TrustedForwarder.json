@@ -1,7 +1,10 @@
 {
     "networks": {
         "development": {
-            "address": "0x43A89C76D2A42789571257EdAc187E8BF0c58cf6"
+            "address": "0x40A9Cf2656cA30346CbC51f017763910e7051768"
+        },
+        "soliditycoverage": {
+            "address": "0xC62E5d1bA2680DFBCd3119325c577D710588AC14"
         }
     },
     "abi": [

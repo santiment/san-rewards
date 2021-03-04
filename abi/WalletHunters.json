@@ -1,7 +1,10 @@
 {
     "networks": {
         "development": {
-            "address": "0xa2766ea35E0591d3ED81E53786c84f40b37322A0"
+            "address": "0x724dd0A7a23A834f73e6b34bB35e624BC82d3963"
+        },
+        "soliditycoverage": {
+            "address": "0x1Ff8859BB2F59E836C021FE630E57FB32Ccae07a"
         }
     },
     "abi": [
@@ -123,17 +126,11 @@
                     "internalType": "uint256",
                     "name": "requestId",
                     "type": "uint256"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "address",
-                    "name": "mayor",
-                    "type": "address"
                 }
             ],
             "name": "RequestDiscarded",
             "type": "event",
-            "signature": "0xde14ed5ba810d34511fd04a7d70bd53b7b75991c5d8cc5d20dbbc0f30bc48a07"
+            "signature": "0x82630baf24d8d8e493a6f3f92edabfa8241eab4fbbbf976370a58f90c48e94ab"
         },
         {
             "anonymous": false,
@@ -1081,11 +1078,6 @@
         {
             "inputs": [
                 {
-                    "internalType": "address",
-                    "name": "mayor",
-                    "type": "address"
-                },
-                {
                     "internalType": "uint256",
                     "name": "requestId",
                     "type": "uint256"
@@ -1095,7 +1087,7 @@
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function",
-            "signature": "0x0302b873"
+            "signature": "0x207d6629"
         },
         {
             "inputs": [
@@ -1418,6 +1410,27 @@
             "type": "function",
             "constant": true,
             "signature": "0x9ae697bf"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "requestId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "votingState",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0xff84c45f"
         }
     ]
 }

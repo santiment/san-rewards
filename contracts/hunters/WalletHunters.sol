@@ -89,7 +89,7 @@ contract WalletHunters is
     );
     event HunterRewardPaid(address indexed hunter, uint256 totalReward);
     event SheriffRewardPaid(address indexed sheriff, uint256 totalReward);
-    event RequestDiscarded(uint256 indexed requestId, address mayor);
+    event RequestDiscarded(uint256 indexed requestId);
     event ConfigurationChanged(
         uint256 votingDuration,
         uint256 sheriffsRewardShare,
@@ -100,13 +100,6 @@ contract WalletHunters is
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
-        _;
-    }
-
-    modifier validateRequestId(uint256 requestId) {
-        require(requestId > 0, "Request id is 0");
-        require(requestId <= requestCounter.current(), "Request doesn't exist");
-        require(!walletRequests[requestId].discarded, "Request is discarded");
         _;
     }
 
@@ -224,14 +217,14 @@ contract WalletHunters is
         address sheriff,
         uint256 requestId,
         bool voteFor
-    ) external override validateRequestId(requestId) {
+    ) external override {
         require(sheriff == _msgSender(), "Sender must be sheriff");
+        require(isSheriff(sheriff), "Sender is not sheriff");
+        require(votingState(requestId), "Voting is finished");
         require(
             walletRequests[requestId].hunter != sheriff,
             "Sheriff can't be hunter"
         );
-        require(isSheriff(sheriff), "Sender is not sheriff");
-        require(_votingState(requestId), "Voting is finished");
 
         uint256 amount = balanceOf(sheriff);
 
@@ -256,18 +249,16 @@ contract WalletHunters is
         emit Voted(requestId, sheriff, amount, voteFor);
     }
 
-    function discardRequest(address mayor, uint256 requestId)
+    function discardRequest(uint256 requestId)
         external
         override
         onlyRole(MAYOR_ROLE)
-        validateRequestId(requestId)
     {
-        require(mayor == _msgSender(), "Sender must be mayor");
-        require(_votingState(requestId), "Voting is finished");
+        require(votingState(requestId), "Voting is finished");
 
         walletRequests[requestId].discarded = true;
 
-        emit RequestDiscarded(requestId, mayor);
+        emit RequestDiscarded(requestId);
     }
 
     function withdraw(address sheriff, uint256 amount) public override {
@@ -388,13 +379,11 @@ contract WalletHunters is
         override
         returns (uint256)
     {
-        require(requestId > 0, "Request id is 0");
-        require(requestId <= requestCounter.current(), "Request doesn't exist");
+        require(!votingState(requestId), "Voting is not finished");
         require(
             hunter == walletRequests[requestId].hunter,
             "Hunter isn't valid for request"
         );
-        require(!_votingState(requestId), "Voting is not finished");
         require(activeRequests[hunter].contains(requestId), "Already rewarded");
 
         if (walletRequests[requestId].discarded) {
@@ -420,13 +409,11 @@ contract WalletHunters is
         override
         returns (uint256)
     {
-        require(requestId > 0, "Request id is 0");
-        require(requestId <= requestCounter.current(), "Request doesn't exist");
+        require(!votingState(requestId), "Voting is not finished");
         require(
             requestVotings[requestId].votes[sheriff].amount > 0,
             "Sheriff doesn't vote"
         );
-        require(!_votingState(requestId), "Voting is not finished");
         require(
             activeRequests[sheriff].contains(requestId),
             "Already rewarded"
@@ -510,11 +497,8 @@ contract WalletHunters is
 
         for (uint256 i = 0; i < activeRequests[user].length(); i = i.add(1)) {
             uint256 requestId = activeRequests[user].at(i);
-            if (!_votingState(requestId)) {
+            if (!votingState(requestId)) {
                 // voting finished
-                continue;
-            }
-            if (walletRequests[requestId].discarded) {
                 continue;
             }
 
@@ -538,9 +522,12 @@ contract WalletHunters is
             ) > SUPER_MAJORITY;
     }
 
-    function _votingState(uint256 requestId) internal view returns (bool) {
+    function votingState(uint256 requestId) public view override returns (bool) {
+        require(requestId > 0, "Request id is 0");
+        require(requestId <= requestCounter.current(), "Request doesn't exist");
+
         // solhint-disable-next-line not-rely-on-time
-        return block.timestamp <= walletRequests[requestId].finishTime;
+        return block.timestamp <= walletRequests[requestId].finishTime && !walletRequests[requestId].discarded;
     }
 
     function _msgSender()

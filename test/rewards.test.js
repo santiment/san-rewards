@@ -10,7 +10,7 @@ const SanMock = artifacts.require("SanMock")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 contract("RewardsDistributor", async function (accounts) {
-    const [deployer, relayer, user1, user2] = accounts
+    const [deployer, relayer, user1, user2, user4] = accounts
     const user3Wallet = Wallet.generate()
     const user3 = user3Wallet.getAddressString()
 
@@ -92,8 +92,6 @@ contract("RewardsDistributor", async function (accounts) {
             expect(await this.sanToken.balanceOf(this.rewards.address)).to.be.bignumber.equal(totalReward.add(balanceBefore))
             expect((await this.rewards.reward(rewardId))['totalReward']).to.be.bignumber.equal(totalReward)
             expect((await this.rewards.reward(rewardId))['totalShare']).to.be.bignumber.equal(totalTokens)
-            // expect((await this.rewards.reward(rewardId))['fromSnapshotId']).to.be.bignumber.equal(totalTokens)
-            // expect((await this.rewards.reward(rewardId))['toSnapshotId']).to.be.bignumber.equal(totalTokens)
         })
 
         it(`Check user rewards #${rewardId}`, async () => {
@@ -101,6 +99,7 @@ contract("RewardsDistributor", async function (accounts) {
             expect(await this.rewards.userReward(user1, rewardId)).to.be.bignumber.equal(token('625'))
             expect(await this.rewards.userReward(user2, rewardId)).to.be.bignumber.equal(token('3125'))
             expect(await this.rewards.userReward(user3, rewardId)).to.be.bignumber.equal(token('6250'))
+            expect(await this.rewards.userReward(user4, rewardId)).to.be.bignumber.equal(token('0'))
         })
 
         it(`Claim user rewards #${rewardId}`, async () => {

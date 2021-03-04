@@ -7,7 +7,7 @@ interface IWalletHunters {
         external
         returns (uint256);
 
-    function discardRequest(address mayor, uint256 requestId) external;
+    function discardRequest(uint256 requestId) external;
 
     function stake(address sheriff, uint256 amount) external;
 
@@ -65,4 +65,6 @@ interface IWalletHunters {
         external
         view
         returns (uint256 votesFor, uint256 votesAgainst);
+
+    function votingState(uint256 requestId) external view returns (bool);
 }
