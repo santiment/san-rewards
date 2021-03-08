@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 /**
  * @dev This contract is version of ERC20 token, but with limitations: holder can't transfer these tokens.
  */
-contract AccountingToken is ERC20 {
-    constructor(string memory name_, string memory symbol_)
-        ERC20(name_, symbol_)
-    // solhint-disable-next-line no-empty-blocks
+contract AccountingTokenUpgradeable is ERC20Upgradeable {
+    function __AccountingToken_init(string memory name_, string memory symbol_)
+        internal
+        initializer
     {
+        __ERC20_init(name_, symbol_);
 
+        __AccountingToken_init_unchained();
     }
+
+    function __AccountingToken_init_unchained() internal initializer {}
 
     // Do not need transfer of this token
     function _transfer(

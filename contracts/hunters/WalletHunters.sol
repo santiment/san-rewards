@@ -2,71 +2,181 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "../interfaces/IWalletHunters.sol";
-import "../interfaces/IRewardsToken.sol";
-import "../utils/AccountingToken.sol";
-import "../gsn/RelayRecipient.sol";
+import "../utils/AccountingTokenUpgradeable.sol";
+import "../interfaces/IERC20Mintable.sol";
+import "../gsn/ERC2771ContextUpgradeable.sol";
+import "../gsn/RelayRecipientUpgradeable.sol";
 
 contract WalletHunters is
     IWalletHunters,
-    Context,
-    AccessControl,
-    AccountingToken,
-    RelayRecipient
+    AccountingTokenUpgradeable,
+    RelayRecipientUpgradeable,
+    AccessControlUpgradeable
 {
-    using Counters for Counters.Counter;
-    using SafeMath for uint256;
-    using SafeERC20 for IRewardsToken;
-    using EnumerableSet for EnumerableSet.UintSet;
+    using CountersUpgradeable for CountersUpgradeable.Counter;
+    using SafeMathUpgradeable for uint256;
+    using SafeERC20Upgradeable for IERC20Mintable;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
+    using AddressUpgradeable for address;
 
-    uint256 public constant SUPER_MAJORITY = 67;
-    uint256 public constant SHERIFFS_REWARD_SHARE = 20;
-    uint256 public constant FIXED_SHERIFF_REWARD = 10000 ether;
-    uint256 public constant MINIMAL_VOTES_FOR_REQUEST = 2000 ether;
-    uint256 public constant MINIMAL_DEPOSIT_FOR_SHERIFF = 1000 ether;
+    struct WalletRequest {
+        address hunter;
+        uint256 reward;
+        uint256 finishTime;
+        uint256 sheriffsRewardShare;
+        uint256 fixedSheriffReward;
+        bool discarded;
+    }
+
+    struct RequestVoting {
+        uint256 votesFor;
+        uint256 votesAgainst;
+        mapping(address => SheriffVote) votes;
+    }
+
+    struct SheriffVote {
+        uint256 amount;
+        bool voteFor;
+    }
+
+    struct Configuration {
+        uint256 votingDuration;
+        uint256 sheriffsRewardShare;
+        uint256 fixedSheriffReward;
+        uint256 minimalVotesForRequest;
+        uint256 minimalDepositForSheriff;
+    }
+
+    uint256 public constant MAX_PERCENT = 10000; // 100%
+    uint256 public constant SUPER_MAJORITY = 6700; // 67%
 
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
+    string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
+    string private constant ERC20_SYMBOL = "WHST";
 
-    uint256 private immutable _votingDuration;
-    IRewardsToken public immutable rewardsToken;
+    IERC20Upgradeable public stakingToken;
+    IERC20Mintable public rewardsToken;
 
-    Counters.Counter private _requestCounter;
-    mapping(uint256 => IWalletHunters.WalletRequest) private walletRequests;
-    mapping(uint256 => IWalletHunters.RequestVoting) private requestVotings;
-    mapping(address => IWalletHunters.SheriffVotes) private sheriffVotes;
+    Configuration public configuration;
+    CountersUpgradeable.Counter public requestCounter;
+    mapping(uint256 => WalletRequest) public walletRequests;
+    mapping(uint256 => RequestVoting) private requestVotings;
+    mapping(address => EnumerableSetUpgradeable.UintSet) private activeRequests;
 
-    modifier onlyMayor() {
-        require(
-            hasRole(MAYOR_ROLE, _msgSender()),
-            "Must have mayor role to discard"
-        );
+    event NewWalletRequest(
+        uint256 indexed requestId,
+        address indexed hunter,
+        uint256 reward
+    );
+    event Staked(address indexed sheriff, uint256 amount);
+    event Withdrawn(address indexed sheriff, uint256 amount);
+    event Voted(
+        uint256 indexed requestId,
+        address sheriff,
+        uint256 amount,
+        bool voteFor
+    );
+    event HunterRewardPaid(address indexed hunter, uint256 totalReward);
+    event SheriffRewardPaid(address indexed sheriff, uint256 totalReward);
+    event RequestDiscarded(uint256 indexed requestId);
+    event ConfigurationChanged(
+        uint256 votingDuration,
+        uint256 sheriffsRewardShare,
+        uint256 fixedSheriffReward,
+        uint256 minimalVotesForRequest,
+        uint256 minimalDepositForSheriff
+    );
+
+    modifier onlyRole(bytes32 role) {
+        require(hasRole(role, _msgSender()), "Must have appropriate role");
         _;
     }
 
-    modifier validateRequestId(uint256 requestId) {
-        require(
-            requestId <= _requestCounter.current(),
-            "Request doesn't exist"
+    function initialize(
+        address admin_,
+        address stakingToken_,
+        address rewardsToken_,
+        uint256 votingDuration_,
+        uint256 sheriffsRewardShare_,
+        uint256 fixedSheriffReward_,
+        uint256 minimalVotesForRequest_,
+        uint256 minimalDepositForSheriff_
+    ) external initializer {
+        __WalletHunters_init(
+            admin_,
+            stakingToken_,
+            rewardsToken_,
+            votingDuration_,
+            sheriffsRewardShare_,
+            fixedSheriffReward_,
+            minimalVotesForRequest_,
+            minimalDepositForSheriff_
         );
-        require(!walletRequests[requestId].discarded, "Request is discarded");
-        _;
     }
 
-    constructor(address rewardsToken_, uint256 votingDuration_)
-        AccountingToken("Wallet Hunters, Sheriff Token", "WHST")
-    {
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    function __WalletHunters_init(
+        address admin_,
+        address stakingToken_,
+        address rewardsToken_,
+        uint256 votingDuration_,
+        uint256 sheriffsRewardShare_,
+        uint256 fixedSheriffReward_,
+        uint256 minimalVotesForRequest_,
+        uint256 minimalDepositForSheriff_
+    ) internal initializer {
+        __AccountingToken_init(ERC20_NAME, ERC20_SYMBOL);
+        __RelayRecipientUpgradeable_init();
+        __AccessControl_init();
 
-        _setupRole(MAYOR_ROLE, _msgSender());
+        __WalletHunters_init_unchained(
+            admin_,
+            stakingToken_,
+            rewardsToken_,
+            votingDuration_,
+            sheriffsRewardShare_,
+            fixedSheriffReward_,
+            minimalVotesForRequest_,
+            minimalDepositForSheriff_
+        );
+    }
 
-        _votingDuration = votingDuration_;
-        rewardsToken = IRewardsToken(rewardsToken_);
+    function __WalletHunters_init_unchained(
+        address admin,
+        address stakingToken_,
+        address rewardsToken_,
+        uint256 votingDuration_,
+        uint256 sheriffsRewardShare_,
+        uint256 fixedSheriffReward_,
+        uint256 minimalVotesForRequest_,
+        uint256 minimalDepositForSheriff_
+    ) internal initializer {
+        require(rewardsToken_.isContract(), "RewardsToken must be contract");
+        require(stakingToken_.isContract(), "SnapshotToken must be contract");
+
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _setupRole(MAYOR_ROLE, admin);
+
+        stakingToken = IERC20Upgradeable(stakingToken_);
+        rewardsToken = IERC20Mintable(rewardsToken_);
+
+        _updateConfiguration(
+            votingDuration_,
+            sheriffsRewardShare_,
+            fixedSheriffReward_,
+            minimalVotesForRequest_,
+            minimalDepositForSheriff_
+        );
     }
 
     function submitRequest(address hunter, uint256 reward)
@@ -74,15 +184,21 @@ contract WalletHunters is
         override
         returns (uint256)
     {
-        _requestCounter.increment();
-        uint256 id = _requestCounter.current();
+        requestCounter.increment();
+        uint256 id = requestCounter.current();
 
-        IWalletHunters.WalletRequest storage _request = walletRequests[id];
+        WalletRequest storage _request = walletRequests[id];
 
         _request.hunter = hunter;
         _request.reward = reward;
+        _request.discarded = false;
+        _request.sheriffsRewardShare = configuration.sheriffsRewardShare;
+        _request.fixedSheriffReward = configuration.fixedSheriffReward;
         // solhint-disable-next-line not-rely-on-time
-        _request.requestTime = block.timestamp;
+        _request.finishTime = block.timestamp.add(configuration.votingDuration);
+
+        // ignore return
+        activeRequests[hunter].add(id);
 
         emit NewWalletRequest(id, hunter, reward);
 
@@ -93,70 +209,56 @@ contract WalletHunters is
         require(sheriff == _msgSender(), "Sender must be sheriff");
         require(amount > 0, "Cannot deposit 0");
         _mint(sheriff, amount);
-        rewardsToken.safeTransferFrom(sheriff, address(this), amount);
-        emit Staked(sheriff, amount);
-    }
-
-    function stakeWithPermit(
-        address sheriff,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external override {
-        require(sheriff == _msgSender(), "Sender must be sheriff");
-        require(amount > 0, "Cannot deposit 0");
-        _mint(sheriff, amount);
-        rewardsToken.permit(sheriff, address(this), amount, deadline, v, r, s);
-        rewardsToken.safeTransferFrom(sheriff, address(this), amount);
+        stakingToken.safeTransferFrom(sheriff, address(this), amount);
         emit Staked(sheriff, amount);
     }
 
     function vote(
         address sheriff,
         uint256 requestId,
-        Vote kind
-    ) external override validateRequestId(requestId) {
+        bool voteFor
+    ) external override {
         require(sheriff == _msgSender(), "Sender must be sheriff");
         require(isSheriff(sheriff), "Sender is not sheriff");
-        require(_votingState(requestId), "Voting is finished");
+        require(votingState(requestId), "Voting is finished");
+        require(
+            walletRequests[requestId].hunter != sheriff,
+            "Sheriff can't be hunter"
+        );
 
         uint256 amount = balanceOf(sheriff);
 
         require(
-            sheriffVotes[sheriff].requests.add(requestId),
-            "Sheriff is already voted"
+            activeRequests[sheriff].add(requestId),
+            "User is already participated"
         );
-        sheriffVotes[sheriff].votes[requestId].amount = amount;
+        requestVotings[requestId].votes[sheriff].amount = amount;
 
-        if (kind == Vote.FOR) {
-            sheriffVotes[sheriff].votes[requestId].voteFor = true;
+        if (voteFor) {
+            requestVotings[requestId].votes[sheriff].voteFor = true;
             requestVotings[requestId].votesFor = requestVotings[requestId]
                 .votesFor
                 .add(amount);
         } else {
-            sheriffVotes[sheriff].votes[requestId].voteFor = false;
+            requestVotings[requestId].votes[sheriff].voteFor = false;
             requestVotings[requestId].votesAgainst = requestVotings[requestId]
                 .votesAgainst
                 .add(amount);
         }
 
-        emit Voted(sheriff, amount, kind);
+        emit Voted(requestId, sheriff, amount, voteFor);
     }
 
-    function discardRequest(address mayor, uint256 requestId)
+    function discardRequest(uint256 requestId)
         external
         override
-        onlyMayor
-        validateRequestId(requestId)
+        onlyRole(MAYOR_ROLE)
     {
-        require(mayor == _msgSender(), "Sender must be mayor");
-        require(_votingState(requestId), "Voting is finished");
+        require(votingState(requestId), "Voting is finished");
 
         walletRequests[requestId].discarded = true;
 
-        emit RequestDiscarded(requestId, mayor);
+        emit RequestDiscarded(requestId);
     }
 
     function withdraw(address sheriff, uint256 amount) public override {
@@ -165,151 +267,136 @@ contract WalletHunters is
         uint256 available = balanceOf(sheriff).sub(lockedBalance(sheriff));
         require(amount <= available, "Withdraw exceeds balance");
         _burn(sheriff, amount);
-        rewardsToken.safeTransfer(sheriff, amount);
+        stakingToken.safeTransfer(sheriff, amount);
         emit Withdrawn(sheriff, amount);
     }
 
-    function exit(address sheriff) external override {
-        require(_msgSender() == sheriff, "Sender must be sheriff");
+    function exit(address sheriff, uint256[] calldata requestIds)
+        external
+        override
+    {
+        claimSheriffRewards(sheriff, requestIds);
         withdraw(sheriff, balanceOf(sheriff));
-        getSheriffRewards(sheriff);
     }
 
-    function setTrustedForwarder(address trustedForwarder) external override {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "Must have admin role"
-        );
-        super._setTrustedForwarder(trustedForwarder);
-    }
-
-    function getHunterReward(address hunter, uint256 requestId)
+    function claimHunterReward(address hunter, uint256[] calldata requestIds)
         external
         override
     {
         require(hunter == _msgSender(), "Sender must be hunter");
-        require(
-            hunter == walletRequests[requestId].hunter,
-            "Hunter isn't valid"
-        );
-
-        uint256 reward = hunterReward(requestId);
-        walletRequests[requestId].rewardPaid = true;
-
-        if (reward > 0) {
-            rewardsToken.mint(hunter, reward);
-        }
-
-        emit HunterRewardPaid(hunter, requestId, reward);
-    }
-
-    function getHunterRewardsByIds(
-        address hunter,
-        uint256[] calldata requestIds
-    ) external override {
-        require(hunter == _msgSender(), "Sender must be hunter");
-
         uint256 totalReward = 0;
 
         for (uint256 i = 0; i < requestIds.length; i = i.add(1)) {
             uint256 requestId = requestIds[i];
-            require(
-                hunter == walletRequests[requestId].hunter,
-                "Hunter isn't valid"
-            );
-            uint256 reward = hunterReward(requestId);
+
+            uint256 reward = hunterReward(hunter, requestId);
+            activeRequests[hunter].remove(requestId);
+
             totalReward = totalReward.add(reward);
-
-            walletRequests[requestId].rewardPaid = true;
-
-            emit HunterRewardPaid(hunter, requestId, reward);
         }
 
         if (totalReward > 0) {
             rewardsToken.mint(hunter, totalReward);
         }
+
+        emit HunterRewardPaid(hunter, totalReward);
     }
 
-    function getSheriffReward(address sheriff, uint256 requestId)
-        external
+    function claimSheriffRewards(address sheriff, uint256[] calldata requestIds)
+        public
         override
     {
-        require(sheriff == _msgSender(), "Sender must be sheriff");
-        uint256 reward = sheriffReward(sheriff, requestId);
-
-        _removeVote(sheriff, requestId);
-
-        if (reward > 0) {
-            rewardsToken.mint(sheriff, reward);
-        }
-
-        emit SheriffRewardPaid(sheriff, requestId, reward);
-    }
-
-    function getSheriffRewards(address sheriff) public override {
-        require(sheriff == _msgSender(), "Sender must be sheriff");
-        uint256 totalReward = 0;
-
-        for (uint256 i = 0; i < sheriffVotes[sheriff].requests.length(); ) {
-            uint256 requestId = sheriffVotes[sheriff].requests.at(i);
-
-            if (_votingState(requestId)) {
-                i = i.add(1);
-                continue;
-            }
-
-            uint256 reward = sheriffReward(sheriff, requestId);
-            totalReward = totalReward.add(reward);
-
-            _removeVote(sheriff, requestId);
-
-            emit SheriffRewardPaid(sheriff, requestId, reward);
-        }
-
-        if (totalReward > 0) {
-            rewardsToken.mint(sheriff, totalReward);
-        }
-    }
-
-    function getSheriffRewardsByIds(
-        address sheriff,
-        uint256[] calldata requestIds
-    ) external override {
         require(sheriff == _msgSender(), "Sender must be sheriff");
         uint256 totalReward = 0;
 
         for (uint256 i = 0; i < requestIds.length; i = i.add(1)) {
             uint256 requestId = requestIds[i];
+
             uint256 reward = sheriffReward(sheriff, requestId);
+            activeRequests[sheriff].remove(requestId);
+
             totalReward = totalReward.add(reward);
-
-            _removeVote(sheriff, requestId);
-
-            emit SheriffRewardPaid(sheriff, requestId, reward);
         }
 
         if (totalReward > 0) {
             rewardsToken.mint(sheriff, totalReward);
         }
+
+        emit SheriffRewardPaid(sheriff, totalReward);
     }
 
-    function hunterReward(uint256 requestId)
+    function updateConfiguration(
+        uint256 _votingDuration,
+        uint256 _sheriffsRewardShare,
+        uint256 _fixedSheriffReward,
+        uint256 _minimalVotesForRequest,
+        uint256 _minimalDepositForSheriff
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _updateConfiguration(
+            _votingDuration,
+            _sheriffsRewardShare,
+            _fixedSheriffReward,
+            _minimalVotesForRequest,
+            _minimalDepositForSheriff
+        );
+    }
+
+    function _updateConfiguration(
+        uint256 _votingDuration,
+        uint256 _sheriffsRewardShare,
+        uint256 _fixedSheriffReward,
+        uint256 _minimalVotesForRequest,
+        uint256 _minimalDepositForSheriff
+    ) internal {
+        require(
+            _votingDuration >= 1 hours && _votingDuration <= 1 weeks,
+            "Voting duration too long"
+        );
+        require(
+            _sheriffsRewardShare > 0 && _sheriffsRewardShare < MAX_PERCENT,
+            "Sheriff share too much"
+        );
+
+        configuration.votingDuration = _votingDuration;
+        configuration.sheriffsRewardShare = _sheriffsRewardShare;
+        configuration.fixedSheriffReward = _fixedSheriffReward;
+        configuration.minimalVotesForRequest = _minimalVotesForRequest;
+        configuration.minimalDepositForSheriff = _minimalDepositForSheriff;
+
+        emit ConfigurationChanged(
+            _votingDuration,
+            _sheriffsRewardShare,
+            _fixedSheriffReward,
+            _minimalVotesForRequest,
+            _minimalDepositForSheriff
+        );
+    }
+
+    function hunterReward(address hunter, uint256 requestId)
         public
         view
         override
-        validateRequestId(requestId)
         returns (uint256)
     {
-        require(!_votingState(requestId), "Voting is not finished");
+        require(!votingState(requestId), "Voting is not finished");
+        require(
+            hunter == walletRequests[requestId].hunter,
+            "Hunter isn't valid for request"
+        );
+        require(activeRequests[hunter].contains(requestId), "Already rewarded");
 
-        if (
-            !walletRequests[requestId].rewardPaid && _walletApproved(requestId)
-        ) {
+        if (walletRequests[requestId].discarded) {
+            return 0;
+        }
+
+        if (_walletApproved(requestId)) {
             return
                 walletRequests[requestId]
                     .reward
-                    .mul(100 - SHERIFFS_REWARD_SHARE)
-                    .div(100);
+                    .mul(
+                    MAX_PERCENT - walletRequests[requestId].sheriffsRewardShare
+                )
+                    .div(MAX_PERCENT);
         } else {
             return 0;
         }
@@ -321,15 +408,15 @@ contract WalletHunters is
         override
         returns (uint256)
     {
+        require(!votingState(requestId), "Voting is not finished");
         require(
-            requestId <= _requestCounter.current(),
-            "Request doesn't exist"
-        );
-        require(
-            sheriffVotes[sheriff].requests.contains(requestId),
+            requestVotings[requestId].votes[sheriff].amount > 0,
             "Sheriff doesn't vote"
         );
-        require(!_votingState(requestId), "Voting is not finished");
+        require(
+            activeRequests[sheriff].contains(requestId),
+            "Already rewarded"
+        );
 
         if (walletRequests[requestId].discarded) {
             return 0;
@@ -343,34 +430,36 @@ contract WalletHunters is
                 reward
                     .mul(votes)
                     .div(totalVotes)
-                    .mul(SHERIFFS_REWARD_SHARE)
-                    .div(100);
+                    .mul(walletRequests[requestId].sheriffsRewardShare)
+                    .div(MAX_PERCENT);
         } else {
-            return FIXED_SHERIFF_REWARD;
+            return walletRequests[requestId].fixedSheriffReward;
         }
     }
 
-    function request(uint256 requestId)
+    function setTrustedForwarder(address trustedForwarder)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        super._setTrustedForwarder(trustedForwarder);
+    }
+
+    function activeRequestsLength(address user)
         external
         view
         override
-        validateRequestId(requestId)
-        returns (
-            address hunter,
-            uint256 reward,
-            uint256 requestTime,
-            bool votingState,
-            bool rewardPaid,
-            bool discarded
-        )
+        returns (uint256)
     {
-        hunter = walletRequests[requestId].hunter;
-        reward = walletRequests[requestId].reward;
-        requestTime = walletRequests[requestId].requestTime;
-        // solhint-disable-next-line not-rely-on-time
-        votingState = block.timestamp <= requestTime.add(_votingDuration);
-        rewardPaid = walletRequests[requestId].rewardPaid;
-        discarded = walletRequests[requestId].discarded;
+        return activeRequests[user].length();
+    }
+
+    function activeRequest(address user, uint256 index)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return activeRequests[user].at(index);
     }
 
     function countVotes(uint256 requestId)
@@ -383,15 +472,21 @@ contract WalletHunters is
         votesAgainst = requestVotings[requestId].votesAgainst;
     }
 
+    function getVote(address sheriff, uint256 requestId)
+        external
+        view
+        override
+        returns (uint256 votes, bool voteFor)
+    {
+        votes = requestVotings[requestId].votes[sheriff].amount;
+        voteFor = requestVotings[requestId].votes[sheriff].voteFor;
+    }
+
     function isSheriff(address sheriff) public view override returns (bool) {
-        return balanceOf(sheriff) >= MINIMAL_DEPOSIT_FOR_SHERIFF;
+        return balanceOf(sheriff) >= configuration.minimalDepositForSheriff;
     }
 
-    function votingDuration() external view override returns (uint256) {
-        return _votingDuration;
-    }
-
-    function lockedBalance(address sheriff)
+    function lockedBalance(address user)
         public
         view
         override
@@ -399,72 +494,64 @@ contract WalletHunters is
     {
         locked = 0;
 
-        for (
-            uint256 i = 0;
-            i < sheriffVotes[sheriff].requests.length();
-            i = i.add(1)
-        ) {
-            uint256 requestId = sheriffVotes[sheriff].requests.at(i);
-            if (!_votingState(requestId)) {
+        for (uint256 i = 0; i < activeRequests[user].length(); i = i.add(1)) {
+            uint256 requestId = activeRequests[user].at(i);
+            if (!votingState(requestId)) {
+                // voting finished
                 continue;
             }
-            if (walletRequests[requestId].discarded) {
-                continue;
-            }
-            uint256 votes = sheriffVotes[sheriff].votes[requestId].amount;
-            if (locked >= votes) {
-                continue;
-            }
-            locked = votes;
-        }
-    }
 
-    function _removeVote(address sheriff, uint256 requestId) internal {
-        sheriffVotes[sheriff].requests.remove(requestId);
-        delete sheriffVotes[sheriff].votes[requestId];
+            uint256 votes = requestVotings[requestId].votes[user].amount;
+            if (votes > locked) {
+                locked = votes;
+            }
+        }
     }
 
     function _walletApproved(uint256 requestId) internal view returns (bool) {
         uint256 totalVotes =
             requestVotings[requestId].votesFor +
                 requestVotings[requestId].votesAgainst;
-        if (totalVotes < MINIMAL_VOTES_FOR_REQUEST) {
+        if (totalVotes < configuration.minimalVotesForRequest) {
             return false;
         }
         return
-            requestVotings[requestId].votesFor.mul(100).div(totalVotes) >
-            SUPER_MAJORITY;
+            requestVotings[requestId].votesFor.mul(MAX_PERCENT).div(
+                totalVotes
+            ) > SUPER_MAJORITY;
     }
 
-    function _finishTime(uint256 requestId) internal view returns (uint256) {
-        return walletRequests[requestId].requestTime.add(_votingDuration);
-    }
+    function votingState(uint256 requestId)
+        public
+        view
+        override
+        returns (bool)
+    {
+        require(requestId > 0, "Request id is 0");
+        require(requestId <= requestCounter.current(), "Request doesn't exist");
 
-    function _votingState(uint256 requestId) internal view returns (bool) {
         // solhint-disable-next-line not-rely-on-time
-        return block.timestamp <= _finishTime(requestId);
+        return
+            block.timestamp <= walletRequests[requestId].finishTime &&
+            !walletRequests[requestId].discarded;
     }
 
     function _msgSender()
         internal
         view
-        override(Context, BaseRelayRecipient)
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
         returns (address payable)
     {
-        return BaseRelayRecipient._msgSender();
+        return ERC2771ContextUpgradeable._msgSender();
     }
 
     function _msgData()
         internal
         view
-        override(Context, BaseRelayRecipient)
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
         returns (bytes memory)
     {
-        return BaseRelayRecipient._msgData();
-    }
-
-    function versionRecipient() external pure override returns (string memory) {
-        return "2.0.0+";
+        return ERC2771ContextUpgradeable._msgData();
     }
 
     function _getSheriffVotes(
@@ -472,8 +559,8 @@ contract WalletHunters is
         uint256 requestId,
         bool voteFor
     ) internal view returns (uint256) {
-        if (sheriffVotes[sheriff].votes[requestId].voteFor == voteFor) {
-            return sheriffVotes[sheriff].votes[requestId].amount;
+        if (requestVotings[requestId].votes[sheriff].voteFor == voteFor) {
+            return requestVotings[requestId].votes[sheriff].amount;
         } else {
             return 0;
         }

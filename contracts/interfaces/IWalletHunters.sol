@@ -2,105 +2,60 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
-
 interface IWalletHunters {
-    enum Vote {AGAINST, FOR}
-
-    struct WalletRequest {
-        address hunter;
-        uint256 reward;
-        uint256 requestTime;
-        bool rewardPaid;
-        bool discarded;
-    }
-
-    struct RequestVoting {
-        uint256 votesFor;
-        uint256 votesAgainst;
-    }
-
-    struct SheriffVote {
-        uint256 amount;
-        bool voteFor;
-    }
-
-    struct SheriffVotes {
-        EnumerableSet.UintSet requests;
-        mapping(uint256 => SheriffVote) votes;
-    }
-
-    event NewWalletRequest(
-        uint256 indexed requestId,
-        address indexed hunter,
-        uint256 reward
-    );
-    event Staked(address indexed sheriff, uint256 amount);
-    event Withdrawn(address indexed sheriff, uint256 amount);
-    event Voted(address indexed sheriff, uint256 amount, Vote kind);
-    event HunterRewardPaid(
-        address indexed hunter,
-        uint256 indexed requestId,
-        uint256 reward
-    );
-    event SheriffRewardPaid(
-        address indexed sheriff,
-        uint256 indexed requestId,
-        uint256 reward
-    );
-    event RequestDiscarded(uint256 indexed requestId, address mayor);
-
     function submitRequest(address hunter, uint256 reward)
         external
         returns (uint256);
 
-    function discardRequest(address mayor, uint256 requestId) external;
-
-    function setTrustedForwarder(address trustedForwarder) external;
+    function discardRequest(uint256 requestId) external;
 
     function stake(address sheriff, uint256 amount) external;
-
-    function stakeWithPermit(
-        address sheriff,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
 
     function vote(
         address sheriff,
         uint256 requestId,
-        Vote kind
+        bool voteFor
     ) external;
 
     function withdraw(address sheriff, uint256 amount) external;
 
-    function exit(address sheriff) external;
+    function exit(address sheriff, uint256[] calldata requestIds) external;
 
-    function getHunterReward(address hunter, uint256 requestId) external;
+    function activeRequestsLength(address user) external view returns (uint256);
 
-    function getHunterRewardsByIds(
-        address hunter,
-        uint256[] calldata requestIds
+    function activeRequest(address user, uint256 index)
+        external
+        view
+        returns (uint256);
+
+    function claimHunterReward(address hunter, uint256[] calldata requestIds)
+        external;
+
+    function claimSheriffRewards(address sheriff, uint256[] calldata requestIds)
+        external;
+
+    function updateConfiguration(
+        uint256 votingDuration,
+        uint256 sheriffsRewardShare,
+        uint256 fixedSheriffReward,
+        uint256 minimalVotesForRequest,
+        uint256 minimalDepositForSheriff
     ) external;
 
-    function getSheriffReward(address sheriff, uint256 requestId) external;
-
-    function getSheriffRewards(address sheriff) external;
-
-    function getSheriffRewardsByIds(
-        address sheriff,
-        uint256[] calldata requestIds
-    ) external;
-
-    function hunterReward(uint256 requestId) external view returns (uint256);
+    function hunterReward(address hunter, uint256 requestId)
+        external
+        view
+        returns (uint256);
 
     function sheriffReward(address sheriff, uint256 requestId)
         external
         view
         returns (uint256);
+
+    function getVote(address sheriff, uint256 requestId)
+        external
+        view
+        returns (uint256 votes, bool voteFor);
 
     function lockedBalance(address sheriff) external view returns (uint256);
 
@@ -111,17 +66,5 @@ interface IWalletHunters {
         view
         returns (uint256 votesFor, uint256 votesAgainst);
 
-    function request(uint256 requestId)
-        external
-        view
-        returns (
-            address hunter,
-            uint256 reward,
-            uint256 requestTime,
-            bool votingState,
-            bool rewardPaid,
-            bool discarded
-        );
-
-    function votingDuration() external view returns (uint256);
+    function votingState(uint256 requestId) external view returns (bool);
 }

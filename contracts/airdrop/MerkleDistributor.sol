@@ -34,10 +34,7 @@ contract MerkleDistributor is IMerkleDistributor {
 
         // Mark it claimed and send the token.
         _setClaimed(index);
-        require(
-            IERC20(_token).transfer(account, amount),
-            "Transfer failed"
-        );
+        require(IERC20(_token).transfer(account, amount), "Transfer failed");
 
         emit Claimed(index, account, amount);
     }

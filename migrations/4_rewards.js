@@ -1,14 +1,24 @@
-const FarmingRewardsFactory = artifacts.require("FarmingRewardsFactory")
-const StakingRewardsFactory = artifacts.require("StakingRewardsFactory")
+const {saveContract} = require("./utils")
+const {deployProxy} = require('@openzeppelin/truffle-upgrades');
+
+const RewardsDistributor = artifacts.require("RewardsDistributor")
 const RewardsToken = artifacts.require("RewardsToken")
+const SanMock = artifacts.require("SanMock")
 
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
-    const rewardsToken = await RewardsToken.deployed();
+    const rewardsToken = await RewardsToken.deployed()
+    const sanMock = await SanMock.deployed()
 
-    await deployer.deploy(FarmingRewardsFactory, rewardsToken.address, {from: owner})
-    rewardsToken.grantRole(await rewardsToken.MINTER_ROLE(), FarmingRewardsFactory.address, {from: owner})
+    const rewards = await deployProxy(RewardsDistributor, [
+            owner,
+            sanMock.address,
+            rewardsToken.address,
+        ], {deployer}
+    )
 
-    await deployer.deploy(StakingRewardsFactory, rewardsToken.address, {from: owner})
+    await saveContract("RewardsDistributor", rewards.abi, network, rewards.address)
+
+    await rewardsToken.grantRole(await rewardsToken.SNAPSHOTER_ROLE(), RewardsDistributor.address, {from: owner})
 }

@@ -1,5 +1,5 @@
 const MerkleTree = require('./merkle-tree')
-const {utils: {soliditySha3: solidityKeccak256}} = require('web3')
+const {utils} = require('ethers')
 
 module.exports = class BalanceTree {
 
@@ -23,10 +23,9 @@ module.exports = class BalanceTree {
     // keccak256(abi.encode(index, account, amount))
     static toNode(index, account, amount) {
         return Buffer.from(
-            solidityKeccak256(
-                {t: 'uint256', v: index},
-                {t: 'address', v: account},
-                {t: 'uint256', v: amount},
+            utils.solidityKeccak256(
+                ['uint256', 'address', 'uint256'],
+                [index, account, amount]
             ).substr(2),
             'hex'
         )

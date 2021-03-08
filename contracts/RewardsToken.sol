@@ -1,108 +1,168 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Pausable.sol";
-import "@openzeppelin/contracts/drafts/ERC20Permit.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20SnapshotUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "./interfaces/IRewardsToken.sol";
-import "./gsn/RelayRecipient.sol";
-import "./gsn/BaseRelayRecipient.sol";
+import "./utils/AccountingToken.sol";
+import "./interfaces/IERC20Snapshot.sol";
+import "./interfaces/IERC20Mintable.sol";
+import "./interfaces/IERC20Pausable.sol";
+import "./gsn/RelayRecipientUpgradeable.sol";
 
-contract RewardsToken is IRewardsToken, ERC20Permit, ERC20Pausable, RelayRecipient, AccessControl {
+contract RewardsToken is
+    IERC20Snapshot,
+    IERC20Pausable,
+    IERC20Mintable,
+    ERC20PausableUpgradeable,
+    ERC20SnapshotUpgradeable,
+    RelayRecipientUpgradeable,
+    AccessControlUpgradeable
+{
     using SafeMath for uint256;
 
-    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 private constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant SNAPSHOTER_ROLE = keccak256("SNAPSHOTER_ROLE");
 
-    string private constant ERC20_NAME = "Santiment Rewards Token";
-    string private constant ERC20_SYMBOL = "SRT";
+    string private constant ERC20_NAME = "Santiment Rewards Share Token";
+    string private constant ERC20_SYMBOL = "SRHT";
 
-    constructor() ERC20(ERC20_NAME, ERC20_SYMBOL) ERC20Permit(ERC20_NAME) {
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-
-        _setupRole(MINTER_ROLE, _msgSender());
-        _setupRole(PAUSER_ROLE, _msgSender());
+    modifier onlyRole(bytes32 role) {
+        require(hasRole(role, _msgSender()), "Must have appropriate role");
+        _;
     }
 
-    function mint(address to, uint256 amount) external override {
-        require(
-            hasRole(MINTER_ROLE, _msgSender()),
-            "Must have minter role"
-        );
+    function initialize(address admin) external initializer {
+        __RewardsToken_init(admin);
+    }
+
+    function __RewardsToken_init(address admin) internal initializer {
+        __ERC20Pausable_init();
+        __ERC20Snapshot_init();
+        __ERC20_init(ERC20_NAME, ERC20_SYMBOL);
+        __RelayRecipientUpgradeable_init();
+        __AccessControl_init();
+
+        __RewardsToken_init_unchained(admin);
+    }
+
+    function __RewardsToken_init_unchained(address admin) internal initializer {
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+
+        _setupRole(MINTER_ROLE, admin);
+        _setupRole(PAUSER_ROLE, admin);
+        _setupRole(SNAPSHOTER_ROLE, admin);
+    }
+
+    function mint(address to, uint256 amount)
+        external
+        override
+        onlyRole(MINTER_ROLE)
+    {
         _mint(to, amount);
     }
 
-    function burn(uint256 amount) external override {
-        _burn(_msgSender(), amount);
-    }
-
-    function burnFrom(address account, uint256 amount) external override {
-        uint256 decreasedAllowance =
-            allowance(account, _msgSender()).sub(
-                amount,
-                "Burn amount exceeds allowance"
-            );
-
-        _approve(account, _msgSender(), decreasedAllowance);
-        _burn(account, amount);
-    }
-
-    function pause() external override {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "Must have pauser role"
-        );
+    function pause() external override onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
-    function unpause() external override {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "Must have pauser role"
-        );
+    function unpause() external override onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 
-    function setTrustedForwarder(address trustedForwarder) external override {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "Must have admin role"
-        );
+    function paused()
+        public
+        view
+        override(PausableUpgradeable, IERC20Pausable)
+        returns (bool)
+    {
+        return PausableUpgradeable.paused();
+    }
+
+    function snapshot()
+        external
+        override
+        onlyRole(SNAPSHOTER_ROLE)
+        returns (uint256)
+    {
+        return _snapshot();
+    }
+
+    function balanceOfAt(address account, uint256 snapshotId)
+        public
+        view
+        override(IERC20Snapshot, ERC20SnapshotUpgradeable)
+        returns (uint256)
+    {
+        return ERC20SnapshotUpgradeable.balanceOfAt(account, snapshotId);
+    }
+
+    function totalSupplyAt(uint256 snapshotId)
+        public
+        view
+        override(IERC20Snapshot, ERC20SnapshotUpgradeable)
+        returns (uint256)
+    {
+        return ERC20SnapshotUpgradeable.totalSupplyAt(snapshotId);
+    }
+
+    function setTrustedForwarder(address trustedForwarder)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         super._setTrustedForwarder(trustedForwarder);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override (ERC20Pausable, ERC20) {
-        ERC20Pausable._beforeTokenTransfer(from, to, amount);
+    // Do not need transfer of this token
+    function _transfer(
+        address,
+        address,
+        uint256
+    ) internal pure override {
+        revert("Forbidden");
     }
 
-    function minterRole() external pure override returns (bytes32) {
-        return MINTER_ROLE;
+    // Do not need allowance of this token
+    function _approve(
+        address,
+        address,
+        uint256
+    ) internal pure override {
+        revert("Forbidden");
     }
 
-    function pauserRole() external pure override returns (bytes32) {
-        return PAUSER_ROLE;
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20PausableUpgradeable, ERC20SnapshotUpgradeable) {
+        // ERC20._beforeTokenTransfer will be invoked twice with epmty block
+        ERC20PausableUpgradeable._beforeTokenTransfer(from, to, amount);
+        ERC20SnapshotUpgradeable._beforeTokenTransfer(from, to, amount);
     }
 
-    function _msgSender() internal view override(Context, BaseRelayRecipient) returns (address payable) {
-        return BaseRelayRecipient._msgSender();
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (address payable)
+    {
+        return ERC2771ContextUpgradeable._msgSender();
     }
 
-    function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
-        return BaseRelayRecipient._msgData();
-    }
-
-    function getChainId() external view returns (uint256 chainId) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            chainId := chainid()
-        }
-    }
-
-    function versionRecipient() external override pure returns (string memory) {
-        return "2.0.0+";
+    function _msgData()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (bytes memory)
+    {
+        return ERC2771ContextUpgradeable._msgData();
     }
 }
