@@ -87,8 +87,16 @@ contract WalletHunters is
         uint256 amount,
         bool voteFor
     );
-    event HunterRewardPaid(address indexed hunter, uint256[] requestIds, uint256 totalReward);
-    event SheriffRewardPaid(address indexed sheriff, uint256[] requestIds, uint256 totalReward);
+    event HunterRewardPaid(
+        address indexed hunter,
+        uint256[] requestIds,
+        uint256 totalReward
+    );
+    event SheriffRewardPaid(
+        address indexed sheriff,
+        uint256[] requestIds,
+        uint256 totalReward
+    );
     event RequestDiscarded(uint256 indexed requestId);
     event ConfigurationChanged(
         uint256 votingDuration,

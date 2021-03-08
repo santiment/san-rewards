@@ -9,7 +9,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 import "./gsn/RelayRecipientUpgradeable.sol";
 
-contract RewardsItem is ERC721BurnableUpgradeable, RelayRecipientUpgradeable, AccessControlUpgradeable, PausableUpgradeable {
+contract RewardsItem is
+    ERC721BurnableUpgradeable,
+    RelayRecipientUpgradeable,
+    AccessControlUpgradeable,
+    PausableUpgradeable
+{
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -60,7 +65,10 @@ contract RewardsItem is ERC721BurnableUpgradeable, RelayRecipientUpgradeable, Ac
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, string memory tokenUri) external onlyRole(MINTER_ROLE) {
+    function mint(address to, string memory tokenUri)
+        external
+        onlyRole(MINTER_ROLE)
+    {
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
         _mint(to, _tokenIdTracker.current());
@@ -77,19 +85,19 @@ contract RewardsItem is ERC721BurnableUpgradeable, RelayRecipientUpgradeable, Ac
     }
 
     function _msgSender()
-    internal
-    view
-    override(ContextUpgradeable, ERC2771ContextUpgradeable)
-    returns (address payable)
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (address payable)
     {
         return ERC2771ContextUpgradeable._msgSender();
     }
 
     function _msgData()
-    internal
-    view
-    override(ContextUpgradeable, ERC2771ContextUpgradeable)
-    returns (bytes memory)
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (bytes memory)
     {
         return ERC2771ContextUpgradeable._msgData();
     }
