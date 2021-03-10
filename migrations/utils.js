@@ -21,10 +21,11 @@ module.exports.saveContract = async (contractName, abi, network, address) => {
     if (!module.exports.isTestnet(network) && !module.exports.isMainnet(network)) return
     const fileName = `./abi/${contractName}.json`
 
-    let jsonContract = ""
+    let jsonContract
     try {
         jsonContract = await readAsync(fileName)
     } catch (e) {
+        jsonContract = ""
     }
 
     const savedContract = jsonContract.length === 0 ? {networks: {}} : JSON.parse(jsonContract.toString())

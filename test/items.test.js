@@ -4,39 +4,20 @@ const {expect} = require('chai')
 const {expectEvent, expectRevert} = require('@openzeppelin/test-helpers')
 
 const {ContentClient} = require("../src/content/upload");
-const {token, bn, relay, ZERO, ZERO_ADDRESS} = require("./utils")
+const {bn, ZERO_ADDRESS} = require("./utils")
+const { RewardItems } = require("../src/contracts/RewardItems")
 
-const RewardItems = artifacts.require("RewardItems")
+const RewardItemsContract = artifacts.require("RewardItems")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
+
 
 contract("RewardItems", async function (accounts) {
     const [deployer, minter, user1, user2] = accounts
 
-    const itemReward = {
-        name: "Santiment",
-        description: "Santiment is a behavior analytics platform for cryptocurrencies, sourcing on-chain, social and development information on 900+ coins.",
-        image: "https://app.santiment.net/insights/read/mith-trading-airdrop-starts-with-40%25-pump-495",
-        external_url: "https://santiment.net/",
-        background_color: "f9fafc",
-        attributes: [
-            {
-                "trait_type": "kind",   
-                "value": "subscription"
-            },
-            {
-                "trait_type": "level",   
-                "value": "PRO"
-            },
-            {
-                "trait_type": "duration",
-                "display_type": "date",
-                "value": `${30 * 24 * 60 * 60}`,
-            }
-        ]
-    }
+    const itemReward = RewardItems.createSubsriptionItem("PRO", 30 * 24 * 60 * 60)
 
     before(async () => {
-        this.items = await RewardItems.deployed()
+        this.items = await RewardItemsContract.deployed()
         this.forwarder = await TrustedForwarder.deployed()
         this.content = new ContentClient()
     })
