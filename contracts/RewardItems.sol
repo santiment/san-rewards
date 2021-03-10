@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 import "./gsn/RelayRecipientUpgradeable.sol";
 
-contract RewardsItem is
+contract RewardItems is
     ERC721BurnableUpgradeable,
     RelayRecipientUpgradeable,
     AccessControlUpgradeable,
@@ -19,6 +19,7 @@ contract RewardsItem is
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    string public constant IPFS = "ipfs://";
 
     CountersUpgradeable.Counter private _tokenIdTracker;
 
@@ -39,7 +40,7 @@ contract RewardsItem is
     }
 
     function __RewardsItem_init(address admin) internal initializer {
-        __ERC721_init("Santiment Rewards", "SRWDS");
+        __ERC721_init("Santiment Reward Items", "SRI");
         __ERC721Burnable_init_unchained();
         __RelayRecipientUpgradeable_init();
         __AccessControl_init_unchained();
@@ -52,6 +53,9 @@ contract RewardsItem is
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
 
         _setupRole(MINTER_ROLE, admin);
+        _setupRole(PAUSER_ROLE, admin);
+
+        _setBaseURI(IPFS);
     }
 
     /**
@@ -82,6 +86,19 @@ contract RewardsItem is
 
     function unpause() external onlyRole(PAUSER_ROLE) {
         _unpause();
+    }
+
+    function setTrustedForwarder(address trustedForwarder)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        super._setTrustedForwarder(trustedForwarder);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+        super._beforeTokenTransfer(from, to, tokenId);
+
+        require(!paused(), "ERC721Pausable: token transfer while paused");
     }
 
     function _msgSender()

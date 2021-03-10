@@ -11,30 +11,7 @@ class TrustedForwarder {
     }
 
     async createRelayRequest(from, to, calldata, gas = 1e6) {
-
-        const nonce = await this.contract.getNonce(from).then(nonce => nonce.toString())
-        const chainId = await this.contract.getChainId()
-
-        const request = {
-            from,
-            to,
-            value: 0,
-            gas,
-            nonce,
-            data: calldata
-        }
-
-        const data = {
-            primaryType: 'ForwardRequest',
-            types: {EIP712Domain, ForwardRequest},
-            domain: {name: 'MinimalForwarder', version: '1.0.0', chainId, verifyingContract: this.contract.address},
-            message: request
-        }
-
-        return {
-            request,
-            signingData: data,
-        }
+        return _createRelayRequest(this.contract, from, to, calldata, gas)
     }
 
     async execute(args) {
@@ -50,6 +27,32 @@ class TrustedForwarder {
 
     static async getImplementationAddress(provider) {
         return await utils.getImplementationAddress(await provider.getNetwork(), contractNetworks)
+    }
+}
+
+async function _createRelayRequest(forwarder, from, to, calldata, gas) {
+    const nonce = await forwarder.getNonce(from).then(nonce => nonce.toString())
+    const chainId = await forwarder.getChainId()
+
+    const request = {
+        from,
+        to,
+        value: 0,
+        gas,
+        nonce,
+        data: calldata
+    }
+
+    const data = {
+        primaryType: 'ForwardRequest',
+        types: {EIP712Domain, ForwardRequest},
+        domain: {name: 'MinimalForwarder', version: '1.0.0', chainId, verifyingContract: forwarder.address},
+        message: request
+    }
+
+    return {
+        request,
+        signingData: data,
     }
 }
 

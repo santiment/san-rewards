@@ -1,15 +1,15 @@
 const {saveContract} = require("./utils")
 const {deployProxy} = require('@openzeppelin/truffle-upgrades');
 
-const RewardsItem = artifacts.require("RewardsItem")
+const RewardItems = artifacts.require("RewardItems")
 
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
-    const rewardsItem = await deployProxy(RewardsItem, [
+    const rewardsItem = await deployProxy(RewardItems, [
             owner,
         ], {deployer}
     )
 
-    await saveContract("RewardsItem", rewardsItem.abi, network, rewardsItem.address)
+    await saveContract("RewardItems", rewardsItem.abi, network, rewardsItem.address)
 }

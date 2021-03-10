@@ -34,6 +34,7 @@ contract('WalletHunters', function (accounts) {
 
         expect(await this.rewardsToken.hasRole(await this.rewardsToken.MINTER_ROLE(), this.hunters.address)).to.be.true
         expect(await this.hunters.hasRole(await this.hunters.MAYOR_ROLE(), mayor)).to.be.true
+        expect(await this.hunters.hasRole(await this.hunters.MAYOR_ROLE(), deployer)).to.be.true
     })
 
     it("Check hunters state", async () => {

@@ -15,6 +15,12 @@ contract('RewardsToken', function (accounts) {
         this.forwarder = await TrustedForwarder.deployed()
     })
 
+    it("Check access roles after deploy", async () => {
+        expect(await this.token.hasRole(await this.token.MINTER_ROLE(), deployer)).to.be.true
+        expect(await this.token.hasRole(await this.token.PAUSER_ROLE(), deployer)).to.be.true
+        expect(await this.token.hasRole(await this.token.SNAPSHOTER_ROLE(), deployer)).to.be.true
+    })
+
     it("Check forbidden methods", async () => {
         await expectRevert(this.token.transfer(user2, token('100'), {from: user1}), "Reason given: Forbidden")
         await expectRevert(this.token.approve(user2, token('100'), {from: user1}), "Reason given: Forbidden")

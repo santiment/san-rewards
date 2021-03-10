@@ -21,7 +21,7 @@ contract RewardsDistributor is
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
-    bytes32 public constant DISTRIBUTOR_ROLE = keccak256("MAYOR_ROLE");
+    bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLE");
     uint256 public constant MATH_PRECISION = 10000;
 
     struct Reward {

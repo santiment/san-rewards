@@ -6,6 +6,7 @@ const {bn} = require("./utils");
 const RewardsToken = artifacts.require("RewardsToken")
 const WalletHunters = artifacts.require("WalletHunters")
 const RewardsDistributor = artifacts.require("RewardsDistributor")
+const RewardItems = artifacts.require("RewardItems")
 
 contract("Proxy", async function (accounts) {
     const [owner] = accounts
@@ -15,6 +16,7 @@ contract("Proxy", async function (accounts) {
         this.rewardsToken = await RewardsToken.deployed()
         this.hunters = await WalletHunters.deployed()
         this.rewards = await RewardsDistributor.deployed()
+        this.items = await RewardItems.deployed()
     })
 
     it("Check RewardsToken", async () => {
@@ -28,7 +30,6 @@ contract("Proxy", async function (accounts) {
 
     it("Check WalletHunters", async () => {
         expect(await this.admin.getProxyAdmin(this.hunters.address)).to.be.equal(this.admin.address)
-        expect(await this.admin.owner()).to.be.equal(owner)
 
         expect(await this.hunters.name()).to.be.equal("Wallet Hunters, Sheriff Token")
         expect(await this.hunters.symbol()).to.be.equal("WHST")
@@ -37,6 +38,12 @@ contract("Proxy", async function (accounts) {
 
     it("Check RewardsDistributor", async () => {
         expect(await this.admin.getProxyAdmin(this.rewards.address)).to.be.equal(this.admin.address)
-        expect(await this.admin.owner()).to.be.equal(owner)
+    })
+
+    it("Check RewardItems", async () => {
+        expect(await this.admin.getProxyAdmin(this.items.address)).to.be.equal(this.admin.address)
+
+        expect(await this.hunters.name()).to.be.equal("Santiment Reward Items")
+        expect(await this.hunters.symbol()).to.be.equal("SRI")
     })
 })
