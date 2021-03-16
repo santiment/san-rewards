@@ -26,7 +26,7 @@ contract("Proxy", async function (accounts) {
         expect(await this.admin.owner()).to.be.equal(owner)
 
         expect(await this.rewardsToken.name()).to.be.equal("Santiment Rewards Share Token")
-        expect(await this.rewardsToken.symbol()).to.be.equal("SRHT")
+        expect(await this.rewardsToken.symbol()).to.be.equal("SRST")
         expect(await this.rewardsToken.decimals()).to.be.bignumber.equal(bn('18'))
     })
 

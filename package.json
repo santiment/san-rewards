@@ -1,9 +1,10 @@
 {
     "name": "san-rewards",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Santiment rewards smart contracts",
     "files": [
-        "/src"
+        "/src",
+        "/abi"
     ],
     "scripts": {
         "compile": "truffle compile --all",
