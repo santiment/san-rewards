@@ -32,7 +32,7 @@ contract RewardsToken is
     bytes32 public constant SNAPSHOTER_ROLE = keccak256("SNAPSHOTER_ROLE");
 
     string private constant ERC20_NAME = "Santiment Rewards Share Token";
-    string private constant ERC20_SYMBOL = "SRHT";
+    string private constant ERC20_SYMBOL = "SRST";
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");

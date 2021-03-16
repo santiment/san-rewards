@@ -1,4 +1,4 @@
-const {BN, ether, constants: {MAX_UINT256}} = require('@openzeppelin/test-helpers')
+const {BN, ether, constants: {MAX_UINT256, ZERO_ADDRESS}} = require('@openzeppelin/test-helpers')
 const ethSigUtil = require('eth-sig-util')
 
 const bn = (n) => new BN(n)
@@ -85,5 +85,6 @@ module.exports = {
     ForwardRequest,
     EIP712Domain,
     buildPermit,
-    relay
+    relay,
+    ZERO_ADDRESS
 }

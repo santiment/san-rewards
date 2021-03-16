@@ -87,8 +87,16 @@ contract WalletHunters is
         uint256 amount,
         bool voteFor
     );
-    event HunterRewardPaid(address indexed hunter, uint256 totalReward);
-    event SheriffRewardPaid(address indexed sheriff, uint256 totalReward);
+    event HunterRewardPaid(
+        address indexed hunter,
+        uint256[] requestIds,
+        uint256 totalReward
+    );
+    event SheriffRewardPaid(
+        address indexed sheriff,
+        uint256[] requestIds,
+        uint256 totalReward
+    );
     event RequestDiscarded(uint256 indexed requestId);
     event ConfigurationChanged(
         uint256 votingDuration,
@@ -299,7 +307,7 @@ contract WalletHunters is
             rewardsToken.mint(hunter, totalReward);
         }
 
-        emit HunterRewardPaid(hunter, totalReward);
+        emit HunterRewardPaid(hunter, requestIds, totalReward);
     }
 
     function claimSheriffRewards(address sheriff, uint256[] calldata requestIds)
@@ -322,7 +330,7 @@ contract WalletHunters is
             rewardsToken.mint(sheriff, totalReward);
         }
 
-        emit SheriffRewardPaid(sheriff, totalReward);
+        emit SheriffRewardPaid(sheriff, requestIds, totalReward);
     }
 
     function updateConfiguration(

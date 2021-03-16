@@ -1,0 +1,21 @@
+{
+	"name": "Santiment",
+	"description": "Santiment is a behavior analytics platform for cryptocurrencies, sourcing on-chain, social and development information on 900+ coins.",
+	"image": "https://ipfs.io/ipfs/QmSEBs5nEehihBKJfTqbSBtaJ5Mwdy3qiGqiviWnvps7ny?filename=Santiment.svg",
+	"external_url": "https://santiment.net/",
+	"background_color": "f9fafc",
+	"attributes": [
+		{
+			"trait_type": "kind",   
+			"value": "subscription"
+		},
+		{
+			"trait_type": "level",   
+			"value": "PRO"
+		},
+		{
+			"trait_type": "duration",
+			"value": "1 month"
+		}
+	]
+}

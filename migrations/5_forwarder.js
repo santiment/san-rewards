@@ -1,3 +1,4 @@
+/* global artifacts */
 const {saveContract} = require("./utils")
 
 const TrustedForwarder = artifacts.require("TrustedForwarder")
