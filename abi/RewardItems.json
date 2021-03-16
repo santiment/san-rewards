@@ -2,6 +2,9 @@
     "networks": {
         "development": {
             "address": "0x88B59f051F48A785d971F68e76F79960383e086a"
+        },
+        "rinkeby": {
+            "address": "0xA83FAE866b75d6A6e2AA1B4C1E1d6763F2540f39"
         }
     },
     "abi": [

@@ -1,0 +1,22 @@
+{
+	"name": "Santiment",
+	"description": "Santiment is a behavior analytics platform for cryptocurrencies, sourcing on-chain, social and development information on 900+ coins.",
+	"image": "https://app.santiment.net/insights/read/mith-trading-airdrop-starts-with-40%25-pump-495",
+	"external_url": "https://santiment.net/",
+	"background_color": "f9fafc",
+	"attributes": [
+		{
+			"trait_type": "kind",   
+			"value": "subscription"
+		},
+		{
+			"trait_type": "level",   
+			"value": "PRO"
+		},
+		{
+			"trait_type": "duration",
+			"display_type": "date",
+			"value": 2592000,
+		}
+	]
+}

@@ -3,7 +3,7 @@
 const {expect} = require('chai')
 const {expectEvent, expectRevert} = require('@openzeppelin/test-helpers')
 
-const {ContentClient} = require("../src/content/upload");
+const {ContentClient, LOCAL_IPFS_URL} = require("../src/content/upload");
 const {bn, ZERO_ADDRESS} = require("./utils")
 const { RewardItems } = require("../src/contracts/RewardItems")
 
@@ -19,7 +19,7 @@ contract("RewardItems", async function (accounts) {
     before(async () => {
         this.items = await RewardItemsContract.deployed()
         this.forwarder = await TrustedForwarder.deployed()
-        this.content = new ContentClient()
+        this.content = new ContentClient(LOCAL_IPFS_URL)
     })
 
     it("Check access roles after deploy", async () => {

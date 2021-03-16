@@ -37,7 +37,7 @@ class RewardItems {
         },
         {
             "trait_type": "level",   
-            "value": `${duration}`
+            "value": `${level}`
         },
         {
             "trait_type": "duration",

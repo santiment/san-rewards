@@ -1,3 +1,5 @@
+/* global contract, artifacts */
+
 const {expect} = require('chai')
 const {admin} = require('@openzeppelin/truffle-upgrades');
 
@@ -43,7 +45,7 @@ contract("Proxy", async function (accounts) {
     it("Check RewardItems", async () => {
         expect(await this.admin.getProxyAdmin(this.items.address)).to.be.equal(this.admin.address)
 
-        expect(await this.hunters.name()).to.be.equal("Santiment Reward Items")
-        expect(await this.hunters.symbol()).to.be.equal("SRI")
+        expect(await this.items.name()).to.be.equal("Santiment Reward Items")
+        expect(await this.items.symbol()).to.be.equal("SRI")
     })
 })

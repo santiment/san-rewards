@@ -1,10 +1,7 @@
 {
     "networks": {
-        "ropsten": {
-            "address": "0xe7a5Dd4Cb1Fa66dFeD27eC68ae5Bb90FE6d27b1b"
-        },
         "rinkeby": {
-            "address": "0xDA5FCaD76f897b93647B8FB49fA4e98147EDF01a"
+            "address": "0x88fDb7Ea40C1b50edDEDa17Cc457Ca357e371c7A"
         }
     },
     "abi": [

@@ -14,6 +14,7 @@
         "verify:rinkeby": "truffle run verify SanMock --network rinkeby",
         "ganache": "ganache-cli",
         "airdrop": "node ./scripts/cli.js airdrop ./scripts/airdrop.json",
+        "ipfs-add": "node ./scripts/cli.js ipfs-add ./scripts/reward-item.json",
         "prettier:solidity": "prettier --write contracts/*.sol contracts/**/*.sol",
         "lint": "solhint 'contracts/**/*.sol'",
         "test": "truffle test --no-color"
