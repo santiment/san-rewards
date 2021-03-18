@@ -1,7 +1,7 @@
 const {Contract} = require('ethers')
 const utils = require('./utils')
 
-const {abi, contractNetworks} = require('../../abi/RewardItems.json')
+const {abi, networks} = require('../../abi/RewardItems.json')
 
 const rewardItemTemplate = {
     name: "Santiment",
@@ -18,11 +18,11 @@ class RewardItems {
     }
 
     static async getAddress(provider) {
-        return await utils.getAddress(await provider.getNetwork(), contractNetworks)
+        return await utils.getAddress(await provider.getNetwork(), networks)
     }
 
     static async getImplementationAddress(provider) {
-        return await utils.getImplementationAddress(await provider.getNetwork(), contractNetworks)
+        return await utils.getImplementationAddress(await provider.getNetwork(), networks)
     }
 
     static createRewardItem(attributes = []) {
@@ -32,11 +32,11 @@ class RewardItems {
     static createSubsriptionItem(level, duration = 30*24*60*60) {
         return _createRewardItem([
         {
-            "trait_type": "kind",   
+            "trait_type": "kind",
             "value": "subscription"
         },
         {
-            "trait_type": "level",   
+            "trait_type": "level",
             "value": `${level}`
         },
         {
@@ -48,7 +48,7 @@ class RewardItems {
 }
 
 function _createRewardItem(attributes = []) {
-    return {...rewardItemTemplate, ...{ attributes }} 
+    return {...rewardItemTemplate, ...{ attributes }}
 }
 
 module.exports = {
