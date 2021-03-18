@@ -153,7 +153,8 @@ interface IWalletHunters {
      * @dev        Get sheriff vote information for wallet request.
      * @param      sheriff    The sheriff address.
      * @param      requestId  The request id.
-     * @return     amount of votes and vote for or against.
+     * @return     votes      amount of votes
+     * @return     voteFor    true - vote for, false - against.
      */
     function getVote(address sheriff, uint256 requestId)
         external
@@ -177,7 +178,8 @@ interface IWalletHunters {
     /**
      * @dev        Get amount of votes for wallet request, for and against.
      * @param      requestId  The request id.
-     * @return     votes for and votes against.
+     * @return     votesFor   amount of votes against.
+     * @return     votesAgainst amount of votes against.
      */
     function countVotes(uint256 requestId)
         external
