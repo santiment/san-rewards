@@ -70,9 +70,9 @@ contract('WalletHunters', function (accounts) {
         // fetch before balances
         const beforeBalances = await Promise.all(sheriffs.map(async sheriff => await this.sanToken.balanceOf(sheriff)))
 
-        // mint san tokens
+        // mint intial san tokens
         for (const {sheriff, index} of sheriffs.map((sheriff, index) => ({sheriff, index}))) {
-            await this.sanToken.mint(sheriff, sheriffsSanTokens[index], {from: deployer})
+            await this.sanToken.transfer(sheriff, sheriffsSanTokens[index], {from: deployer})
         }
 
         // check balance

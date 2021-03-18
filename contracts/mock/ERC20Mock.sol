@@ -13,15 +13,7 @@ contract ERC20Mock is ERC20 {
         _mint(_msgSender(), totalSupply * 1 ether);
     }
 
-    function mint(address account, uint256 amount) public {
-        _mint(account, amount);
-    }
-
-    function burn(address account, uint256 amount) public {
-        _burn(account, amount);
-    }
-
-    function burnFrom(address account, uint256 amount) public virtual {
+    function _burnFrom(address account, uint256 amount) internal {
         uint256 currentAllowance = allowance(account, _msgSender());
         require(
             currentAllowance >= amount,
@@ -29,6 +21,10 @@ contract ERC20Mock is ERC20 {
         );
         _approve(account, _msgSender(), currentAllowance - amount);
         _burn(account, amount);
+    }
+
+    function _burn(uint256 amount) internal {
+        _burn(_msgSender(), amount);
     }
 
     function transferFrom(
@@ -39,7 +35,7 @@ contract ERC20Mock is ERC20 {
         if (recipient != address(0)) {
             return super.transferFrom(sender, recipient, amount);
         } else {
-            burnFrom(sender, amount);
+            _burnFrom(sender, amount);
             return true;
         }
     }
@@ -52,24 +48,8 @@ contract ERC20Mock is ERC20 {
         if (recipient != address(0)) {
             return super.transfer(recipient, amount);
         } else {
-            burn(_msgSender(), amount);
+            _burn(amount);
             return true;
         }
-    }
-
-    function transferInternal(
-        address from,
-        address to,
-        uint256 value
-    ) public {
-        _transfer(from, to, value);
-    }
-
-    function approveInternal(
-        address owner,
-        address spender,
-        uint256 value
-    ) public {
-        _approve(owner, spender, value);
     }
 }
