@@ -7,7 +7,7 @@ const check = (condition, message) => {
 async function getAddress(network, contractNetworks) {
     const networkKey = `${network.name}`
 
-    await check(Object.keys(contractNetworks).contains(networkKey), `Contract is not deployed at ${networkKey}`)
+    await check(Object.keys(contractNetworks).includes(networkKey), `Contract is not deployed at ${networkKey}`)
 
     return contractNetworks[networkKey].address
 }
@@ -15,7 +15,7 @@ async function getAddress(network, contractNetworks) {
 async function getImplementationAddress(network, contractNetworks) {
     const networkKey = `${network.name}`
 
-    await check(Object.keys(contractNetworks).contains(networkKey), `Contract is not deployed at ${networkKey}`)
+    await check(Object.keys(contractNetworks).includes(networkKey), `Contract is not deployed at ${networkKey}`)
 
     return contractNetworks[networkKey].implementation
 }
