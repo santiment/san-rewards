@@ -4,7 +4,7 @@ const {expectEvent, expectRevert, send, ether} = require('@openzeppelin/test-hel
 const Wallet = require('ethereumjs-wallet').default;
 const ethers = require('ethers')
 const {SanToken} = require("../src/contracts/SanToken.js")
-const {token, bn, relay, relayUsingSan} = require("./utils")
+const {token, bn, relay} = require("./utils")
 
 const RewardsDistributorContract = artifacts.require("RewardsDistributor")
 const RewardsToken = artifacts.require("RewardsToken")
@@ -52,7 +52,7 @@ contract("RewardsDistributor", async function (accounts) {
         expect(await this.forwarder.hasRole(await this.forwarder.RELAYER_ROLE(), relayer)).to.be.true
     })
 
-    const rewardIds = [1].map(it => bn(it))
+    const rewardIds = [1, 2, 3].map(it => bn(it))
     const [user1Tokens, user2Tokens, user3Tokens, user4Tokens] = [token('1000'), token('5000'), token('10000'), token('16000')]
     const totalTokens = user1Tokens.add(user2Tokens).add(user3Tokens).add(user4Tokens)
     const totalReward = token('20000')

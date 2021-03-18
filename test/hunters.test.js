@@ -49,8 +49,13 @@ contract('WalletHunters', function (accounts) {
         expect(configuration.minimalDepositForSheriff).to.be.bignumber.equal(minimalDepositForSheriff)
     })
 
+    it("Check forbidden methods", async () => {
+        await expectRevert(this.hunters.transfer(sheriff1, token('100'), {from: sheriff1}), "Reason given: Forbidden")
+        await expectRevert(this.hunters.approve(sheriff1, token('100'), {from: sheriff1}), "Reason given: Forbidden")
+    })
+
     it("Grant relayer role", async () => {
-        expect(await this.hunters.isTrustedForwarder(forwarder.address)).to.be.true
+        expect(await this.hunters.isTrustedForwarder(this.forwarder.address)).to.be.true
 
         let receipt = await this.forwarder.grantRole(await this.forwarder.RELAYER_ROLE(), relayer, {from: deployer})
         expectEvent(receipt, "RoleGranted", {
