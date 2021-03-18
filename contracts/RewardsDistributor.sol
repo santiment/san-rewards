@@ -242,10 +242,8 @@ contract RewardsDistributor is
         } else {
             return
                 share
-                    .mul(MATH_PRECISION)
-                    .div(_reward.totalShare)
                     .mul(_reward.totalReward)
-                    .div(MATH_PRECISION);
+                    .div(_reward.totalShare);
         }
     }
 

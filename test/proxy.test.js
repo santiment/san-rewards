@@ -1,5 +1,4 @@
 /* global contract, artifacts */
-
 const {expect} = require('chai')
 const {admin} = require('@openzeppelin/truffle-upgrades');
 

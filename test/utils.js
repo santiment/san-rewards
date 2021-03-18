@@ -43,6 +43,18 @@ const buildPermit = async (token, owner, spender, value, version = '1', deadline
 }
 
 async function relay(forwarder, relayer, fromWallet, to, calldata) {
+    const args = await makeRelayArguments(forwarder, relayer, fromWallet, to, calldata)
+
+    return await forwarder.execute(...args, {from: relayer})
+}
+
+async function relayUsingSan(forwarder, relayer, fromWallet, to, calldata, fee) {
+    const args = await makeRelayArguments(forwarder, relayer, fromWallet, to, calldata)
+
+    return await forwarder.executeUsingSan(...args, fee, {from: relayer})
+}
+
+async function makeRelayArguments(forwarder, relayer, fromWallet, to, calldata) {
 
     const from = fromWallet.getAddressString()
 
@@ -74,7 +86,7 @@ async function relay(forwarder, relayer, fromWallet, to, calldata) {
 
     await forwarder.verify(...args)
 
-    return await forwarder.execute(...args, {from: relayer})
+    return args
 }
 
 module.exports = {
@@ -86,5 +98,6 @@ module.exports = {
     EIP712Domain,
     buildPermit,
     relay,
+    relayUsingSan,
     ZERO_ADDRESS
 }

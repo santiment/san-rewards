@@ -402,7 +402,7 @@ contract WalletHunters is
                 walletRequests[requestId]
                     .reward
                     .mul(
-                    MAX_PERCENT - walletRequests[requestId].sheriffsRewardShare
+                    MAX_PERCENT.sub(walletRequests[requestId].sheriffsRewardShare)
                 )
                     .div(MAX_PERCENT);
         } else {
@@ -524,9 +524,9 @@ contract WalletHunters is
             return false;
         }
         return
-            requestVotings[requestId].votesFor.mul(MAX_PERCENT).div(
-                totalVotes
-            ) > SUPER_MAJORITY;
+            requestVotings[requestId].votesFor
+                .mul(MAX_PERCENT)
+                .div(totalVotes) > SUPER_MAJORITY;
     }
 
     function votingState(uint256 requestId)

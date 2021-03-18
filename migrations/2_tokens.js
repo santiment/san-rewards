@@ -12,7 +12,7 @@ module.exports = async (deployer, network, accounts) => {
     await saveContract("RewardsToken", rewardsToken.abi, network, rewardsToken.address)
 
     if (isMainnet(network)) {
-        const sanAddress = await readAddress("San", network)
+        const sanAddress = await readAddress("San", 'mainnet')
         await SanMock.at(sanAddress)
     } else {
         const sanToken = await deployer.deploy(SanMock, 1_000_000_000)

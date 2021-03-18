@@ -61,7 +61,6 @@ contract MinimalForwarder is EIP712 {
 
     function execute(ForwardRequest calldata req, bytes calldata signature)
         public
-        payable
         virtual
         returns (bool, bytes memory)
     {
@@ -71,7 +70,6 @@ contract MinimalForwarder is EIP712 {
         );
         _nonces[req.from] = req.nonce + 1;
 
-        // solhint-disable-next-line avoid-low-level-calls
         bytes memory returndata =
             req.to.functionCall(abi.encodePacked(req.data, req.from));
 

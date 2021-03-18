@@ -1,3 +1,4 @@
+/* global artifacts */
 const {saveContract} = require("./utils")
 const web3 = require('web3');
 const {deployProxy} = require('@openzeppelin/truffle-upgrades');

@@ -2,6 +2,9 @@
     "networks": {
         "rinkeby": {
             "address": "0x985DAFb0fA61eb3C59B897E0E10C6f7AA27eA1Fc"
+        },
+        "mainnet": {
+            "address": "0x7C5A0CE9267ED19B22F8cae653F198e3E8daf098"
         }
     },
     "abi": [

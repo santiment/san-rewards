@@ -1,3 +1,4 @@
+/* global contract, artifacts */
 const {expect} = require('chai')
 const {constants: {ZERO_ADDRESS}} = require('@openzeppelin/test-helpers')
 const {expectEvent, expectRevert} = require('@openzeppelin/test-helpers')

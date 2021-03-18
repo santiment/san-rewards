@@ -1,4 +1,5 @@
-const {balance, expectEvent, expectRevert, ether, time} = require('@openzeppelin/test-helpers')
+/* global contract, artifacts */
+const {balance, expectEvent, expectRevert, time} = require('@openzeppelin/test-helpers')
 const {expect} = require('chai')
 const Wallet = require('ethereumjs-wallet').default
 
