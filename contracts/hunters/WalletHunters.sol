@@ -68,43 +68,12 @@ contract WalletHunters is
     IERC20Upgradeable public stakingToken;
     IERC20Mintable public rewardsToken;
 
-    Configuration public configuration;
+    Configuration public override configuration;
     CountersUpgradeable.Counter public requestCounter;
-    mapping(uint256 => WalletRequest) public walletRequests;
+    mapping(uint256 => WalletRequest) public override walletRequests;
     mapping(uint256 => RequestVoting) private requestVotings;
-    mapping(address => EnumerableSetUpgradeable.UintSet) private activeRequests;
-
-    event NewWalletRequest(
-        uint256 indexed requestId,
-        address indexed hunter,
-        uint256 reward
-    );
-    event Staked(address indexed sheriff, uint256 amount);
-    event Withdrawn(address indexed sheriff, uint256 amount);
-    event Voted(
-        uint256 indexed requestId,
-        address sheriff,
-        uint256 amount,
-        bool voteFor
-    );
-    event HunterRewardPaid(
-        address indexed hunter,
-        uint256[] requestIds,
-        uint256 totalReward
-    );
-    event SheriffRewardPaid(
-        address indexed sheriff,
-        uint256[] requestIds,
-        uint256 totalReward
-    );
-    event RequestDiscarded(uint256 indexed requestId);
-    event ConfigurationChanged(
-        uint256 votingDuration,
-        uint256 sheriffsRewardShare,
-        uint256 fixedSheriffReward,
-        uint256 minimalVotesForRequest,
-        uint256 minimalDepositForSheriff
-    );
+    mapping(address => EnumerableSetUpgradeable.UintSet)
+        private _activeRequests;
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
@@ -206,7 +175,7 @@ contract WalletHunters is
         _request.finishTime = block.timestamp.add(configuration.votingDuration);
 
         // ignore return
-        activeRequests[hunter].add(id);
+        _activeRequests[hunter].add(id);
 
         emit NewWalletRequest(id, hunter, reward);
 
@@ -237,7 +206,7 @@ contract WalletHunters is
         uint256 amount = balanceOf(sheriff);
 
         require(
-            activeRequests[sheriff].add(requestId),
+            _activeRequests[sheriff].add(requestId),
             "User is already participated"
         );
         requestVotings[requestId].votes[sheriff].amount = amount;
@@ -298,7 +267,7 @@ contract WalletHunters is
             uint256 requestId = requestIds[i];
 
             uint256 reward = hunterReward(hunter, requestId);
-            activeRequests[hunter].remove(requestId);
+            _activeRequests[hunter].remove(requestId);
 
             totalReward = totalReward.add(reward);
         }
@@ -321,7 +290,7 @@ contract WalletHunters is
             uint256 requestId = requestIds[i];
 
             uint256 reward = sheriffReward(sheriff, requestId);
-            activeRequests[sheriff].remove(requestId);
+            _activeRequests[sheriff].remove(requestId);
 
             totalReward = totalReward.add(reward);
         }
@@ -391,7 +360,10 @@ contract WalletHunters is
             hunter == walletRequests[requestId].hunter,
             "Hunter isn't valid for request"
         );
-        require(activeRequests[hunter].contains(requestId), "Already rewarded");
+        require(
+            _activeRequests[hunter].contains(requestId),
+            "Already rewarded"
+        );
 
         if (walletRequests[requestId].discarded) {
             return 0;
@@ -424,7 +396,7 @@ contract WalletHunters is
             "Sheriff doesn't vote"
         );
         require(
-            activeRequests[sheriff].contains(requestId),
+            _activeRequests[sheriff].contains(requestId),
             "Already rewarded"
         );
 
@@ -454,13 +426,22 @@ contract WalletHunters is
         super._setTrustedForwarder(trustedForwarder);
     }
 
+    function activeRequests(address user)
+        external
+        view
+        override
+        returns (bytes32[] memory)
+    {
+        return _activeRequests[user]._inner._values;
+    }
+
     function activeRequestsLength(address user)
         external
         view
         override
         returns (uint256)
     {
-        return activeRequests[user].length();
+        return _activeRequests[user].length();
     }
 
     function activeRequest(address user, uint256 index)
@@ -469,7 +450,7 @@ contract WalletHunters is
         override
         returns (uint256)
     {
-        return activeRequests[user].at(index);
+        return _activeRequests[user].at(index);
     }
 
     function countVotes(uint256 requestId)
@@ -504,8 +485,8 @@ contract WalletHunters is
     {
         locked = 0;
 
-        for (uint256 i = 0; i < activeRequests[user].length(); i = i.add(1)) {
-            uint256 requestId = activeRequests[user].at(i);
+        for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
+            uint256 requestId = _activeRequests[user].at(i);
             if (!votingState(requestId)) {
                 // voting finished
                 continue;
@@ -516,6 +497,19 @@ contract WalletHunters is
                 locked = votes;
             }
         }
+    }
+
+    function walletApproved(uint256 requestId)
+        external
+        view
+        override
+        returns (bool)
+    {
+        require(!votingState(requestId), "Voting is not finished");
+        if (walletRequests[requestId].discarded) {
+            return false;
+        }
+        return _walletApproved(requestId);
     }
 
     function _walletApproved(uint256 requestId) internal view returns (bool) {

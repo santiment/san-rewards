@@ -121,6 +121,8 @@ contract('WalletHunters', function (accounts) {
         let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
         await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {reward, requestId})
 
+        await expectRevert(this.hunters.walletApproved(requestId), "Voting is not finished")
+
         const request = await this.hunters.walletRequests(requestId)
         expect(request.hunter.toLowerCase()).to.be.equal(hunter.toLowerCase())
         expect(request.reward).to.be.bignumber.equal(reward)
@@ -183,6 +185,7 @@ contract('WalletHunters', function (accounts) {
             const request = await this.hunters.walletRequests(requestId)
             expect(request.finishTime).to.be.bignumber.lte(await time.latest())
             expect(await this.hunters.votingState(requestId)).to.be.false
+            expect(await this.hunters.walletApproved(requestId)).to.be.true
         })
 
         it(`Withdraw sheriff reward #${requestId}`, async () => {
@@ -229,6 +232,7 @@ contract('WalletHunters', function (accounts) {
         const request = await this.hunters.walletRequests(discardedRequestId)
         expect(request.discarded).to.be.true
         expect(await this.hunters.votingState(discardedRequestId)).to.be.false
+        expect(await this.hunters.walletApproved(discardedRequestId)).to.be.false
 
         for (const {sheriff, tokens} of sheriffs.map((sheriff) => ({
             sheriff,
@@ -291,11 +295,8 @@ contract('WalletHunters', function (accounts) {
     })
 
     it("Exit sheriff", async () => {
-        const amountRequests = await this.hunters.activeRequestsLength(sheriff3)
-        const requestIds = []
-        for (let i = 0; i < amountRequests; i++) {
-            requestIds.push(await this.hunters.activeRequest(sheriff3, bn(i)))
-        }
+        const requestIds = await this.hunters.activeRequests(sheriff3)
+
         await this.hunters.exit(sheriff3, requestIds, {from: sheriff3})
         await expectRevert(this.hunters.exit(sheriff3, [], {from: sheriff3}), "Cannot withdraw 0")
 
