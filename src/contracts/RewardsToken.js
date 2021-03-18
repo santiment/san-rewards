@@ -1,7 +1,7 @@
 const {Contract} = require('ethers')
 const utils = require('./utils')
 
-const {abi, contractNetworks} = require('../../abi/RewardsToken.json')
+const {abi, networks} = require('../../abi/RewardsToken.json')
 class RewardsToken {
 
     constructor(address, provider) {
@@ -9,11 +9,11 @@ class RewardsToken {
     }
 
     static async getAddress(provider) {
-        return await utils.getAddress(await provider.getNetwork(), contractNetworks)
+        return await utils.getAddress(await provider.getNetwork(), networks)
     }
 
     static async getImplementationAddress(provider) {
-        return await utils.getImplementationAddress(await provider.getNetwork(), contractNetworks)
+        return await utils.getImplementationAddress(await provider.getNetwork(), networks)
     }
 }
 

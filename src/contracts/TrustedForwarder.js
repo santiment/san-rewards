@@ -2,7 +2,7 @@ const {Contract} = require('ethers')
 const utils = require('./utils')
 const {EIP712Domain, ForwardRequest} = require("./signingTypes");
 
-const {abi, contractNetworks} = require('../../abi/TrustedForwarder.json')
+const {abi, networks} = require('../../abi/TrustedForwarder.json')
 
 class TrustedForwarder {
 
@@ -22,11 +22,11 @@ class TrustedForwarder {
     }
 
     static async getAddress(provider) {
-        return await utils.getAddress(await provider.getNetwork(), contractNetworks)
+        return await utils.getAddress(await provider.getNetwork(), networks)
     }
 
     static async getImplementationAddress(provider) {
-        return await utils.getImplementationAddress(await provider.getNetwork(), contractNetworks)
+        return await utils.getImplementationAddress(await provider.getNetwork(), networks)
     }
 }
 
