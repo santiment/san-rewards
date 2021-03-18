@@ -23,12 +23,19 @@ contract ERC20Mock is ERC20 {
 
     function burnFrom(address account, uint256 amount) public virtual {
         uint256 currentAllowance = allowance(account, _msgSender());
-        require(currentAllowance >= amount, "ERC20: burn amount exceeds allowance");
+        require(
+            currentAllowance >= amount,
+            "ERC20: burn amount exceeds allowance"
+        );
         _approve(account, _msgSender(), currentAllowance - amount);
         _burn(account, amount);
     }
 
-    function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public virtual override returns (bool) {
         if (recipient != address(0)) {
             return super.transferFrom(sender, recipient, amount);
         } else {
@@ -37,7 +44,11 @@ contract ERC20Mock is ERC20 {
         }
     }
 
-    function transfer(address recipient, uint256 amount) public override returns (bool) {
+    function transfer(address recipient, uint256 amount)
+        public
+        override
+        returns (bool)
+    {
         if (recipient != address(0)) {
             return super.transfer(recipient, amount);
         } else {

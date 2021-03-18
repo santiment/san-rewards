@@ -30,28 +30,16 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         sanToken = IERC20(_sanToken);
     }
 
-    function execute(
-        ForwardRequest calldata req, 
-        bytes calldata signature
-    )
+    function execute(ForwardRequest calldata req, bytes calldata signature)
         public
         override
         onlyRole(RELAYER_ROLE)
         returns (bool success, bytes memory ret)
     {
-        (success, ret) = super.execute(req, signature);
-    }
+        if (req.gas != 0) {
+            sanToken.safeTransferFrom(req.from, address(0), req.gas);
+        }
 
-    function executeUsingSan(
-        ForwardRequest calldata req, 
-        bytes calldata signature,
-        uint256 fee
-    )
-        public
-        onlyRole(RELAYER_ROLE)
-        returns (bool success, bytes memory ret)
-    {
-        sanToken.safeTransferFrom(req.from, address(0), fee);
         (success, ret) = super.execute(req, signature);
     }
 }

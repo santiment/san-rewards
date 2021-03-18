@@ -136,10 +136,10 @@ contract("RewardsDistributor", async function (accounts) {
         const rewardIdsStr = rewardIds.map(it => it.toString(10)).reverse();
 
         let calldata = this.rewards.contract.methods["claimRewards"](user2, rewardIdsStr).encodeABI()
-        await expectRevert(relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata), "Sender must be user")
+        await expectRevert(relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata, token('0')), "Sender must be user")
 
         calldata = this.rewards.contract.methods["claimRewards"](user3, rewardIdsStr).encodeABI()
-        let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata)
+        let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata, token('0'))
         await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
             reward: balanceBeforeUser3.add(expectedReward)
         })
@@ -155,14 +155,14 @@ contract("RewardsDistributor", async function (accounts) {
         const rewardIdsStr = rewardIds.map(it => it.toString(10)).reverse();
 
         const calldata = this.rewards.contract.methods["claimRewards"](user4, rewardIdsStr).encodeABI()
-        await expectRevert(relayUsingSan(this.forwarder, relayer, user4Wallet, this.rewards.address, calldata, token(sanFee)), "ERC20: burn amount exceeds allowance")
+        await expectRevert(relay(this.forwarder, relayer, user4Wallet, this.rewards.address, calldata, token(sanFee)), "ERC20: burn amount exceeds allowance")
 
         await _approveSanUsingWallet(user4Wallet, sanFee)
 
         const expectedReward = token('10000').mul(bn(rewardIds.length))
         const balanceBeforeUser4 = await this.sanToken.balanceOf(user4)
 
-        let receipt = await relayUsingSan(this.forwarder, relayer, user4Wallet, this.rewards.address, calldata, token(sanFee))
+        let receipt = await relay(this.forwarder, relayer, user4Wallet, this.rewards.address, calldata, token(sanFee))
         await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
             reward: expectedReward
         })

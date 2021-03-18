@@ -240,10 +240,7 @@ contract RewardsDistributor is
         if (share == 0) {
             return 0;
         } else {
-            return
-                share
-                    .mul(_reward.totalReward)
-                    .div(_reward.totalShare);
+            return share.mul(_reward.totalReward).div(_reward.totalShare);
         }
     }
 

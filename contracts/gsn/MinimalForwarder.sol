@@ -18,7 +18,7 @@ contract MinimalForwarder is EIP712 {
         address from;
         address to;
         uint256 value;
-        uint256 gas;
+        uint256 gas; // amount of san tokens
         uint256 nonce;
         bytes data;
     }
@@ -30,7 +30,7 @@ contract MinimalForwarder is EIP712 {
 
     mapping(address => uint256) private _nonces;
 
-    constructor() EIP712("MinimalForwarder", "1.0.0") {}
+    constructor() EIP712("SantimentForwarder", "1.0.0") {}
 
     function getNonce(address from) public view returns (uint256) {
         return _nonces[from];

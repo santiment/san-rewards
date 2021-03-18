@@ -113,7 +113,7 @@ contract('WalletHunters', function (accounts) {
         const hunterBalanceTracker = await balance.tracker(hunter)
 
         const calldata = this.hunters.contract.methods["submitRequest"](hunter, reward).encodeABI()
-        let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
+        let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
         await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {reward, requestId})
 
         const request = await this.hunters.walletRequests(requestId)
@@ -254,9 +254,9 @@ contract('WalletHunters', function (accounts) {
         expect(actualReward).to.be.bignumber.equal(totalReward.mul(maxPercent.sub(sheriffsRewardShare)).div(maxPercent))
 
         const calldata = this.hunters.contract.methods["claimHunterReward"](hunter, requestIds).encodeABI()
-        let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
+        let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
         await expectEvent.inTransaction(receipt.tx, this.hunters, "HunterRewardPaid", {totalReward: actualReward})
-        await expectRevert(relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata), "Already rewarded")
+        await expectRevert(relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0')), "Already rewarded")
 
         expect(await this.rewardsToken.balanceOf(hunter)).to.be.bignumber.equal(balanceBefore.add(actualReward))
         expect(await hunterBalanceTracker.delta()).to.be.bignumber.equal('0')

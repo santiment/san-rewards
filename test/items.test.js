@@ -9,7 +9,6 @@ const { RewardItems } = require("../src/contracts/RewardItems")
 const RewardItemsContract = artifacts.require("RewardItems")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
 
-
 contract("RewardItems", async function (accounts) {
     const [deployer, minter, user1, user2] = accounts
 
@@ -86,7 +85,7 @@ contract("RewardItems", async function (accounts) {
     })
 
     it("Burn item", async () => {
-        
+
         await expectRevert(this.items.burn(0, {from: user1}), "ERC721Burnable: caller is not owner nor approved")
 
         let receipt = await this.items.burn(0, {from: user2})
