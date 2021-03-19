@@ -426,13 +426,21 @@ contract WalletHunters is
         super._setTrustedForwarder(trustedForwarder);
     }
 
-    function activeRequests(address user)
+    function activeRequests(address user, uint256 startIndex, uint256 pageSize)
         external
         view
         override
-        returns (bytes32[] memory)
+        returns (uint256[] memory)
     {
-        return _activeRequests[user]._inner._values;
+        require(startIndex + pageSize <= _activeRequests[user].length(), "Read index out of bounds");
+
+        uint256[] memory result = new uint256[](pageSize);
+
+        for (uint256 i = 0; i < pageSize; i++) {
+            result[i] = _activeRequests[user].at(i + startIndex);
+        }
+
+        return result;
     }
 
     function activeRequestsLength(address user)

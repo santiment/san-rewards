@@ -295,7 +295,8 @@ contract('WalletHunters', function (accounts) {
     })
 
     it("Exit sheriff", async () => {
-        const requestIds = await this.hunters.activeRequests(sheriff3)
+        const amountRequests = await this.hunters.activeRequestsLength(sheriff3)
+        const requestIds = await this.hunters.activeRequests(sheriff3, 0, amountRequests)
 
         await this.hunters.exit(sheriff3, requestIds, {from: sheriff3})
         await expectRevert(this.hunters.exit(sheriff3, [], {from: sheriff3}), "Cannot withdraw 0")

@@ -106,10 +106,10 @@ interface IWalletHunters {
      * @param      user   The user address
      * @return     array of request ids
      */
-    function activeRequests(address user)
+    function activeRequests(address user, uint256 startIndex, uint256 pageSize)
         external
         view
-        returns (bytes32[] memory);
+        returns (uint256[] memory);
 
     /**
      * @dev        Return amount of requests that user participates at this time as sheriff or
