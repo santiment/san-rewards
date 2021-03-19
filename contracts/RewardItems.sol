@@ -40,7 +40,7 @@ contract RewardItems is
     }
 
     function __RewardsItem_init(address admin) internal initializer {
-        __ERC721_init("Santiment Reward Items", "SRI");
+        __ERC721_init("Reward Items", "SRI");
         __ERC721Burnable_init_unchained();
         __RelayRecipientUpgradeable_init();
         __AccessControl_init_unchained();

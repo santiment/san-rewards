@@ -30,7 +30,7 @@ contract MinimalForwarder is EIP712 {
 
     mapping(address => uint256) private _nonces;
 
-    constructor() EIP712("SantimentForwarder", "1.0.0") {}
+    constructor() EIP712("TrustedForwarder", "1.0.0") {}
 
     function getNonce(address from) public view returns (uint256) {
         return _nonces[from];

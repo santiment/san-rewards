@@ -46,7 +46,7 @@ async function _createRelayRequest(forwarder, from, to, calldata, gas) {
     const data = {
         primaryType: 'ForwardRequest',
         types: {EIP712Domain, ForwardRequest},
-        domain: {name: 'SantimentForwarder', version: '1.0.0', chainId, verifyingContract: forwarder.address},
+        domain: {name: 'TrustedForwarder', version: '1.0.0', chainId, verifyingContract: forwarder.address},
         message: request
     }
 

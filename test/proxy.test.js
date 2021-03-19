@@ -24,7 +24,7 @@ contract("Proxy", async function (accounts) {
         expect(await this.admin.getProxyAdmin(this.rewardsToken.address)).to.be.equal(this.admin.address)
         expect(await this.admin.owner()).to.be.equal(owner)
 
-        expect(await this.rewardsToken.name()).to.be.equal("Santiment Rewards Share Token")
+        expect(await this.rewardsToken.name()).to.be.equal("Rewards Share Token")
         expect(await this.rewardsToken.symbol()).to.be.equal("SRST")
         expect(await this.rewardsToken.decimals()).to.be.bignumber.equal(bn('18'))
     })
@@ -44,7 +44,7 @@ contract("Proxy", async function (accounts) {
     it("Check RewardItems", async () => {
         expect(await this.admin.getProxyAdmin(this.items.address)).to.be.equal(this.admin.address)
 
-        expect(await this.items.name()).to.be.equal("Santiment Reward Items")
+        expect(await this.items.name()).to.be.equal("Reward Items")
         expect(await this.items.symbol()).to.be.equal("SRI")
     })
 })

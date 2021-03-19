@@ -6,7 +6,7 @@ const Wallet = require('ethereumjs-wallet').default
 const {bn, token, ZERO, relay} = require("./utils")
 
 const RewardsToken = artifacts.require("RewardsToken")
-const SanMock = artifacts.require("SanMock")
+const RealTokenMock = artifacts.require("RealTokenMock")
 const WalletHunters = artifacts.require("WalletHunters")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
 
@@ -25,7 +25,7 @@ contract('WalletHunters', function (accounts) {
 
     before(async () => {
         this.rewardsToken = await RewardsToken.deployed()
-        this.sanToken = await SanMock.deployed()
+        this.realToken = await RealTokenMock.deployed()
         this.hunters = await WalletHunters.deployed()
         this.forwarder = await TrustedForwarder.deployed()
     })
@@ -40,7 +40,7 @@ contract('WalletHunters', function (accounts) {
 
     it("Check hunters state", async () => {
         expect(await this.hunters.rewardsToken()).to.be.equal(this.rewardsToken.address)
-        expect(await this.hunters.stakingToken()).to.be.equal(this.sanToken.address)
+        expect(await this.hunters.stakingToken()).to.be.equal(this.realToken.address)
         const configuration = await this.hunters.configuration()
         expect(configuration.votingDuration).to.be.bignumber.equal(votingDuration)
         expect(configuration.sheriffsRewardShare).to.be.bignumber.equal(sheriffsRewardShare)
@@ -68,16 +68,16 @@ contract('WalletHunters', function (accounts) {
 
     it(`Mint staking tokens`, async () => {
         // fetch before balances
-        const beforeBalances = await Promise.all(sheriffs.map(async sheriff => await this.sanToken.balanceOf(sheriff)))
+        const beforeBalances = await Promise.all(sheriffs.map(async sheriff => await this.realToken.balanceOf(sheriff)))
 
         // mint intial san tokens
         for (const {sheriff, index} of sheriffs.map((sheriff, index) => ({sheriff, index}))) {
-            await this.sanToken.transfer(sheriff, sheriffsSanTokens[index], {from: deployer})
+            await this.realToken.transfer(sheriff, sheriffsSanTokens[index], {from: deployer})
         }
 
         // check balance
         for (const {sheriff, index} of sheriffs.map((sheriff, index) => ({sheriff, index}))) {
-            expect(await this.sanToken.balanceOf(sheriff)).to.be.bignumber.equal(beforeBalances[index].add(sheriffsSanTokens[index]))
+            expect(await this.realToken.balanceOf(sheriff)).to.be.bignumber.equal(beforeBalances[index].add(sheriffsSanTokens[index]))
         }
     })
 
@@ -90,7 +90,7 @@ contract('WalletHunters', function (accounts) {
         // stake sheriff tokens
         for (const {sheriff, index} of sheriffs.map((sheriff, index) => ({sheriff, index}))) {
             let amount = sheriffsSanTokens[index]
-            await this.sanToken.approve(this.hunters.address, amount, {from: sheriff})
+            await this.realToken.approve(this.hunters.address, amount, {from: sheriff})
             let receipt = await this.hunters.stake(sheriff, amount, {from: sheriff})
             expectEvent(receipt, "Staked", {sheriff, amount})
             await expectRevert(this.hunters.stake(sheriff, amount, {from: sheriff}), "ERC20: transfer amount exceeds balance")
@@ -287,8 +287,8 @@ contract('WalletHunters', function (accounts) {
         expect(await this.hunters.balanceOf(sheriff1)).to.be.bignumber.equal(ZERO)
         expect(await this.hunters.balanceOf(sheriff2)).to.be.bignumber.equal(ZERO)
 
-        expect(await this.sanToken.balanceOf(sheriff1)).to.be.bignumber.equal(sheriffsSanTokens[0])
-        expect(await this.sanToken.balanceOf(sheriff2)).to.be.bignumber.equal(sheriffsSanTokens[1])
+        expect(await this.realToken.balanceOf(sheriff1)).to.be.bignumber.equal(sheriffsSanTokens[0])
+        expect(await this.realToken.balanceOf(sheriff2)).to.be.bignumber.equal(sheriffsSanTokens[1])
 
         expect(await this.rewardsToken.balanceOf(sheriff1)).to.be.bignumber.equal(bn('1090909090909090909089'))
         expect(await this.rewardsToken.balanceOf(sheriff2)).to.be.bignumber.equal(ZERO)
@@ -303,7 +303,7 @@ contract('WalletHunters', function (accounts) {
 
         expect(await this.hunters.balanceOf(sheriff3)).to.be.bignumber.equal(ZERO)
 
-        expect(await this.sanToken.balanceOf(sheriff3)).to.be.bignumber.equal(sheriffsSanTokens[2])
+        expect(await this.realToken.balanceOf(sheriff3)).to.be.bignumber.equal(sheriffsSanTokens[2])
         expect(await this.rewardsToken.balanceOf(sheriff3)).to.be.bignumber.equal(bn('10909090909090909090908'))
     })
 })
