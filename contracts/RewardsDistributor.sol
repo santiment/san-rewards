@@ -34,10 +34,10 @@ contract RewardsDistributor is
     IERC20Upgradeable public rewardsToken;
     IERC20Snapshot public snapshotToken;
 
-    uint256 public lastSnapshotId;
     mapping(uint256 => Reward) private rewards;
-    CountersUpgradeable.Counter public rewardsCounter;
     mapping(uint256 => mapping(address => bool)) private paidUsers;
+    CountersUpgradeable.Counter public rewardsCounter;
+    uint256 public lastSnapshotId;
 
     event RewardDistributed(uint256 indexed rewardId, uint256 totalReward);
     event RewardPaid(address indexed user, uint256 reward);
@@ -81,6 +81,8 @@ contract RewardsDistributor is
 
         rewardsToken = IERC20Upgradeable(rewardsToken_);
         snapshotToken = IERC20Snapshot(snapshotToken_);
+
+        lastSnapshotId = 0;
 
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _setupRole(DISTRIBUTOR_ROLE, admin);

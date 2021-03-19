@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
 
 import "../interfaces/IWalletHunters.sol";
 import "../utils/AccountingTokenUpgradeable.sol";
@@ -404,18 +405,31 @@ contract WalletHunters is
             return 0;
         }
 
-        if (_walletApproved(requestId)) {
+        if (
+            _walletApproved(requestId) &&
+            requestVotings[requestId].votes[sheriff].voteFor
+        ) {
             uint256 reward = walletRequests[requestId].reward;
             uint256 votes = _getSheriffVotes(sheriff, requestId, true);
             uint256 totalVotes = requestVotings[requestId].votesFor;
-            return
+            uint256 actualReward =
                 reward
                     .mul(votes)
                     .div(totalVotes)
                     .mul(walletRequests[requestId].sheriffsRewardShare)
                     .div(MAX_PERCENT);
-        } else {
+            return
+                MathUpgradeable.max(
+                    actualReward,
+                    walletRequests[requestId].fixedSheriffReward
+                );
+        } else if (
+            !_walletApproved(requestId) &&
+            !requestVotings[requestId].votes[sheriff].voteFor
+        ) {
             return walletRequests[requestId].fixedSheriffReward;
+        } else {
+            return 0;
         }
     }
 
@@ -426,13 +440,15 @@ contract WalletHunters is
         super._setTrustedForwarder(trustedForwarder);
     }
 
-    function activeRequests(address user, uint256 startIndex, uint256 pageSize)
-        external
-        view
-        override
-        returns (uint256[] memory)
-    {
-        require(startIndex + pageSize <= _activeRequests[user].length(), "Read index out of bounds");
+    function activeRequests(
+        address user,
+        uint256 startIndex,
+        uint256 pageSize
+    ) external view override returns (uint256[] memory) {
+        require(
+            startIndex.add(pageSize) <= _activeRequests[user].length(),
+            "Read index out of bounds"
+        );
 
         uint256[] memory result = new uint256[](pageSize);
 
@@ -522,8 +538,9 @@ contract WalletHunters is
 
     function _walletApproved(uint256 requestId) internal view returns (bool) {
         uint256 totalVotes =
-            requestVotings[requestId].votesFor +
-                requestVotings[requestId].votesAgainst;
+            requestVotings[requestId].votesFor.add(
+                requestVotings[requestId].votesAgainst
+            );
         if (totalVotes < configuration.minimalVotesForRequest) {
             return false;
         }

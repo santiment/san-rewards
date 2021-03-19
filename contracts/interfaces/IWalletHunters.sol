@@ -106,10 +106,11 @@ interface IWalletHunters {
      * @param      user   The user address
      * @return     array of request ids
      */
-    function activeRequests(address user, uint256 startIndex, uint256 pageSize)
-        external
-        view
-        returns (uint256[] memory);
+    function activeRequests(
+        address user,
+        uint256 startIndex,
+        uint256 pageSize
+    ) external view returns (uint256[] memory);
 
     /**
      * @dev        Return amount of requests that user participates at this time as sheriff or
@@ -212,7 +213,7 @@ interface IWalletHunters {
      * finished state, see #votingState.
      * @param      sheriff    The sheriff address.
      * @param      requestId  The request id.
-     * @return     amount of reward tokens. Return 0 if request was discarded.
+     * @return     amount of reward tokens. Return 0 if request was discarded or user voted wrong.
      */
     function sheriffReward(address sheriff, uint256 requestId)
         external
