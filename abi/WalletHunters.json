@@ -1,7 +1,7 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0x1316d69318958AEd0A367A8dc8198c7be669e109"
+            "address": "0x96D9067E3A1DA6aDB1328CE9AF2cCc912490b8Bd"
         }
     },
     "abi": [
@@ -1280,6 +1280,37 @@
                     "internalType": "address",
                     "name": "user",
                     "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "startIndex",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "pageSize",
+                    "type": "uint256"
+                }
+            ],
+            "name": "activeRequests",
+            "outputs": [
+                {
+                    "internalType": "uint256[]",
+                    "name": "",
+                    "type": "uint256[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0xffc56585"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "user",
+                    "type": "address"
                 }
             ],
             "name": "activeRequestsLength",
@@ -1419,6 +1450,27 @@
             "type": "function",
             "constant": true,
             "signature": "0x9ae697bf"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "requestId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "walletApproved",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x87e367a8"
         },
         {
             "inputs": [

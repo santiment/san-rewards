@@ -40,7 +40,7 @@ contract RewardItems is
     }
 
     function __RewardsItem_init(address admin) internal initializer {
-        __ERC721_init("Santiment Reward Items", "SRI");
+        __ERC721_init("Reward Items", "SRI");
         __ERC721Burnable_init_unchained();
         __RelayRecipientUpgradeable_init();
         __AccessControl_init_unchained();
@@ -95,7 +95,11 @@ contract RewardItems is
         super._setTrustedForwarder(trustedForwarder);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override {
         super._beforeTokenTransfer(from, to, tokenId);
 
         require(!paused(), "ERC721Pausable: token transfer while paused");

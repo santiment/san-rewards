@@ -1,12 +1,18 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0x6724F8155f48B9E7195B419Ec2733C9789bB5BE9"
+            "address": "0xe7a5Dd4Cb1Fa66dFeD27eC68ae5Bb90FE6d27b1b"
         }
     },
     "abi": [
         {
-            "inputs": [],
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_sanToken",
+                    "type": "address"
+                }
+            ],
             "stateMutability": "nonpayable",
             "type": "constructor",
             "signature": "constructor"
@@ -307,6 +313,21 @@
             "signature": "0xd547741f"
         },
         {
+            "inputs": [],
+            "name": "sanToken",
+            "outputs": [
+                {
+                    "internalType": "contract IERC20",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0xb18925af"
+        },
+        {
             "inputs": [
                 {
                     "components": [
@@ -422,9 +443,8 @@
                     "type": "bytes"
                 }
             ],
-            "stateMutability": "payable",
+            "stateMutability": "nonpayable",
             "type": "function",
-            "payable": true,
             "signature": "0x47153f82"
         }
     ]

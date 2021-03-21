@@ -1,5 +1,6 @@
 const fs = require('fs')
 const util = require('util');
+const web3 = require('web3');
 
 const readAsync = util.promisify(fs.readFile)
 const writeAsync = util.promisify(fs.writeFile)
@@ -45,3 +46,8 @@ module.exports.readAddress = async (contractName, network) => {
 
     return abi.networks[network].address
 }
+
+const bn = (n) => new web3.utils.BN(n)
+module.exports.bn = bn
+
+module.exports.token = (n) => bn(n).mul(bn(10).pow(bn(18)))

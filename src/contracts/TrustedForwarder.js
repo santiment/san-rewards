@@ -10,7 +10,7 @@ class TrustedForwarder {
         this.contract = new Contract(address, abi, provider);
     }
 
-    async createRelayRequest(from, to, calldata, gas = 1e6) {
+    async createRelayRequest(from, to, calldata, gas) {
         return _createRelayRequest(this.contract, from, to, calldata, gas)
     }
 
@@ -46,7 +46,7 @@ async function _createRelayRequest(forwarder, from, to, calldata, gas) {
     const data = {
         primaryType: 'ForwardRequest',
         types: {EIP712Domain, ForwardRequest},
-        domain: {name: 'MinimalForwarder', version: '1.0.0', chainId, verifyingContract: forwarder.address},
+        domain: {name: 'TrustedForwarder', version: '1.0.0', chainId, verifyingContract: forwarder.address},
         message: request
     }
 

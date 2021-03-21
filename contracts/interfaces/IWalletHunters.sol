@@ -3,11 +3,49 @@
 pragma solidity ^0.7.6;
 
 interface IWalletHunters {
+    event NewWalletRequest(
+        uint256 indexed requestId,
+        address indexed hunter,
+        uint256 reward
+    );
+
+    event Staked(address indexed sheriff, uint256 amount);
+
+    event Withdrawn(address indexed sheriff, uint256 amount);
+
+    event Voted(
+        uint256 indexed requestId,
+        address sheriff,
+        uint256 amount,
+        bool voteFor
+    );
+
+    event HunterRewardPaid(
+        address indexed hunter,
+        uint256[] requestIds,
+        uint256 totalReward
+    );
+
+    event SheriffRewardPaid(
+        address indexed sheriff,
+        uint256[] requestIds,
+        uint256 totalReward
+    );
+
+    event RequestDiscarded(uint256 indexed requestId);
+
+    event ConfigurationChanged(
+        uint256 votingDuration,
+        uint256 sheriffsRewardShare,
+        uint256 fixedSheriffReward,
+        uint256 minimalVotesForRequest,
+        uint256 minimalDepositForSheriff
+    );
 
     /**
      * @dev        Submit a new wallet request. Increment request id and return it.
      * Request automatically moved in active state, see #votingState. Caller can be different from
-     * hunter address.
+     * hunter address. Emit #NewWalletRequest.
      * @param      hunter  The hunter address, which will get reward.
      * @param      reward  The total reward for this request. Part of it will be shared
      * for sheriffs reward in approve case.
@@ -19,7 +57,7 @@ interface IWalletHunters {
 
     /**
      * @dev        Discard wallet request and move request at finished state, see #votingState.
-     * Every who participated gets 0 reward. Caller must have access role.
+     * Every who participated gets 0 reward. Caller must have access role. Emit #RequestDiscarded.
      * @param      requestId The reqiest id, request must be in active state.
      */
     function discardRequest(uint256 requestId) external;
@@ -27,7 +65,7 @@ interface IWalletHunters {
     /**
      * @dev        Deposit san tokens to have ability to vote for request. Before user
      * should approve tokens using ERC20#approve. Mint internall tokens that represents
-     * amount of staked tokens 1:1.
+     * amount of staked tokens 1:1. Emit #Staked.
      * @param      sheriff  The sheriff address
      * @param      amount   The amount of san tokens
      */
@@ -36,7 +74,7 @@ interface IWalletHunters {
     /**
      * @dev        Vote for wallet request with amount of staked tokens. Sheriff can vote only once.
      * Lock user stake for period of voting. Wallet request must be in voting state, see
-     * #votingState.
+     * #votingState. Emit #Voted.
      * @param      sheriff    The sheriff
      * @param      requestId  The request identifier
      * @param      voteFor    The vote for
@@ -49,7 +87,7 @@ interface IWalletHunters {
 
     /**
      * @dev        Withdraw san tokens. Burn internall tokens 1:1. Tokens must not be in locked
-     * state.
+     * state. Emit #Withdrawn
      * @param      sheriff  The sheriff
      * @param      amount   The amount
      */
@@ -68,7 +106,11 @@ interface IWalletHunters {
      * @param      user   The user address
      * @return     array of request ids
      */
-    // TODO function activeRequests(address user) external view returns(uint256[]);
+    function activeRequests(
+        address user,
+        uint256 startIndex,
+        uint256 pageSize
+    ) external view returns (uint256[] memory);
 
     /**
      * @dev        Return amount of requests that user participates at this time as sheriff or
@@ -92,6 +134,7 @@ interface IWalletHunters {
     /**
      * @dev        Claim hunter reward. Mint reward tokens. Should be used all available request
      * ids in finished state for hunter, even if #hunterReward equal 0 for specific request id.
+     * Emit #HunterRewardPaid.
      * @param      hunter      The hunter address.
      * @param      requestIds  The request ids.
      */
@@ -101,16 +144,44 @@ interface IWalletHunters {
     /**
      * @dev        Claim sheriff reward. Mint reward tokens. Should be used all available request
      * ids in finished state for sheriff, even if #hunterReward equal 0 for specific request id.
+     * Emit #SheriffRewardPaid.
      * @param      sheriff      The sheriff address.
      * @param      requestIds  The request ids.
      */
     function claimSheriffRewards(address sheriff, uint256[] calldata requestIds)
         external;
 
-    // TDDO move get current configutation to interface
+    /**
+     * @dev        Get wallet request data.
+     * @param      requestId  The request id
+     */
+    function walletRequests(uint256 requestId)
+        external
+        returns (
+            address hunter,
+            uint256 reward,
+            uint256 finishTime,
+            uint256 sheriffsRewardShare,
+            uint256 fixedSheriffReward,
+            bool discarded
+        );
 
     /**
-     * @dev        Update wallet hunters configuration. Must have access role.
+     * @dev        Wallet hunters configuration.
+     */
+    function configuration()
+        external
+        returns (
+            uint256 votingDuration,
+            uint256 sheriffsRewardShare,
+            uint256 fixedSheriffReward,
+            uint256 minimalVotesForRequest,
+            uint256 minimalDepositForSheriff
+        );
+
+    /**
+     * @dev        Update wallet hunters configuration. Must have access role. Emit
+     * #ConfigurationChanged.
      * @param      votingDuration            The voting duration.
      * @param      sheriffsRewardShare       The sheriffs reward share.
      * @param      fixedSheriffReward        The fixed sheriff reward in case of disapprove request.
@@ -142,7 +213,7 @@ interface IWalletHunters {
      * finished state, see #votingState.
      * @param      sheriff    The sheriff address.
      * @param      requestId  The request id.
-     * @return     amount of reward tokens. Return 0 if request was discarded.
+     * @return     amount of reward tokens. Return 0 if request was discarded or user voted wrong.
      */
     function sheriffReward(address sheriff, uint256 requestId)
         external
@@ -177,8 +248,8 @@ interface IWalletHunters {
 
     /**
      * @dev        Get amount of votes for wallet request, for and against.
-     * @param      requestId  The request id.
-     * @return     votesFor   amount of votes against.
+     * @param      requestId    The request id.
+     * @return     votesFor     amount of votes against.
      * @return     votesAgainst amount of votes against.
      */
     function countVotes(uint256 requestId)
@@ -190,9 +261,9 @@ interface IWalletHunters {
      * @dev        Get approve status for wallet request. Request must be in finished state, see
      * #votingState.
      * @param      requestId  The request id
-     * @return     true - if wallet approved, false - if wallet disapproved
+     * @return     true - if wallet approved, false - if wallet disapproved or discarded
      */
-    // TODO function walletApproved(uint256 requestId) external view returns (bool);
+    function walletApproved(uint256 requestId) external view returns (bool);
 
     /**
      * @dev        Get wallet request state. Each request has voting period after which

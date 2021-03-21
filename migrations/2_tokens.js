@@ -1,8 +1,8 @@
 /* global artifacts */
-const {isMainnet, saveContract, readAddress} = require("./utils")
+const {isMainnet, isTestnet, saveContract, readAddress, token} = require("./utils")
 const {deployProxy} = require('@openzeppelin/truffle-upgrades');
 
-const SanMock = artifacts.require("SanMock")
+const RealTokenMock = artifacts.require("RealTokenMock")
 const RewardsToken = artifacts.require("RewardsToken")
 
 module.exports = async (deployer, network, accounts) => {
@@ -12,10 +12,19 @@ module.exports = async (deployer, network, accounts) => {
     await saveContract("RewardsToken", rewardsToken.abi, network, rewardsToken.address)
 
     if (isMainnet(network)) {
-        const sanAddress = await readAddress("San", network)
-        await SanMock.at(sanAddress)
+        const sanAddress = await readAddress("San", 'mainnet')
+        await RealTokenMock.at(sanAddress)
     } else {
-        const sanToken = await deployer.deploy(SanMock, 1_000_000_000)
+        const sanToken = await deployer.deploy(RealTokenMock, 1_000_000_000, {from: owner})
         await saveContract("San", sanToken.abi, network, sanToken.address)
+
+        if (isTestnet(network)) {
+            const devAddresses = process.env.DEV_ADDRESSES.split(",")
+
+            for (const addr of devAddresses) {
+                await sanToken.transfer(addr, token(100_000), {from: owner})
+                await rewardsToken.grantRole(await rewardsToken.MINTER_ROLE(), addr, {from: owner})
+            }
+        }
     }
 }

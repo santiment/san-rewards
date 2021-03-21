@@ -1,28 +1,26 @@
-const {saveContract} = require("./utils")
-const web3 = require('web3');
+/* global artifacts */
+const {isTestnet, saveContract, bn, token} = require("./utils")
 const {deployProxy} = require('@openzeppelin/truffle-upgrades');
 
 const WalletHunters = artifacts.require("WalletHunters")
 const RewardsToken = artifacts.require("RewardsToken")
-const SanMock = artifacts.require("SanMock")
-
-const bn = (n) => new web3.utils.BN(n)
+const RealTokenMock = artifacts.require("RealTokenMock")
 
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
     const rewardsToken = await RewardsToken.deployed()
-    const sanMock = await SanMock.deployed()
+    const realTokenMock = await RealTokenMock.deployed()
 
     const votingDuration = bn(24 * 60 * 60) // 1 day
     const sheriffsRewardShare = bn(20 * 100) // 20%
-    const fixedSheriffReward = bn(10).mul(bn(10).pow(bn(18)))
-    const minimalVotesForRequest = bn(150).mul(bn(10).pow(bn(18)))
-    const minimalDepositForSheriff = bn(50) .mul(bn(10).pow(bn(18)))
+    const fixedSheriffReward = token(10)
+    const minimalVotesForRequest = token(150)
+    const minimalDepositForSheriff = token(50)
 
     const hunters = await deployProxy(WalletHunters, [
         owner,
-        sanMock.address,
+        realTokenMock.address,
         rewardsToken.address,
         votingDuration,
         sheriffsRewardShare,
@@ -34,4 +32,12 @@ module.exports = async (deployer, network, accounts) => {
     await saveContract("WalletHunters", hunters.abi, network, hunters.address)
 
     await rewardsToken.grantRole(await rewardsToken.MINTER_ROLE(), WalletHunters.address, {from: owner})
+
+    if (isTestnet(network)) {
+        const devAddresses = process.env.DEV_ADDRESSES.split(",")
+
+        for (const addr of devAddresses) {
+            await hunters.grantRole(await hunters.MAYOR_ROLE(), addr, {from: owner})
+        }
+    }
 }

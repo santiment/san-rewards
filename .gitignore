@@ -3,3 +3,4 @@ build
 .env
 .idea
 .openzeppelin/unknown-*.json
+flattens

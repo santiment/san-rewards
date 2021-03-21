@@ -1,3 +1,4 @@
+/* global contract, artifacts */
 const {expect} = require('chai')
 const {constants: {ZERO_ADDRESS}} = require('@openzeppelin/test-helpers')
 const {expectEvent, expectRevert} = require('@openzeppelin/test-helpers')
@@ -22,8 +23,8 @@ contract('RewardsToken', function (accounts) {
     })
 
     it("Check forbidden methods", async () => {
-        await expectRevert(this.token.transfer(user2, token('100'), {from: user1}), "Reason given: Forbidden")
-        await expectRevert(this.token.approve(user2, token('100'), {from: user1}), "Reason given: Forbidden")
+        await expectRevert(this.token.transfer(user2, token('100'), {from: user1}), "Forbidden")
+        await expectRevert(this.token.approve(user2, token('100'), {from: user1}), "Forbidden")
     })
 
     it("Check minter role", async () => {

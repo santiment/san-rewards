@@ -1,19 +1,20 @@
-const {saveContract} = require("./utils")
+/* global artifacts */
+const {isTestnet, saveContract} = require("./utils")
 const {deployProxy} = require('@openzeppelin/truffle-upgrades');
 
 const RewardsDistributor = artifacts.require("RewardsDistributor")
 const RewardsToken = artifacts.require("RewardsToken")
-const SanMock = artifacts.require("SanMock")
+const RealTokenMock = artifacts.require("RealTokenMock")
 
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
     const rewardsToken = await RewardsToken.deployed()
-    const sanMock = await SanMock.deployed()
+    const realTokenMock = await RealTokenMock.deployed()
 
     const rewards = await deployProxy(RewardsDistributor, [
             owner,
-            sanMock.address,
+            realTokenMock.address,
             rewardsToken.address,
         ], {deployer}
     )
@@ -21,4 +22,12 @@ module.exports = async (deployer, network, accounts) => {
     await saveContract("RewardsDistributor", rewards.abi, network, rewards.address)
 
     await rewardsToken.grantRole(await rewardsToken.SNAPSHOTER_ROLE(), RewardsDistributor.address, {from: owner})
+
+    if (isTestnet(network)) {
+        const devAddresses = process.env.DEV_ADDRESSES.split(",")
+
+        for (const addr of devAddresses) {
+            await rewards.grantRole(await rewards.DISTRIBUTOR_ROLE(), addr, {from: owner})
+        }
+    }
 }
