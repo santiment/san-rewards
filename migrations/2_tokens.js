@@ -23,7 +23,7 @@ module.exports = async (deployer, network, accounts) => {
 
             for (const addr of devAddresses) {
                 await sanToken.transfer(addr, token(100_000), {from: owner})
-                await rewardsToken.grantRole(await token.MINTER_ROLE(), addr, {from: owner})
+                await rewardsToken.grantRole(await rewardsToken.MINTER_ROLE(), addr, {from: owner})
             }
         }
     }

@@ -1,7 +1,7 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0x985DAFb0fA61eb3C59B897E0E10C6f7AA27eA1Fc"
+            "address": "0xD0E3D08EddC77399F818f8888f5D8A2A9661e22D"
         },
         "mainnet": {
             "address": "0x7C5A0CE9267ED19B22F8cae653F198e3E8daf098"
@@ -127,30 +127,6 @@
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "owner",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "spender",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "approveInternal",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function",
-            "signature": "0x56189cb4"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
                     "name": "account",
                     "type": "address"
                 }
@@ -167,25 +143,6 @@
             "type": "function",
             "constant": true,
             "signature": "0x70a08231"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "account",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amount",
-                    "type": "uint256"
-                }
-            ],
-            "name": "burn",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function",
-            "signature": "0x9dc29fac"
         },
         {
             "inputs": [],
@@ -251,25 +208,6 @@
             "stateMutability": "nonpayable",
             "type": "function",
             "signature": "0x39509351"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "account",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amount",
-                    "type": "uint256"
-                }
-            ],
-            "name": "mint",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function",
-            "signature": "0x40c10f19"
         },
         {
             "inputs": [],
@@ -370,30 +308,6 @@
             "stateMutability": "nonpayable",
             "type": "function",
             "signature": "0x23b872dd"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "from",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "to",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "value",
-                    "type": "uint256"
-                }
-            ],
-            "name": "transferInternal",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function",
-            "signature": "0x222f5be0"
         }
     ]
 }

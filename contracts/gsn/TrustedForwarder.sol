@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./MinimalForwarder.sol";
-import "../RewardsToken.sol";
 
 contract TrustedForwarder is MinimalForwarder, AccessControl {
     using SafeERC20 for IERC20;
