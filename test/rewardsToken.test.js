@@ -58,7 +58,7 @@ contract('RewardsToken', function (accounts) {
         expectEvent(receipt, "Paused", {account: pauser})
         expect(await this.token.paused()).to.be.true
 
-        await expectRevert(this.token.mint(user1, token('1000'), {from: deployer}), "ERC20Pausable: token transfer while paused.")
+        await expectRevert(this.token.mint(user1, token('1000'), {from: deployer}), "ERC20Pausable: token transfer while paused")
 
         receipt = await this.token.unpause({from: pauser})
         expectEvent(receipt, "Unpaused", {account: pauser})

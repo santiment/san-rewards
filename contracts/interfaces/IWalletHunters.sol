@@ -46,10 +46,10 @@ interface IWalletHunters {
      * @dev        Submit a new wallet request. Increment request id and return it.
      * Request automatically moved in active state, see #votingState. Caller can be different from
      * hunter address. Emit #NewWalletRequest.
-     * @param      hunter  The hunter address, which will get reward.
+     * @param      hunter  The hunter address, which will get reward
      * @param      reward  The total reward for this request. Part of it will be shared
-     * for sheriffs reward in approve case.
-     * @return     request id for submitted request.
+     * for sheriffs reward in approve case
+     * @return     request id for submitted request
      */
     function submitRequest(address hunter, uint256 reward)
         external

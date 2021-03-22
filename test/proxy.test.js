@@ -1,6 +1,6 @@
 /* global contract, artifacts */
 const {expect} = require('chai')
-const {admin} = require('@openzeppelin/truffle-upgrades');
+const { upgrades } = require("hardhat")
 
 const {bn} = require("./utils");
 
@@ -13,7 +13,7 @@ contract("Proxy", async function (accounts) {
     const [owner] = accounts
 
     before(async () => {
-        this.admin = await admin.getInstance()
+        this.admin = await upgrades.admin.getInstance()
         this.rewardsToken = await RewardsToken.deployed()
         this.hunters = await WalletHunters.deployed()
         this.rewards = await RewardsDistributor.deployed()

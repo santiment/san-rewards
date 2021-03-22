@@ -5,6 +5,7 @@ const Wallet = require('ethereumjs-wallet').default;
 const ethers = require('ethers')
 const {SanToken} = require("../src/contracts/SanToken.js")
 const {token, bn, relay} = require("./utils")
+const hre = require("hardhat");
 
 const RewardsDistributorContract = artifacts.require("RewardsDistributor")
 const RewardsToken = artifacts.require("RewardsToken")
@@ -90,7 +91,7 @@ contract("RewardsDistributor", async function (accounts) {
                 receipt = await this.rewards.distributeRewardWithRate(rate, {from: deployer})
             } else {
                 await expectRevert(this.rewards.distributeReward(totalReward.add(bn(1)), {from: user1}), "Must have appropriate role")
-                await expectRevert(this.rewards.distributeReward(totalReward.add(bn(1)), {from: deployer}), "ERC20: transfer amount exceeds allowance.")
+                await expectRevert(this.rewards.distributeReward(totalReward.add(bn(1)), {from: deployer}), "ERC20: transfer amount exceeds allowance")
 
                 receipt = await this.rewards.distributeReward(totalReward, {from: deployer})
             }
@@ -173,7 +174,7 @@ contract("RewardsDistributor", async function (accounts) {
 
 async function _approveSanUsingWallet(wallet, sanFee) {
 
-    const user4Provider = new ethers.providers.JsonRpcProvider()
+    const user4Provider = new ethers.providers.Web3Provider(hre.network.provider)
     const signer = new ethers.Wallet(wallet.privateKey, user4Provider)
 
     const sanToken = new SanToken(this.realTokenMock.address, signer)
