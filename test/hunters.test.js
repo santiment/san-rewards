@@ -51,7 +51,9 @@ contract('WalletHunters', function (accounts) {
 
     it("Check forbidden methods", async () => {
         await expectRevert(this.hunters.transfer(sheriff1, token('100'), {from: sheriff1}), "Forbidden")
+        await expectRevert(this.hunters.transferFrom(sheriff1, sheriff2, token('100'), {from: sheriff1}), "Forbidden")
         await expectRevert(this.hunters.approve(sheriff1, token('100'), {from: sheriff1}), "Forbidden")
+        await expectRevert(this.hunters.increaseAllowance(sheriff1, token('100'), {from: sheriff1}), "Forbidden")
     })
 
     it("Grant relayer role", async () => {
