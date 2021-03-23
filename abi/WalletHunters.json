@@ -1,7 +1,7 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0x96D9067E3A1DA6aDB1328CE9AF2cCc912490b8Bd"
+            "address": "0x772e255402EEE3Fa243CB17AF58001f40Da78d90"
         }
     },
     "abi": [
@@ -310,12 +310,38 @@
             "inputs": [
                 {
                     "indexed": true,
+                    "internalType": "address",
+                    "name": "user",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256[]",
+                    "name": "requestIds",
+                    "type": "uint256[]"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "totalReward",
+                    "type": "uint256"
+                }
+            ],
+            "name": "UserRewardPaid",
+            "type": "event",
+            "signature": "0x4497c4a3ba893c5e0cd79646bfa95096bee9a2361617153e7bb4dbe8d0a24729"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
                     "internalType": "uint256",
                     "name": "requestId",
                     "type": "uint256"
                 },
                 {
-                    "indexed": false,
+                    "indexed": true,
                     "internalType": "address",
                     "name": "sheriff",
                     "type": "address"
@@ -758,21 +784,6 @@
             "signature": "0x36568abe"
         },
         {
-            "inputs": [],
-            "name": "requestCounter",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "_value",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x973a814e"
-        },
-        {
             "inputs": [
                 {
                     "internalType": "bytes32",
@@ -920,52 +931,6 @@
             "type": "function",
             "constant": true,
             "signature": "0x7da0a877"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "name": "walletRequests",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "hunter",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "reward",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "finishTime",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "sheriffsRewardShare",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "fixedSheriffReward",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "bool",
-                    "name": "discarded",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0xf8a448f1"
         },
         {
             "inputs": [
@@ -1140,6 +1105,25 @@
             "inputs": [
                 {
                     "internalType": "address",
+                    "name": "user",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256[]",
+                    "name": "requestIds",
+                    "type": "uint256[]"
+                }
+            ],
+            "name": "claimRewards",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function",
+            "signature": "0x05231dea"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
                     "name": "hunter",
                     "type": "address"
                 },
@@ -1207,6 +1191,229 @@
             "stateMutability": "nonpayable",
             "type": "function",
             "signature": "0xe59375f1"
+        },
+        {
+            "inputs": [],
+            "name": "walletProposalsLength",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x828067d0"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "startRequestId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "pageSize",
+                    "type": "uint256"
+                }
+            ],
+            "name": "walletProposals",
+            "outputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "uint256",
+                            "name": "requestId",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "hunter",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "reward",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "enum IWalletHunters.State",
+                            "name": "state",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "claimedReward",
+                            "type": "bool"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "creationTime",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "finishTime",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "votesFor",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "votesAgainst",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "sheriffsRewardShare",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "fixedSheriffReward",
+                            "type": "uint256"
+                        }
+                    ],
+                    "internalType": "struct IWalletHunters.WalletProposal[]",
+                    "name": "",
+                    "type": "tuple[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x32007f37"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "requestId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "walletProposal",
+            "outputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "uint256",
+                            "name": "requestId",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "hunter",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "reward",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "enum IWalletHunters.State",
+                            "name": "state",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "claimedReward",
+                            "type": "bool"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "creationTime",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "finishTime",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "votesFor",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "votesAgainst",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "sheriffsRewardShare",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "fixedSheriffReward",
+                            "type": "uint256"
+                        }
+                    ],
+                    "internalType": "struct IWalletHunters.WalletProposal",
+                    "name": "",
+                    "type": "tuple"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0xe414be18"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "user",
+                    "type": "address"
+                }
+            ],
+            "name": "userRewards",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x0660f1e8"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "user",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "requestId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "userReward",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x378c53bf"
         },
         {
             "inputs": [
@@ -1311,27 +1518,6 @@
                     "internalType": "address",
                     "name": "user",
                     "type": "address"
-                }
-            ],
-            "name": "activeRequestsLength",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x0ec6eb73"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "user",
-                    "type": "address"
                 },
                 {
                     "internalType": "uint256",
@@ -1355,28 +1541,23 @@
         {
             "inputs": [
                 {
-                    "internalType": "uint256",
-                    "name": "requestId",
-                    "type": "uint256"
+                    "internalType": "address",
+                    "name": "user",
+                    "type": "address"
                 }
             ],
-            "name": "countVotes",
+            "name": "activeRequestsLength",
             "outputs": [
                 {
                     "internalType": "uint256",
-                    "name": "votesFor",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "votesAgainst",
+                    "name": "",
                     "type": "uint256"
                 }
             ],
             "stateMutability": "view",
             "type": "function",
             "constant": true,
-            "signature": "0x1840f0ca"
+            "signature": "0x0ec6eb73"
         },
         {
             "inputs": [
@@ -1450,48 +1631,6 @@
             "type": "function",
             "constant": true,
             "signature": "0x9ae697bf"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "requestId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "walletApproved",
-            "outputs": [
-                {
-                    "internalType": "bool",
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x87e367a8"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "requestId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "votingState",
-            "outputs": [
-                {
-                    "internalType": "bool",
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0xff84c45f"
         }
     ]
 }
