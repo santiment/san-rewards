@@ -9,7 +9,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20BurnableUpgradeable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20SnapshotUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
-import "./interfaces/IRewardsToken.sol";
 import "./utils/AccountingToken.sol";
 import "./interfaces/IERC20Snapshot.sol";
 import "./interfaces/IERC20Mintable.sol";
