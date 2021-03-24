@@ -416,6 +416,7 @@ contract WalletHunters is
         configuration.sheriffsRewardShare = _sheriffsRewardShare;
         configuration.fixedSheriffReward = _fixedSheriffReward;
         configuration.minimalVotesForRequest = _minimalVotesForRequest;
+        configuration.minimalDepositForSheriff = _minimalDepositForSheriff;
         configuration.walletReward = _walletReward;
 
         emit ConfigurationChanged(
@@ -423,7 +424,8 @@ contract WalletHunters is
             _sheriffsRewardShare,
             _fixedSheriffReward,
             _minimalVotesForRequest,
-            _minimalDepositForSheriff
+            _minimalDepositForSheriff,
+            _walletReward
         );
     }
 
@@ -470,6 +472,7 @@ contract WalletHunters is
         view
     {
         proposal.requestId = requestId;
+        proposal.tokenId = _requests[requestId].tokenId;
 
         proposal.hunter = _requests[requestId].hunter;
         proposal.walletReward = _requests[requestId].walletReward;

@@ -4,11 +4,21 @@ const {expect} = require('chai')
 const Wallet = require('ethereumjs-wallet').default
 
 const {bn, token, ZERO, relay} = require("./utils")
+const {ContentClient, LOCAL_IPFS_URL} = require("../src/content/upload");
+const { RewardItems } = require("../src/contracts/RewardItems")
 
 const RewardsToken = artifacts.require("RewardsToken")
 const RealTokenMock = artifacts.require("RealTokenMock")
 const WalletHunters = artifacts.require("WalletHunters")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
+const Wallets = artifacts.require("Wallets")
+
+const wallet = {
+    address: "0x1111111111111111111111111111111111111111",
+    name: "Famous wallet",
+    description: "Famous wallet",
+    labels: "label1,label2,label3"
+}
 
 contract('WalletHunters', function (accounts) {
     const [deployer, mayor, relayer, sheriff1, sheriff2, sheriff3] = accounts
@@ -19,15 +29,18 @@ contract('WalletHunters', function (accounts) {
 
     const votingDuration = bn(24 * 60 * 60) // 1 day
     const sheriffsRewardShare = bn(20 * 100) // 20%
-    const fixedSheriffReward = bn(10).mul(bn(10).pow(bn(18)))
-    const minimalVotesForRequest = bn(150).mul(bn(10).pow(bn(18)))
-    const minimalDepositForSheriff = bn(50).mul(bn(10).pow(bn(18)))
+    const fixedSheriffReward = token(`10`)
+    const minimalVotesForRequest = token(`150`)
+    const minimalDepositForSheriff = token(`50`)
+    const walletReward = token(`200`)
 
     before(async () => {
         this.rewardsToken = await RewardsToken.deployed()
         this.realToken = await RealTokenMock.deployed()
         this.hunters = await WalletHunters.deployed()
         this.forwarder = await TrustedForwarder.deployed()
+        this.wallets = await Wallets.deployed()
+        this.content = new ContentClient(LOCAL_IPFS_URL)
     })
 
     it(`Check access roles after deploy`, async () => {
@@ -47,6 +60,7 @@ contract('WalletHunters', function (accounts) {
         expect(configuration.fixedSheriffReward).to.be.bignumber.equal(fixedSheriffReward)
         expect(configuration.minimalVotesForRequest).to.be.bignumber.equal(minimalVotesForRequest)
         expect(configuration.minimalDepositForSheriff).to.be.bignumber.equal(minimalDepositForSheriff)
+        expect(configuration.walletReward).to.be.bignumber.equal(walletReward)
     })
 
     it("Check forbidden methods", async () => {
@@ -119,16 +133,24 @@ contract('WalletHunters', function (accounts) {
     const submitNewWallet = async (reward, requestId) => {
         const hunterBalanceTracker = await balance.tracker(hunter)
 
-        const calldata = this.hunters.contract.methods["submitRequest"](hunter, reward).encodeABI()
+        const walletItem = RewardItems.createWalletItem(
+            wallet.address, `${wallet.name}#${requestId}`, wallet.description, wallet.labels
+        )
+        const cid = await this.content.add(walletItem)
+        const walletItemPath = cid.path
+
+
+        const calldata = this.hunters.contract.methods["submitRequest"](hunter, walletItemPath).encodeABI()
         let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
 
-        await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {reward, requestId})
+        await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {walletReward: reward, requestId, tokenId: requestId})
 
         const proposal = await this.hunters.walletProposal(requestId)
 
         expect(proposal.requestId).to.be.bignumber.equal(requestId)
+        expect(proposal.tokenId).to.be.bignumber.equal(requestId)
         expect(proposal.hunter.toLowerCase()).to.be.equal(hunter.toLowerCase())
-        expect(proposal.reward).to.be.bignumber.equal(reward)
+        expect(proposal.walletReward).to.be.bignumber.equal(reward)
         expect(proposal.claimedReward).to.be.false
         expect(proposal.finishTime).to.be.bignumber.gte(await time.latest())
         expect(proposal.creationTime).to.be.bignumber.lte(proposal.finishTime)
@@ -142,6 +164,9 @@ contract('WalletHunters', function (accounts) {
 
         expect(await hunterBalanceTracker.delta()).to.be.bignumber.equal('0')
         expect(await this.hunters.walletProposalsLength()).to.be.bignumber.equal(bn(1).add(requestId))
+
+        expect(await this.wallets.ownerOf(proposal.tokenId)).to.be.equal(this.hunters.address)
+        expect(await this.wallets.tokenURI(proposal.tokenId)).to.be.equal(`ipfs://${walletItemPath}`)
     }
 
     const voteFor = async (requestId) => {
@@ -169,7 +194,26 @@ contract('WalletHunters', function (accounts) {
         await expectRevert(this.hunters.vote(deployer, requestId, true, {from: deployer}), "Sender is not sheriff")
     }
 
+    const updateReward = async (reward) => {
+        await this.hunters.updateConfiguration(
+            votingDuration,
+            sheriffsRewardShare,
+            fixedSheriffReward,
+            minimalVotesForRequest,
+            minimalDepositForSheriff,
+            reward,
+            {from: deployer}
+        )
+
+        const configuration = await this.hunters.configuration()
+        expect(configuration.walletReward).to.be.bignumber.equal(reward)
+    }
+
     walletRequests.forEach(({requestId, reward}, requestIndex) => {
+
+        it (`Update reward`, async () => {
+            await updateReward(reward)
+        })
 
         it(`Submit a new wallet #${requestId}`, async () => {
             await submitNewWallet(reward, requestId);
@@ -227,7 +271,8 @@ contract('WalletHunters', function (accounts) {
     const discardedRequestId = bn(3)
 
     it("Submit fourth wallet", async () => {
-        await submitNewWallet(token('10000'), discardedRequestId)
+        const configuration = await this.hunters.configuration()
+        await submitNewWallet(configuration.walletReward, discardedRequestId)
     })
 
     it("Vote for fourth wallet", async () => {
@@ -276,6 +321,12 @@ contract('WalletHunters', function (accounts) {
 
         expect(await this.rewardsToken.balanceOf(hunter)).to.be.bignumber.equal(balanceBefore.add(actualReward))
         expect(await hunterBalanceTracker.delta()).to.be.bignumber.equal('0')
+
+        for (let requestId of requestIds) {
+            const proposal = await this.hunters.walletProposal(requestId)
+            const tokenOwner = await this.wallets.ownerOf(proposal.tokenId)
+            expect(tokenOwner.toLowerCase()).to.be.equal(hunter.toLowerCase())
+        }
     })
 
     it("Withdraw sheriff's deposit", async () => {
@@ -322,6 +373,7 @@ contract('WalletHunters', function (accounts) {
         for (let proposal of proposals) {
 
             expect(proposal.requestId).to.not.equal(undefined)
+            expect(proposal.tokenId).to.not.equal(undefined)
             expect(proposal.hunter.toLowerCase()).to.be.equal(hunter.toLowerCase())
 
             expect(proposal.claimedReward).to.be.true

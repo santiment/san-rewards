@@ -26,7 +26,7 @@ interface IWalletHunters {
         uint256 indexed requestId,
         address indexed hunter,
         uint256 indexed tokenId,
-        uint256 reward
+        uint256 walletReward
     );
 
     event Staked(address indexed sheriff, uint256 amount);
@@ -65,7 +65,8 @@ interface IWalletHunters {
         uint256 sheriffsRewardShare,
         uint256 fixedSheriffReward,
         uint256 minimalVotesForRequest,
-        uint256 minimalDepositForSheriff
+        uint256 minimalDepositForSheriff,
+        uint256 walletReward
     );
 
     /**

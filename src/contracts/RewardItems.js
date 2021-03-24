@@ -11,6 +11,14 @@ const rewardItemTemplate = {
     background_color: "f9fafc"
 }
 
+const walletItemTemplate = {
+    name: "Wallet Hunters",
+    description: "Wallet Hunter game",
+    image: "https://app.santiment.net/insights/read/mith-trading-airdrop-starts-with-40%25-pump-495",
+    external_url: "https://santiment.net/",
+    background_color: "f9fafc"
+}
+
 class RewardItems {
 
     constructor(address, provider) {
@@ -26,11 +34,11 @@ class RewardItems {
     }
 
     static createRewardItem(attributes = []) {
-        return _createRewardItem(attributes)
+        return {...rewardItemTemplate, ...{ attributes }}
     }
 
     static createSubsriptionItem(level, duration = 30*24*60*60) {
-        return _createRewardItem([
+        const attributes = [
         {
             "trait_type": "kind",
             "value": "subscription"
@@ -43,12 +51,32 @@ class RewardItems {
             "trait_type": "duration",
             "display_type": "date",
             "value": `${duration}`,
-        }])
-    }
-}
+        }]
 
-function _createRewardItem(attributes = []) {
-    return {...rewardItemTemplate, ...{ attributes }}
+        return {...rewardItemTemplate, ...{ attributes }}
+    }
+
+    static createWalletItem(walletAddress, name, description, labels) {
+        const attributes = [
+        {
+            "trait_type": "wallet_address",
+            "value": `${walletAddress}`
+        },
+        {
+            "trait_type": "name",
+            "value": `${name}`
+        },
+        {
+            "trait_type": "description",
+            "value": `${description}`
+        },
+        {
+            "trait_type": "lables",
+            "value": `${labels}`,
+        }]
+
+        return {...walletItemTemplate, ...{ attributes }}
+    }
 }
 
 module.exports = {
