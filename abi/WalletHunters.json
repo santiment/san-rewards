@@ -1,7 +1,7 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0x772e255402EEE3Fa243CB17AF58001f40Da78d90"
+            "address": "0x5be1e04E2C5BCaa57b32f86f78720014BD5Ae64a"
         }
     },
     "abi": [
@@ -63,11 +63,17 @@
                     "internalType": "uint256",
                     "name": "minimalDepositForSheriff",
                     "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "walletReward",
+                    "type": "uint256"
                 }
             ],
             "name": "ConfigurationChanged",
             "type": "event",
-            "signature": "0xda4281c14b22d30368ef10494e51dffececd1b7d8e9fcffd1da22890398d4260"
+            "signature": "0x34eabf6ce26618d827a5f39d913b92218ef543e3b7d20c654c167e645c91fabe"
         },
         {
             "anonymous": false,
@@ -111,15 +117,21 @@
                     "type": "address"
                 },
                 {
+                    "indexed": true,
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                },
+                {
                     "indexed": false,
                     "internalType": "uint256",
-                    "name": "reward",
+                    "name": "walletReward",
                     "type": "uint256"
                 }
             ],
             "name": "NewWalletRequest",
             "type": "event",
-            "signature": "0x76664a8bf74c8214a2779a595bbec0820521931eb7ffac23a597467fcbd83f2e"
+            "signature": "0xd31ec0f28b6a16699601bbfd95d1615ff3c5614cda10b1138c3a1138fb5542e0"
         },
         {
             "anonymous": false,
@@ -543,6 +555,11 @@
                     "internalType": "uint256",
                     "name": "minimalDepositForSheriff",
                     "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "walletReward",
+                    "type": "uint256"
                 }
             ],
             "stateMutability": "view",
@@ -933,6 +950,21 @@
             "signature": "0x7da0a877"
         },
         {
+            "inputs": [],
+            "name": "walletsNftToken",
+            "outputs": [
+                {
+                    "internalType": "contract IERC721Mintable",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x991a5b27"
+        },
+        {
             "inputs": [
                 {
                     "internalType": "address",
@@ -947,6 +979,11 @@
                 {
                     "internalType": "address",
                     "name": "rewardsToken_",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "walletsNftToken_",
                     "type": "address"
                 },
                 {
@@ -973,13 +1010,53 @@
                     "internalType": "uint256",
                     "name": "minimalDepositForSheriff_",
                     "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "walletReward_",
+                    "type": "uint256"
                 }
             ],
             "name": "initialize",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function",
-            "signature": "0xdf8fa430"
+            "signature": "0xe91f0ed6"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bytes",
+                    "name": "",
+                    "type": "bytes"
+                }
+            ],
+            "name": "onERC721Received",
+            "outputs": [
+                {
+                    "internalType": "bytes4",
+                    "name": "",
+                    "type": "bytes4"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function",
+            "signature": "0x150b7a02"
         },
         {
             "inputs": [
@@ -989,9 +1066,9 @@
                     "type": "address"
                 },
                 {
-                    "internalType": "uint256",
-                    "name": "reward",
-                    "type": "uint256"
+                    "internalType": "string",
+                    "name": "tokenUri",
+                    "type": "string"
                 }
             ],
             "name": "submitRequest",
@@ -1004,7 +1081,7 @@
             ],
             "stateMutability": "nonpayable",
             "type": "function",
-            "signature": "0x8c3cbe3a"
+            "signature": "0xc14f68df"
         },
         {
             "inputs": [
@@ -1184,13 +1261,18 @@
                     "internalType": "uint256",
                     "name": "_minimalDepositForSheriff",
                     "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_walletReward",
+                    "type": "uint256"
                 }
             ],
             "name": "updateConfiguration",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function",
-            "signature": "0xe59375f1"
+            "signature": "0x0cff5166"
         },
         {
             "inputs": [],
@@ -1236,7 +1318,12 @@
                         },
                         {
                             "internalType": "uint256",
-                            "name": "reward",
+                            "name": "walletReward",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "tokenId",
                             "type": "uint256"
                         },
                         {
@@ -1314,7 +1401,12 @@
                         },
                         {
                             "internalType": "uint256",
-                            "name": "reward",
+                            "name": "walletReward",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "tokenId",
                             "type": "uint256"
                         },
                         {

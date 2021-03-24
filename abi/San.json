@@ -1,7 +1,7 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0xD0E3D08EddC77399F818f8888f5D8A2A9661e22D"
+            "address": "0x736eBa37AEad062F5a9beCA48F32EBf79E83Db08"
         },
         "mainnet": {
             "address": "0x7C5A0CE9267ED19B22F8cae653F198e3E8daf098"
