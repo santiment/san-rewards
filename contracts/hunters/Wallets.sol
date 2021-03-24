@@ -72,7 +72,7 @@ contract Wallets is
     function mint(address to, string memory tokenUri)
         external
         onlyRole(MINTER_ROLE)
-        returns(uint256)
+        returns (uint256)
     {
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.

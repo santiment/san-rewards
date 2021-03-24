@@ -5,11 +5,13 @@ const TrustedForwarder = artifacts.require("TrustedForwarder")
 const RewardsDistributor = artifacts.require("RewardsDistributor")
 const WalletHunters = artifacts.require("WalletHunters")
 const RealTokenMock = artifacts.require("RealTokenMock")
+const Wallets = artifacts.require("Wallets")
 
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
     const hunters = await WalletHunters.deployed()
+    const wallets = await Wallets.deployed()
     const rewardsDistributor = await RewardsDistributor.deployed()
     const realTokenMock = await RealTokenMock.deployed()
 
@@ -17,6 +19,7 @@ module.exports = async (deployer, network, accounts) => {
     await saveContract("TrustedForwarder", forwarder.abi, network, forwarder.address)
 
     await hunters.setTrustedForwarder(forwarder.address, {from: owner})
+    await wallets.setTrustedForwarder(forwarder.address, {from: owner})
     await rewardsDistributor.setTrustedForwarder(forwarder.address, {from: owner})
 
     if (isTestnet(network)) {

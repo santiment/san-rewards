@@ -84,6 +84,7 @@ contract WalletHunters is
     mapping(uint256 => RequestVoting) private _requestVotings;
     mapping(address => EnumerableSetUpgradeable.UintSet)
         private _activeRequests;
+    mapping(address => mapping(uint256 => bool)) private _submitedWallets;
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
@@ -178,8 +179,16 @@ contract WalletHunters is
         );
     }
 
-    function onERC721Received(address, address from, uint256 tokenId, bytes memory) external override returns (bytes4) {
-        require(_msgSender() == address(walletsNftToken), "Nft token not supported");
+    function onERC721Received(
+        address,
+        address from,
+        uint256 tokenId,
+        bytes memory
+    ) external override returns (bytes4) {
+        require(
+            _msgSender() == address(walletsNftToken),
+            "Nft token not supported"
+        );
 
         _submitRequest(from, tokenId);
 
@@ -202,6 +211,10 @@ contract WalletHunters is
         internal
         returns (uint256)
     {
+        require(
+            !_submitedWallets[address(walletsNftToken)][tokenId],
+            "Token already submited"
+        );
         uint256 id = _requestCounter.current();
         _requestCounter.increment();
 
@@ -217,8 +230,12 @@ contract WalletHunters is
         _request.creationTime = block.timestamp;
         _request.finishTime = block.timestamp.add(configuration.votingDuration);
 
-        // ignore return
-        _activeRequests[hunter].add(id);
+        _submitedWallets[address(walletsNftToken)][tokenId] = true;
+
+        require(
+            _activeRequests[hunter].add(id),
+            "Can't add request for hunter"
+        );
 
         emit NewWalletRequest(id, hunter, tokenId, configuration.walletReward);
 
@@ -278,6 +295,8 @@ contract WalletHunters is
 
         _requests[requestId].discarded = true;
 
+        walletsNftToken.burn(_requests[requestId].tokenId);
+
         emit RequestDiscarded(requestId);
     }
 
@@ -313,7 +332,16 @@ contract WalletHunters is
             if (_requests[requestId].hunter == user) {
                 reward = hunterReward(user, requestId);
                 _activeRequests[user].remove(requestId);
-                walletsNftToken.transferFrom(address(this), user, _requests[requestId].tokenId);
+
+                if (_walletState(requestId) == State.APPROVED) {
+                    walletsNftToken.transferFrom(
+                        address(this),
+                        user,
+                        _requests[requestId].tokenId
+                    );
+                } else if (_walletState(requestId) == State.DECLINED) {
+                    walletsNftToken.burn(_requests[requestId].tokenId);
+                }
             } else {
                 reward = sheriffReward(user, requestId);
                 _activeRequests[user].remove(requestId);
@@ -342,7 +370,15 @@ contract WalletHunters is
             uint256 reward = hunterReward(hunter, requestId);
             _activeRequests[hunter].remove(requestId);
 
-            walletsNftToken.transferFrom(address(this), hunter, _requests[requestId].tokenId);
+            if (_walletState(requestId) == State.APPROVED) {
+                walletsNftToken.transferFrom(
+                    address(this),
+                    hunter,
+                    _requests[requestId].tokenId
+                );
+            } else if (_walletState(requestId) == State.DECLINED) {
+                walletsNftToken.burn(_requests[requestId].tokenId);
+            }
 
             totalReward = totalReward.add(reward);
         }
@@ -411,6 +447,7 @@ contract WalletHunters is
             _sheriffsRewardShare > 0 && _sheriffsRewardShare < MAX_PERCENT,
             "Sheriff share too much"
         );
+        require(_walletReward > 0, "Reward must be more than 0");
 
         configuration.votingDuration = _votingDuration;
         configuration.sheriffsRewardShare = _sheriffsRewardShare;
@@ -472,6 +509,7 @@ contract WalletHunters is
         view
     {
         proposal.requestId = requestId;
+        proposal.nftTokenAddress = address(walletsNftToken);
         proposal.tokenId = _requests[requestId].tokenId;
 
         proposal.hunter = _requests[requestId].hunter;

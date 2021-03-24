@@ -322,7 +322,7 @@ contract('WalletHunters', function (accounts) {
         expect(await this.rewardsToken.balanceOf(hunter)).to.be.bignumber.equal(balanceBefore.add(actualReward))
         expect(await hunterBalanceTracker.delta()).to.be.bignumber.equal('0')
 
-        for (let requestId of requestIds) {
+        for (let requestId of walletRequests.map(it => it.requestId)) {
             const proposal = await this.hunters.walletProposal(requestId)
             const tokenOwner = await this.wallets.ownerOf(proposal.tokenId)
             expect(tokenOwner.toLowerCase()).to.be.equal(hunter.toLowerCase())
