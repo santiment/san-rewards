@@ -10,7 +10,8 @@ interface IWalletHunters {
     struct WalletProposal {
         uint256 requestId;
         address hunter;
-        uint256 reward;
+        uint256 walletReward;
+        uint256 tokenId;
         State state;
         bool claimedReward;
         uint256 creationTime;
@@ -24,6 +25,7 @@ interface IWalletHunters {
     event NewWalletRequest(
         uint256 indexed requestId,
         address indexed hunter,
+        uint256 indexed tokenId,
         uint256 reward
     );
 
@@ -68,14 +70,14 @@ interface IWalletHunters {
 
     /**
      * @dev        Submit a new wallet request. Increment request id and return it. Counter starts
-     * from 0. Request automatically moved in active state, see enum #State. Caller can be
+     * from 0. Request automatically moved in active state, see enum #State. Caller must be
+     * hunter.
      * different from hunter address. Emit #NewWalletRequest.
-     * @param      hunter  The hunter address, which will get reward.
-     * @param      reward  The total reward for this request. Part of it will be shared
-     * for sheriffs reward in approve case.
+     * @param      hunter    The hunter address, which will get reward
+     * @param      tokenUri  The token uri for nft token
      * @return     request id for submitted request.
      */
-    function submitRequest(address hunter, uint256 reward)
+    function submitRequest(address hunter, string memory tokenUri)
         external
         returns (uint256);
 
@@ -222,7 +224,8 @@ interface IWalletHunters {
             uint256 sheriffsRewardShare,
             uint256 fixedSheriffReward,
             uint256 minimalVotesForRequest,
-            uint256 minimalDepositForSheriff
+            uint256 minimalDepositForSheriff,
+            uint256 walletReward
         );
 
     /**
@@ -233,13 +236,15 @@ interface IWalletHunters {
      * @param      fixedSheriffReward        The fixed sheriff reward in case of disapprove request.
      * @param      minimalVotesForRequest    The minimal votes for request to be approved.
      * @param      minimalDepositForSheriff  The minimal deposit to become sheriff.
+     * @param      walletReward              The fixed hunter reward
      */
     function updateConfiguration(
         uint256 votingDuration,
         uint256 sheriffsRewardShare,
         uint256 fixedSheriffReward,
         uint256 minimalVotesForRequest,
-        uint256 minimalDepositForSheriff
+        uint256 minimalDepositForSheriff,
+        uint256 walletReward
     ) external;
 
     /**

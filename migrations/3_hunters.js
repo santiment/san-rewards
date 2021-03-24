@@ -3,6 +3,7 @@ const {isTestnet, saveContract, bn, token} = require("./utils")
 const {deployProxy} = require('@openzeppelin/truffle-upgrades');
 
 const WalletHunters = artifacts.require("WalletHunters")
+const Wallets = artifacts.require("Wallets")
 const RewardsToken = artifacts.require("RewardsToken")
 const RealTokenMock = artifacts.require("RealTokenMock")
 
@@ -11,6 +12,17 @@ module.exports = async (deployer, network, accounts) => {
 
     const rewardsToken = await RewardsToken.deployed()
     const realTokenMock = await RealTokenMock.deployed()
+
+    const hunters = await deployProxy(Wallets, [
+        owner,
+        realTokenMock.address,
+        rewardsToken.address,
+        votingDuration,
+        sheriffsRewardShare,
+        fixedSheriffReward,
+        minimalVotesForRequest,
+        minimalDepositForSheriff
+    ], {deployer})
 
     const votingDuration = bn(24 * 60 * 60) // 1 day
     const sheriffsRewardShare = bn(20 * 100) // 20%

@@ -72,12 +72,16 @@ contract Wallets is
     function mint(address to, string memory tokenUri)
         external
         onlyRole(MINTER_ROLE)
+        returns(uint256)
     {
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
-        _mint(to, _tokenIdTracker.current());
-        _setTokenURI(_tokenIdTracker.current(), tokenUri);
+        uint256 tokenId = _tokenIdTracker.current();
+        _mint(to, tokenId);
+        _setTokenURI(tokenId, tokenUri);
         _tokenIdTracker.increment();
+
+        return tokenId;
     }
 
     function pause() external onlyRole(PAUSER_ROLE) {

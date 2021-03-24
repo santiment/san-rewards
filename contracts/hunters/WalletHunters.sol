@@ -6,6 +6,7 @@ pragma abicoder v2;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
@@ -17,11 +18,13 @@ import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
 import "../interfaces/IWalletHunters.sol";
 import "../utils/AccountingTokenUpgradeable.sol";
 import "../interfaces/IERC20Mintable.sol";
+import "../interfaces/IERC721Mintable.sol";
 import "../gsn/ERC2771ContextUpgradeable.sol";
 import "../gsn/RelayRecipientUpgradeable.sol";
 
 contract WalletHunters is
     IWalletHunters,
+    IERC721ReceiverUpgradeable,
     AccountingTokenUpgradeable,
     RelayRecipientUpgradeable,
     AccessControlUpgradeable
@@ -35,7 +38,8 @@ contract WalletHunters is
 
     struct Request {
         address hunter;
-        uint256 reward;
+        uint256 walletReward;
+        uint256 tokenId;
         uint256 creationTime;
         uint256 finishTime;
         uint256 sheriffsRewardShare;
@@ -60,6 +64,7 @@ contract WalletHunters is
         uint256 fixedSheriffReward;
         uint256 minimalVotesForRequest;
         uint256 minimalDepositForSheriff;
+        uint256 walletReward;
     }
 
     uint256 public constant MAX_PERCENT = 10000; // 100%
@@ -71,6 +76,7 @@ contract WalletHunters is
 
     IERC20Upgradeable public stakingToken;
     IERC20Mintable public rewardsToken;
+    IERC721Mintable public walletsNftToken;
 
     Configuration public override configuration;
     CountersUpgradeable.Counter private _requestCounter;
@@ -88,21 +94,25 @@ contract WalletHunters is
         address admin_,
         address stakingToken_,
         address rewardsToken_,
+        address walletsNftToken_,
         uint256 votingDuration_,
         uint256 sheriffsRewardShare_,
         uint256 fixedSheriffReward_,
         uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_
+        uint256 minimalDepositForSheriff_,
+        uint256 walletReward_
     ) external initializer {
         __WalletHunters_init(
             admin_,
             stakingToken_,
             rewardsToken_,
+            walletsNftToken_,
             votingDuration_,
             sheriffsRewardShare_,
             fixedSheriffReward_,
             minimalVotesForRequest_,
-            minimalDepositForSheriff_
+            minimalDepositForSheriff_,
+            walletReward_
         );
     }
 
@@ -110,11 +120,13 @@ contract WalletHunters is
         address admin_,
         address stakingToken_,
         address rewardsToken_,
+        address walletsNftToken_,
         uint256 votingDuration_,
         uint256 sheriffsRewardShare_,
         uint256 fixedSheriffReward_,
         uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_
+        uint256 minimalDepositForSheriff_,
+        uint256 walletReward_
     ) internal initializer {
         __AccountingToken_init(ERC20_NAME, ERC20_SYMBOL);
         __RelayRecipientUpgradeable_init();
@@ -124,11 +136,13 @@ contract WalletHunters is
             admin_,
             stakingToken_,
             rewardsToken_,
+            walletsNftToken_,
             votingDuration_,
             sheriffsRewardShare_,
             fixedSheriffReward_,
             minimalVotesForRequest_,
-            minimalDepositForSheriff_
+            minimalDepositForSheriff_,
+            walletReward_
         );
     }
 
@@ -136,11 +150,13 @@ contract WalletHunters is
         address admin,
         address stakingToken_,
         address rewardsToken_,
+        address walletsNftToken_,
         uint256 votingDuration_,
         uint256 sheriffsRewardShare_,
         uint256 fixedSheriffReward_,
         uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_
+        uint256 minimalDepositForSheriff_,
+        uint256 walletReward_
     ) internal initializer {
         require(rewardsToken_.isContract(), "RewardsToken must be contract");
         require(stakingToken_.isContract(), "SnapshotToken must be contract");
@@ -150,19 +166,40 @@ contract WalletHunters is
 
         stakingToken = IERC20Upgradeable(stakingToken_);
         rewardsToken = IERC20Mintable(rewardsToken_);
+        walletsNftToken = IERC721Mintable(walletsNftToken_);
 
         _updateConfiguration(
             votingDuration_,
             sheriffsRewardShare_,
             fixedSheriffReward_,
             minimalVotesForRequest_,
-            minimalDepositForSheriff_
+            minimalDepositForSheriff_,
+            walletReward_
         );
     }
 
-    function submitRequest(address hunter, uint256 reward)
+    function onERC721Received(address, address from, uint256 tokenId, bytes memory) external override returns (bytes4) {
+        require(_msgSender() == address(walletsNftToken), "Nft token not supported");
+
+        _submitRequest(from, tokenId);
+
+        return this.onERC721Received.selector;
+    }
+
+    function submitRequest(address hunter, string memory tokenUri)
         external
         override
+        returns (uint256)
+    {
+        require(_msgSender() == hunter, "Sender must be hunter");
+
+        uint256 tokenId = walletsNftToken.mint(address(this), tokenUri);
+
+        return _submitRequest(hunter, tokenId);
+    }
+
+    function _submitRequest(address hunter, uint256 tokenId)
+        internal
         returns (uint256)
     {
         uint256 id = _requestCounter.current();
@@ -171,7 +208,8 @@ contract WalletHunters is
         Request storage _request = _requests[id];
 
         _request.hunter = hunter;
-        _request.reward = reward;
+        _request.walletReward = configuration.walletReward;
+        _request.tokenId = tokenId;
         _request.discarded = false;
         _request.sheriffsRewardShare = configuration.sheriffsRewardShare;
         _request.fixedSheriffReward = configuration.fixedSheriffReward;
@@ -182,7 +220,7 @@ contract WalletHunters is
         // ignore return
         _activeRequests[hunter].add(id);
 
-        emit NewWalletRequest(id, hunter, reward);
+        emit NewWalletRequest(id, hunter, tokenId, configuration.walletReward);
 
         return id;
     }
@@ -271,9 +309,15 @@ contract WalletHunters is
         for (uint256 i = 0; i < requestIds.length; i = i.add(1)) {
             uint256 requestId = requestIds[i];
 
-            uint256 reward = userReward(user, requestId);
-
-            _activeRequests[user].remove(requestId);
+            uint256 reward;
+            if (_requests[requestId].hunter == user) {
+                reward = hunterReward(user, requestId);
+                _activeRequests[user].remove(requestId);
+                walletsNftToken.transferFrom(address(this), user, _requests[requestId].tokenId);
+            } else {
+                reward = sheriffReward(user, requestId);
+                _activeRequests[user].remove(requestId);
+            }
 
             totalReward = totalReward.add(reward);
         }
@@ -297,6 +341,8 @@ contract WalletHunters is
 
             uint256 reward = hunterReward(hunter, requestId);
             _activeRequests[hunter].remove(requestId);
+
+            walletsNftToken.transferFrom(address(this), hunter, _requests[requestId].tokenId);
 
             totalReward = totalReward.add(reward);
         }
@@ -336,14 +382,16 @@ contract WalletHunters is
         uint256 _sheriffsRewardShare,
         uint256 _fixedSheriffReward,
         uint256 _minimalVotesForRequest,
-        uint256 _minimalDepositForSheriff
+        uint256 _minimalDepositForSheriff,
+        uint256 _walletReward
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _updateConfiguration(
             _votingDuration,
             _sheriffsRewardShare,
             _fixedSheriffReward,
             _minimalVotesForRequest,
-            _minimalDepositForSheriff
+            _minimalDepositForSheriff,
+            _walletReward
         );
     }
 
@@ -352,7 +400,8 @@ contract WalletHunters is
         uint256 _sheriffsRewardShare,
         uint256 _fixedSheriffReward,
         uint256 _minimalVotesForRequest,
-        uint256 _minimalDepositForSheriff
+        uint256 _minimalDepositForSheriff,
+        uint256 _walletReward
     ) internal {
         require(
             _votingDuration >= 1 hours && _votingDuration <= 1 weeks,
@@ -367,7 +416,7 @@ contract WalletHunters is
         configuration.sheriffsRewardShare = _sheriffsRewardShare;
         configuration.fixedSheriffReward = _fixedSheriffReward;
         configuration.minimalVotesForRequest = _minimalVotesForRequest;
-        configuration.minimalDepositForSheriff = _minimalDepositForSheriff;
+        configuration.walletReward = _walletReward;
 
         emit ConfigurationChanged(
             _votingDuration,
@@ -423,7 +472,7 @@ contract WalletHunters is
         proposal.requestId = requestId;
 
         proposal.hunter = _requests[requestId].hunter;
-        proposal.reward = _requests[requestId].reward;
+        proposal.walletReward = _requests[requestId].walletReward;
         proposal.creationTime = _requests[requestId].creationTime;
         proposal.finishTime = _requests[requestId].finishTime;
         proposal.sheriffsRewardShare = _requests[requestId].sheriffsRewardShare;
@@ -500,7 +549,7 @@ contract WalletHunters is
         if (_walletApproved(requestId)) {
             return
                 _requests[requestId]
-                    .reward
+                    .walletReward
                     .mul(
                     MAX_PERCENT.sub(_requests[requestId].sheriffsRewardShare)
                 )
@@ -535,7 +584,7 @@ contract WalletHunters is
         if (
             walletApproved && _requestVotings[requestId].votes[sheriff].voteFor
         ) {
-            uint256 reward = _requests[requestId].reward;
+            uint256 reward = _requests[requestId].walletReward;
             uint256 votes = _requestVotings[requestId].votes[sheriff].amount;
             uint256 totalVotes = _requestVotings[requestId].votesFor;
             uint256 actualReward =
