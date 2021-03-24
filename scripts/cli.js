@@ -43,7 +43,7 @@ async function main() {
     program
         .command('ipfs-add <input> [output]')
         .description("create ipfs tokenuri from input", {
-            input: "file in json format, example: scripts/reward-item-example.json",
+            input: "file in json format, example: scripts/item-example.json",
             output: "file ipfs tokenuri, example: scripts/tokenuri-example.json",
         })
         .action(async (input, output) => {

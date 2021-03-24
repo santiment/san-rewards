@@ -1,0 +1,25 @@
+{
+	"name": "Wallet Hunters",
+	"description": "Wallet Hunters games from Santiment",
+	"image": "https://ipfs.io/ipfs/QmSEBs5nEehihBKJfTqbSBtaJ5Mwdy3qiGqiviWnvps7ny?filename=Santiment.svg",
+	"external_url": "https://santiment.net/",
+	"background_color": "f9fafc",
+	"attributes": [
+		{
+			"trait_type": "wallet_address",
+			"value": "0xD0E3D08EddC77399F818f8888f5D8A2A9661e22D"
+		},
+		{
+			"trait_type": "name",
+			"value": "Famous wallet"
+		},
+		{
+			"trait_type": "description",
+			"value": "This wallet made tx with big value, https://example.com"
+		},
+		{
+			"trait_type": "labels",
+			"value": "wallet,tresaures,bank"
+		}
+	]
+}

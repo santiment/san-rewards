@@ -71,7 +71,7 @@ class RewardItems {
             "value": `${description}`
         },
         {
-            "trait_type": "lables",
+            "trait_type": "labels",
             "value": `${labels}`,
         }]
 
