@@ -212,6 +212,13 @@ interface IWalletHunters {
     function walletProposalsLength() external view returns (uint256);
 
     /**
+     * @dev        Get nonce for hunter to avoid resending signature.
+     * @param      hunter  The hunter address
+     * @return     nonce for hunter submit
+     */
+    function nonces(address hunter) external view returns(uint256);
+
+    /**
      * @dev        Wallet hunters configuration.
      */
     function configuration()

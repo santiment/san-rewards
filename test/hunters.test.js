@@ -2,8 +2,9 @@
 const {balance, expectEvent, expectRevert, time} = require('@openzeppelin/test-helpers')
 const {expect} = require('chai')
 const Wallet = require('ethereumjs-wallet').default
+const ethSigUtil = require('eth-sig-util')
 
-const {bn, token, ZERO, relay} = require("./utils")
+const {bn, token, ZERO, MAX_UINT256, relay, buildSubmit} = require("./utils")
 
 const RewardsToken = artifacts.require("RewardsToken")
 const RealTokenMock = artifacts.require("RealTokenMock")
@@ -14,6 +15,10 @@ contract('WalletHunters', function (accounts) {
     const [deployer, mayor, relayer, sheriff1, sheriff2, sheriff3] = accounts
     const hunterWallet = Wallet.generate()
     const hunter = hunterWallet.getAddressString()
+
+    const mayorWallet2 = Wallet.generate()
+    const mayor2 = mayorWallet2.getAddressString()
+
     const sheriffs = [sheriff1, sheriff2, sheriff3]
     const sheriffsSanTokens = [token('1000'), token('5000'), token('10000')]
 
@@ -32,9 +37,11 @@ contract('WalletHunters', function (accounts) {
 
     it(`Check access roles after deploy`, async () => {
         await this.hunters.grantRole(await this.hunters.MAYOR_ROLE(), mayor, {from: deployer})
+        await this.hunters.grantRole(await this.hunters.MAYOR_ROLE(), mayor2, {from: deployer})
 
         expect(await this.rewardsToken.hasRole(await this.rewardsToken.MINTER_ROLE(), this.hunters.address)).to.be.true
         expect(await this.hunters.hasRole(await this.hunters.MAYOR_ROLE(), mayor)).to.be.true
+        expect(await this.hunters.hasRole(await this.hunters.MAYOR_ROLE(), mayor2)).to.be.true
         expect(await this.hunters.hasRole(await this.hunters.MAYOR_ROLE(), deployer)).to.be.true
     })
 
@@ -119,7 +126,20 @@ contract('WalletHunters', function (accounts) {
     const submitNewWallet = async (reward, requestId) => {
         const hunterBalanceTracker = await balance.tracker(hunter)
 
-        const calldata = this.hunters.contract.methods["submitRequest"](hunter, reward).encodeABI()
+        const submit = buildSubmit(
+            this.hunters.address,
+            'Wallet Hunters, Sheriff Token',
+            await this.forwarder.getChainId(),
+            hunter,
+            reward,
+            await this.hunters.nonces(hunter),
+            '1',
+            MAX_UINT256
+        )
+
+        const signature = ethSigUtil.signTypedData_v4(mayorWallet2.getPrivateKey(), {data: submit})
+
+        const calldata = this.hunters.contract.methods["submitRequest"](hunter, reward, MAX_UINT256, signature).encodeABI()
         let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
 
         await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {reward, requestId})

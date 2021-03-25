@@ -1,45 +1,17 @@
 const {BN, ether, constants: {MAX_UINT256, ZERO_ADDRESS}} = require('@openzeppelin/test-helpers')
 const ethSigUtil = require('eth-sig-util')
+const {EIP712Domain, Permit, ForwardRequest, buildSubmit, buildPermit, buildForwardRequest} = require("../src/contracts/signingTypes.js")
 
 const bn = (n) => new BN(n)
 const token = (n) => ether(n)
 const ZERO = new BN(0)
 
-const EIP712Domain = [
-    {name: 'name', type: 'string'},
-    {name: 'version', type: 'string'},
-    {name: 'chainId', type: 'uint256'},
-    {name: 'verifyingContract', type: 'address'},
-]
-
-const Permit = [
-    {name: 'owner', type: 'address'},
-    {name: 'spender', type: 'address'},
-    {name: 'value', type: 'uint256'},
-    {name: 'nonce', type: 'uint256'},
-    {name: 'deadline', type: 'uint256'},
-]
-
-const ForwardRequest = [
-    {name: 'from', type: 'address'},
-    {name: 'to', type: 'address'},
-    {name: 'value', type: 'uint256'},
-    {name: 'gas', type: 'uint256'},
-    {name: 'nonce', type: 'uint256'},
-    {name: 'data', type: 'bytes'}
-]
-
-const buildPermit = async (token, owner, spender, value, version = '1', deadline = MAX_UINT256) => {
+const _buildPermit = async (token, owner, spender, value, version = '1', deadline = MAX_UINT256) => {
     const chainId = await token.getChainId()
     const name = await token.name()
     const nonce = await token.nonces(owner)
     const verifyingContract = token.address
-    return {
-        primaryType: 'Permit',
-        types: {EIP712Domain, Permit},
-        domain: {name, version, chainId, verifyingContract},
-        message: {owner, spender, value, nonce, deadline},
-    }
+    return buildPermit(verifyingContract, name, chainId, owner, spender, value, nonce, version, deadline)
 }
 
 async function relay(forwarder, relayer, fromWallet, to, calldata, fee) {
@@ -90,7 +62,10 @@ module.exports = {
     Permit,
     ForwardRequest,
     EIP712Domain,
-    buildPermit,
+    buildPermit: _buildPermit,
+    buildSubmit,
+    buildForwardRequest,
     relay,
-    ZERO_ADDRESS
+    ZERO_ADDRESS,
+    MAX_UINT256
 }

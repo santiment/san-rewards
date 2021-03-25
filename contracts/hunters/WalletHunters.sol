@@ -11,8 +11,10 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/drafts/EIP712Upgradeable.sol";
 
 import "../interfaces/IWalletHunters.sol";
 import "../utils/AccountingTokenUpgradeable.sol";
@@ -24,7 +26,8 @@ contract WalletHunters is
     IWalletHunters,
     AccountingTokenUpgradeable,
     RelayRecipientUpgradeable,
-    AccessControlUpgradeable
+    AccessControlUpgradeable,
+    EIP712Upgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeMathUpgradeable for uint256;
@@ -66,6 +69,7 @@ contract WalletHunters is
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
 
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
+    bytes32 private constant SUBMIT_TYPEHASH = keccak256("Submit(address hunter,uint256 reward,uint256 nonce,uint256 deadline)");
     string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
     string private constant ERC20_SYMBOL = "WHST";
 
@@ -76,8 +80,8 @@ contract WalletHunters is
     CountersUpgradeable.Counter private _requestCounter;
     mapping(uint256 => Request) private _requests;
     mapping(uint256 => RequestVoting) private _requestVotings;
-    mapping(address => EnumerableSetUpgradeable.UintSet)
-        private _activeRequests;
+    mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
+    mapping(address => CountersUpgradeable.Counter) private _nonces;
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
@@ -119,6 +123,7 @@ contract WalletHunters is
         __AccountingToken_init(ERC20_NAME, ERC20_SYMBOL);
         __RelayRecipientUpgradeable_init();
         __AccessControl_init();
+        __EIP712_init(ERC20_NAME, "1");
 
         __WalletHunters_init_unchained(
             admin_,
@@ -160,9 +165,39 @@ contract WalletHunters is
         );
     }
 
-    function submitRequest(address hunter, uint256 reward)
+    function submitRequest(address hunter, uint256 reward, uint256 deadline, bytes memory signature)
         external
-        override
+        returns (uint256)
+    {
+        require(block.timestamp <= deadline, "Expired deadline");
+
+        bytes32 structHash = keccak256(
+            abi.encode(
+                SUBMIT_TYPEHASH,
+                hunter,
+                reward,
+                _nonces[hunter].current(),
+                deadline
+            )
+        );
+
+        bytes32 hash = _hashTypedDataV4(structHash);
+
+        address signer = ECDSAUpgradeable.recover(hash, signature);
+
+        require(hasRole(MAYOR_ROLE, signer), "Signer must have appropriate role");
+
+        _nonces[hunter].increment();
+
+        return _submitRequest(hunter, reward);
+    }
+
+    function submitRequest(address hunter, uint256 reward) external override onlyRole(MAYOR_ROLE) returns (uint256) {
+        return _submitRequest(hunter, reward);
+    }
+
+    function _submitRequest(address hunter, uint256 reward)
+        internal
         returns (uint256)
     {
         uint256 id = _requestCounter.current();
@@ -560,6 +595,10 @@ contract WalletHunters is
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         super._setTrustedForwarder(trustedForwarder);
+    }
+
+    function nonces(address hunter) external view override returns(uint256) {
+        return _nonces[hunter].current();
     }
 
     function activeRequests(
