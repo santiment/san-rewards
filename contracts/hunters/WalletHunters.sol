@@ -143,7 +143,7 @@ contract WalletHunters is
         uint256 minimalDepositForSheriff_
     ) internal initializer {
         require(rewardsToken_.isContract(), "RewardsToken must be contract");
-        require(stakingToken_.isContract(), "SnapshotToken must be contract");
+        require(stakingToken_.isContract(), "StakingToken must be contract");
 
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _setupRole(MAYOR_ROLE, admin);
@@ -165,6 +165,8 @@ contract WalletHunters is
         override
         returns (uint256)
     {
+        require(_msgSender() == hunter, "Sender must be hunter");
+
         uint256 id = _requestCounter.current();
         _requestCounter.increment();
 
