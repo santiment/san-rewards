@@ -22,6 +22,8 @@ contract RewardItems is
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     string public constant IPFS = "ipfs://";
+    string private constant ERC721_NAME = "San Promo Access";
+    string private constant ERC721_SYMBOL = "SRI";
 
     CountersUpgradeable.Counter private _tokenIdTracker;
 
@@ -42,7 +44,7 @@ contract RewardItems is
     }
 
     function __RewardsItem_init(address admin) internal initializer {
-        __ERC721_init("Reward Items", "SRI");
+        __ERC721_init(ERC721_NAME, ERC721_SYMBOL);
 
         __ERC721URIStorage_init_unchained();
         __ERC721Enumerable_init_unchained();

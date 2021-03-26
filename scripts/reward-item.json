@@ -1,8 +1,8 @@
 {
-	"name": "Santiment",
-	"description": "Santiment is a behavior analytics platform for cryptocurrencies, sourcing on-chain, social and development information on 900+ coins.",
+	"name": "Santiment Sanbase",
+	"description": "Behavior analysis & monitoring platform for 1000+ crypto assets",
 	"image": "https://ipfs.io/ipfs/QmSEBs5nEehihBKJfTqbSBtaJ5Mwdy3qiGqiviWnvps7ny?filename=Santiment.svg",
-	"external_url": "https://santiment.net/",
+	"external_url": "https://app.santiment.net/pricing",
 	"background_color": "f9fafc",
 	"attributes": [
 		{
