@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
-
-import "./ERC2771ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
 
 abstract contract RelayRecipientUpgradeable is
     Initializable,
@@ -20,9 +19,9 @@ abstract contract RelayRecipientUpgradeable is
 
     event TrustedForwarderChanged(address previous, address current);
 
-    function _setTrustedForwarder(address _trustedForwarder) internal {
-        address previousForwarder = trustedForwarder;
-        trustedForwarder = _trustedForwarder;
-        emit TrustedForwarderChanged(previousForwarder, trustedForwarder);
+    function _setTrustedForwarder(address trustedForwarder_) internal {
+        address previousForwarder = _trustedForwarder;
+        _trustedForwarder = trustedForwarder_;
+        emit TrustedForwarderChanged(previousForwarder, trustedForwarder_);
     }
 }

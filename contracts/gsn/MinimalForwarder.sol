@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-pragma solidity ^0.7.6;
-pragma abicoder v2;
-
-import "@openzeppelin/contracts/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/drafts/EIP712.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 /*
@@ -30,7 +28,7 @@ contract MinimalForwarder is EIP712 {
 
     mapping(address => uint256) private _nonces;
 
-    constructor() EIP712("TrustedForwarder", "1.0.0") {}
+    constructor(string memory name, string memory version) EIP712(name, version) {}
 
     function getNonce(address from) public view returns (uint256) {
         return _nonces[from];
@@ -74,13 +72,5 @@ contract MinimalForwarder is EIP712 {
             req.to.functionCall(abi.encodePacked(req.data, req.from));
 
         return (true, returndata);
-    }
-
-    function getChainId() public view returns (uint256 chainId) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            chainId := chainid()
-        }
     }
 }

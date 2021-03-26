@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
@@ -19,7 +19,6 @@ contract RewardsDistributor is
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using AddressUpgradeable for address;
     using SafeERC20Upgradeable for IERC20Upgradeable;
-    using SafeMathUpgradeable for uint256;
 
     bytes32 public constant DISTRIBUTOR_ROLE = keccak256("DISTRIBUTOR_ROLE");
     uint256 public constant MATH_PRECISION = 10000;
@@ -165,7 +164,7 @@ contract RewardsDistributor is
 
         uint256 toTotalSupply = snapshotToken.totalSupplyAt(toSnapshotId);
 
-        totalShare = toTotalSupply.sub(fromTotalSupply);
+        totalShare = toTotalSupply - fromTotalSupply;
         fromSnapshotId = lastSnapshotId;
         lastSnapshotId = toSnapshotId;
     }
@@ -175,7 +174,7 @@ contract RewardsDistributor is
         pure
         returns (uint256)
     {
-        return totalShare.mul(rate).div(MATH_PRECISION);
+        return totalShare * rate / MATH_PRECISION;
     }
 
     function claimRewards(address user, uint256[] calldata rewardIds)
@@ -185,12 +184,12 @@ contract RewardsDistributor is
         require(user == _msgSender(), "Sender must be user");
         uint256 totalReward = 0;
 
-        for (uint256 i = 0; i < rewardIds.length; i = i.add(1)) {
+        for (uint256 i = 0; i < rewardIds.length; i++) {
             uint256 rewardId = rewardIds[i];
             uint256 _userReward = userReward(user, rewardId);
             paidUsers[rewardId][user] = true;
 
-            totalReward = totalReward.add(_userReward);
+            totalReward = totalReward + _userReward;
         }
 
         if (totalReward > 0) {
@@ -235,14 +234,13 @@ contract RewardsDistributor is
             );
         }
 
-        uint256 toBalance =
-            snapshotToken.balanceOfAt(user, _reward.toSnapshotId);
-        uint256 share = toBalance.sub(fromBalance);
+        uint256 toBalance = snapshotToken.balanceOfAt(user, _reward.toSnapshotId);
+        uint256 share = toBalance - fromBalance;
 
         if (share == 0) {
             return 0;
         } else {
-            return share.mul(_reward.totalReward).div(_reward.totalShare);
+            return share * _reward.totalReward / _reward.totalShare;
         }
     }
 
@@ -269,17 +267,17 @@ contract RewardsDistributor is
         internal
         view
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (address payable)
+        returns (address)
     {
-        return ERC2771ContextUpgradeable._msgSender();
+        return super._msgSender();
     }
 
     function _msgData()
         internal
         view
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (bytes memory)
+        returns (bytes calldata)
     {
-        return ERC2771ContextUpgradeable._msgData();
+        return super._msgData();
     }
 }

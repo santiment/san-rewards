@@ -1,8 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
-pragma solidity ^0.7.6;
-// solhint-disable-next-line compiler-version
-pragma abicoder v2;
+pragma solidity ^0.8.0;
 
 interface IWalletHunters {
     enum State {ACTIVE, APPROVED, DECLINED, DISCARDED}
@@ -68,8 +65,8 @@ interface IWalletHunters {
 
     /**
      * @dev        Submit a new wallet request. Increment request id and return it. Counter starts
-     * from 0. Request automatically moved in active state, see enum #State. Caller can be
-     * different from hunter address. Emit #NewWalletRequest.
+     * from 0. Request automatically moved in active state, see enum #State. Caller must be hunter.
+     * Emit #NewWalletRequest.
      * @param      hunter  The hunter address, which will get reward.
      * @param      reward  The total reward for this request. Part of it will be shared
      * for sheriffs reward in approve case.

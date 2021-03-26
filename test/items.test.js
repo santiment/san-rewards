@@ -5,6 +5,7 @@ const {expectEvent, expectRevert} = require('@openzeppelin/test-helpers')
 const {ContentClient, LOCAL_IPFS_URL} = require("../src/content/upload");
 const {bn, ZERO_ADDRESS} = require("./utils")
 const { RewardItems } = require("../src/contracts/RewardItems")
+const interfaceId = require("../src/contracts/interfaceIds")
 
 const RewardItemsContract = artifacts.require("RewardItems")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
@@ -18,6 +19,15 @@ contract("RewardItems", async function (accounts) {
         this.items = await RewardItemsContract.deployed()
         this.forwarder = await TrustedForwarder.deployed()
         this.content = new ContentClient(LOCAL_IPFS_URL)
+    })
+
+    it("Check supports interfaces", async () => {
+        expect(await this.items.supportsInterface(interfaceId.IERC165)).to.be.true
+        expect(await this.items.supportsInterface(interfaceId.IERC721)).to.be.true
+        expect(await this.items.supportsInterface(interfaceId.IERC721Metadata)).to.be.true
+        expect(await this.items.supportsInterface(interfaceId.IERC721Enumerable)).to.be.true
+        expect(await this.items.supportsInterface(interfaceId.IAccessControl)).to.be.true
+        expect(await this.items.supportsInterface(interfaceId.IAccessControlEnumerable)).to.be.true
     })
 
     it("Check access roles after deploy", async () => {
@@ -76,7 +86,7 @@ contract("RewardItems", async function (accounts) {
         })
 
         expect(await this.items.balanceOf(user1)).to.be.bignumber.equal(bn(0))
-        await expectRevert(this.items.tokenOfOwnerByIndex(user1, 0), "EnumerableSet: index out of bounds")
+        await expectRevert(this.items.tokenOfOwnerByIndex(user1, 0), "ERC721Enumerable: owner index out of bounds")
 
         expect(await this.items.balanceOf(user2)).to.be.bignumber.equal(bn(1))
         expect(await this.items.totalSupply()).to.be.bignumber.equal(bn(1))
@@ -97,7 +107,7 @@ contract("RewardItems", async function (accounts) {
 
         expect(await this.items.balanceOf(user2)).to.be.bignumber.equal(bn(0))
         expect(await this.items.totalSupply()).to.be.bignumber.equal(bn(0))
-        await expectRevert(this.items.tokenOfOwnerByIndex(user2, 0), "EnumerableSet: index out of bounds")
+        await expectRevert(this.items.tokenOfOwnerByIndex(user2, 0), "ERC721Enumerable: owner index out of bounds")
         await expectRevert(this.items.ownerOf(0), "ERC721: owner query for nonexistent token")
     })
 })

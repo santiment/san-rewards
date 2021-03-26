@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20SnapshotUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20SnapshotUpgradeable.sol";
 
 import "./utils/AccountingToken.sol";
 import "./interfaces/IERC20Snapshot.sol";
@@ -19,12 +17,11 @@ contract RewardsToken is
     IERC20Snapshot,
     IERC20Pausable,
     IERC20Mintable,
-    ERC20PausableUpgradeable,
-    ERC20SnapshotUpgradeable,
     RelayRecipientUpgradeable,
-    AccessControlUpgradeable
+    AccessControlUpgradeable,
+    ERC20PausableUpgradeable,
+    ERC20SnapshotUpgradeable
 {
-    using SafeMath for uint256;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -142,26 +139,24 @@ contract RewardsToken is
         address to,
         uint256 amount
     ) internal override(ERC20PausableUpgradeable, ERC20SnapshotUpgradeable) {
-        // ERC20._beforeTokenTransfer will be invoked twice with epmty block
-        ERC20PausableUpgradeable._beforeTokenTransfer(from, to, amount);
-        ERC20SnapshotUpgradeable._beforeTokenTransfer(from, to, amount);
+        super._beforeTokenTransfer(from, to, amount);
     }
 
     function _msgSender()
         internal
         view
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (address payable)
+        returns (address)
     {
-        return ERC2771ContextUpgradeable._msgSender();
+        return super._msgSender();
     }
 
     function _msgData()
         internal
         view
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (bytes memory)
+        returns (bytes calldata)
     {
-        return ERC2771ContextUpgradeable._msgData();
+        return super._msgData();
     }
 }
