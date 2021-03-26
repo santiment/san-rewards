@@ -1,25 +1,29 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./gsn/RelayRecipientUpgradeable.sol";
 
 contract RewardItems is
-    ERC721BurnableUpgradeable,
+    PausableUpgradeable,
+    AccessControlEnumerableUpgradeable,
     RelayRecipientUpgradeable,
-    AccessControlUpgradeable,
-    PausableUpgradeable
+    ERC721URIStorageUpgradeable,
+    ERC721EnumerableUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     string public constant IPFS = "ipfs://";
+    string private constant ERC721_NAME = "San Promo Access";
+    string private constant ERC721_SYMBOL = "ASAN";
 
     CountersUpgradeable.Counter private _tokenIdTracker;
 
@@ -40,8 +44,11 @@ contract RewardItems is
     }
 
     function __RewardsItem_init(address admin) internal initializer {
-        __ERC721_init("Reward Items", "SRI");
-        __ERC721Burnable_init_unchained();
+        __ERC721_init(ERC721_NAME, ERC721_SYMBOL);
+
+        __ERC721URIStorage_init_unchained();
+        __ERC721Enumerable_init_unchained();
+
         __RelayRecipientUpgradeable_init();
         __AccessControl_init_unchained();
         __Pausable_init_unchained();
@@ -54,8 +61,6 @@ contract RewardItems is
 
         _setupRole(MINTER_ROLE, admin);
         _setupRole(PAUSER_ROLE, admin);
-
-        _setBaseURI(IPFS);
     }
 
     /**
@@ -80,6 +85,12 @@ contract RewardItems is
         _tokenIdTracker.increment();
     }
 
+    function burn(uint256 tokenId) external {
+        //solhint-disable-next-line max-line-length
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721Burnable: caller is not owner nor approved");
+        _burn(tokenId);
+    }
+
     function pause() external onlyRole(PAUSER_ROLE) {
         _pause();
     }
@@ -95,11 +106,27 @@ contract RewardItems is
         super._setTrustedForwarder(trustedForwarder);
     }
 
+    function supportsInterface(bytes4 interfaceId) public view override(AccessControlEnumerableUpgradeable, ERC721Upgradeable, ERC721EnumerableUpgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
+    function _baseURI() internal pure override returns (string memory) {
+        return IPFS;
+    }
+
+    function _burn(uint256 tokenId) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
+        super._burn(tokenId);
+    }
+
     function _beforeTokenTransfer(
         address from,
         address to,
         uint256 tokenId
-    ) internal override {
+    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         super._beforeTokenTransfer(from, to, tokenId);
 
         require(!paused(), "ERC721Pausable: token transfer while paused");
@@ -109,17 +136,21 @@ contract RewardItems is
         internal
         view
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (address payable)
+        returns (address)
     {
-        return ERC2771ContextUpgradeable._msgSender();
+        return super._msgSender();
     }
 
     function _msgData()
         internal
         view
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (bytes memory)
+        returns (bytes calldata)
     {
-        return ERC2771ContextUpgradeable._msgData();
+        return super._msgData();
+    }
+
+    function getInterfaceId() external pure returns(bytes4) {
+        return type(IERC721EnumerableUpgradeable).interfaceId;
     }
 }

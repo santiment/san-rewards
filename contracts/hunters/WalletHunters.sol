@@ -1,23 +1,18 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
-pragma solidity ^0.7.6;
-// solhint-disable-next-line compiler-version
-pragma abicoder v2;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 
 import "../interfaces/IWalletHunters.sol";
 import "../utils/AccountingTokenUpgradeable.sol";
 import "../interfaces/IERC20Mintable.sol";
-import "../gsn/ERC2771ContextUpgradeable.sol";
 import "../gsn/RelayRecipientUpgradeable.sol";
 
 contract WalletHunters is
@@ -27,7 +22,6 @@ contract WalletHunters is
     AccessControlUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using SafeMathUpgradeable for uint256;
     using SafeERC20Upgradeable for IERC20Mintable;
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
@@ -179,7 +173,7 @@ contract WalletHunters is
         _request.fixedSheriffReward = configuration.fixedSheriffReward;
         // solhint-disable-next-line not-rely-on-time
         _request.creationTime = block.timestamp;
-        _request.finishTime = block.timestamp.add(configuration.votingDuration);
+        _request.finishTime = block.timestamp + configuration.votingDuration;
 
         // ignore return
         _activeRequests[hunter].add(id);
@@ -221,13 +215,11 @@ contract WalletHunters is
         if (voteFor) {
             _requestVotings[requestId].votes[sheriff].voteFor = true;
             _requestVotings[requestId].votesFor = _requestVotings[requestId]
-                .votesFor
-                .add(amount);
+                .votesFor + amount;
         } else {
             _requestVotings[requestId].votes[sheriff].voteFor = false;
             _requestVotings[requestId].votesAgainst = _requestVotings[requestId]
-                .votesAgainst
-                .add(amount);
+                .votesAgainst + amount;
         }
 
         emit Voted(requestId, sheriff, amount, voteFor);
@@ -248,7 +240,7 @@ contract WalletHunters is
     function withdraw(address sheriff, uint256 amount) public override {
         require(sheriff == _msgSender(), "Sender must be sheriff");
         require(amount > 0, "Cannot withdraw 0");
-        uint256 available = balanceOf(sheriff).sub(lockedBalance(sheriff));
+        uint256 available = balanceOf(sheriff) - lockedBalance(sheriff);
         require(amount <= available, "Withdraw exceeds balance");
         _burn(sheriff, amount);
         stakingToken.safeTransfer(sheriff, amount);
@@ -270,14 +262,14 @@ contract WalletHunters is
         require(user == _msgSender(), "Sender must be user");
         uint256 totalReward = 0;
 
-        for (uint256 i = 0; i < requestIds.length; i = i.add(1)) {
+        for (uint256 i = 0; i < requestIds.length; i++) {
             uint256 requestId = requestIds[i];
 
             uint256 reward = userReward(user, requestId);
 
             _activeRequests[user].remove(requestId);
 
-            totalReward = totalReward.add(reward);
+            totalReward = totalReward + reward;
         }
 
         if (totalReward > 0) {
@@ -294,13 +286,13 @@ contract WalletHunters is
         require(hunter == _msgSender(), "Sender must be hunter");
         uint256 totalReward = 0;
 
-        for (uint256 i = 0; i < requestIds.length; i = i.add(1)) {
+        for (uint256 i = 0; i < requestIds.length; i++) {
             uint256 requestId = requestIds[i];
 
             uint256 reward = hunterReward(hunter, requestId);
             _activeRequests[hunter].remove(requestId);
 
-            totalReward = totalReward.add(reward);
+            totalReward = totalReward + reward;
         }
 
         if (totalReward > 0) {
@@ -317,13 +309,13 @@ contract WalletHunters is
         require(sheriff == _msgSender(), "Sender must be sheriff");
         uint256 totalReward = 0;
 
-        for (uint256 i = 0; i < requestIds.length; i = i.add(1)) {
+        for (uint256 i = 0; i < requestIds.length; i++) {
             uint256 requestId = requestIds[i];
 
             uint256 reward = sheriffReward(sheriff, requestId);
             _activeRequests[sheriff].remove(requestId);
 
-            totalReward = totalReward.add(reward);
+            totalReward = totalReward + reward;
         }
 
         if (totalReward > 0) {
@@ -391,14 +383,14 @@ contract WalletHunters is
         returns (WalletProposal[] memory)
     {
         require(
-            startRequestId.add(pageSize) <= _requestCounter.current(),
+            startRequestId + pageSize <= _requestCounter.current(),
             "Read index out of bounds"
         );
 
         WalletProposal[] memory result = new WalletProposal[](pageSize);
 
-        for (uint256 i = 0; i < pageSize; i = i.add(1)) {
-            _walletProposal(startRequestId.add(i), result[i]);
+        for (uint256 i = 0; i < pageSize; i++) {
+            _walletProposal(startRequestId + i, result[i]);
         }
 
         return result;
@@ -447,7 +439,7 @@ contract WalletHunters is
     {
         uint256 totalReward = 0;
 
-        for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
+        for (uint256 i = 0; i < _activeRequests[user].length(); i++) {
             uint256 requestId = _activeRequests[user].at(i);
 
             if (_votingState(requestId)) {
@@ -457,7 +449,7 @@ contract WalletHunters is
 
             uint256 reward = userReward(user, requestId);
 
-            totalReward = totalReward.add(reward);
+            totalReward = totalReward + reward;
         }
 
         return totalReward;
@@ -500,13 +492,7 @@ contract WalletHunters is
         }
 
         if (_walletApproved(requestId)) {
-            return
-                _requests[requestId]
-                    .reward
-                    .mul(
-                    MAX_PERCENT.sub(_requests[requestId].sheriffsRewardShare)
-                )
-                    .div(MAX_PERCENT);
+            return _requests[requestId].reward * (MAX_PERCENT - _requests[requestId].sheriffsRewardShare) / MAX_PERCENT;
         } else {
             return 0;
         }
@@ -540,12 +526,7 @@ contract WalletHunters is
             uint256 reward = _requests[requestId].reward;
             uint256 votes = _requestVotings[requestId].votes[sheriff].amount;
             uint256 totalVotes = _requestVotings[requestId].votesFor;
-            uint256 actualReward =
-                reward
-                    .mul(votes)
-                    .div(totalVotes)
-                    .mul(_requests[requestId].sheriffsRewardShare)
-                    .div(MAX_PERCENT);
+            uint256 actualReward = reward * votes / totalVotes * _requests[requestId].sheriffsRewardShare / MAX_PERCENT;
             return MathUpgradeable.max(actualReward, actualReward);
         } else if (
             !walletApproved &&
@@ -570,14 +551,14 @@ contract WalletHunters is
         uint256 pageSize
     ) external view override returns (uint256[] memory) {
         require(
-            startIndex.add(pageSize) <= _activeRequests[user].length(),
+            startIndex + pageSize <= _activeRequests[user].length(),
             "Read index out of bounds"
         );
 
         uint256[] memory result = new uint256[](pageSize);
 
-        for (uint256 i = 0; i < pageSize; i = i.add(1)) {
-            result[i] = _activeRequests[user].at(startIndex.add(i));
+        for (uint256 i = 0; i < pageSize; i++) {
+            result[i] = _activeRequests[user].at(startIndex + i);
         }
 
         return result;
@@ -623,7 +604,7 @@ contract WalletHunters is
     {
         locked = 0;
 
-        for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
+        for (uint256 i = 0; i < _activeRequests[user].length(); i++) {
             uint256 requestId = _activeRequests[user].at(i);
             if (!_votingState(requestId)) {
                 // voting finished
@@ -655,16 +636,11 @@ contract WalletHunters is
 
     function _walletApproved(uint256 requestId) internal view returns (bool) {
         uint256 totalVotes =
-            _requestVotings[requestId].votesFor.add(
-                _requestVotings[requestId].votesAgainst
-            );
+            _requestVotings[requestId].votesFor + _requestVotings[requestId].votesAgainst;
         if (totalVotes < configuration.minimalVotesForRequest) {
             return false;
         }
-        return
-            _requestVotings[requestId].votesFor.mul(MAX_PERCENT).div(
-                totalVotes
-            ) > SUPER_MAJORITY;
+        return _requestVotings[requestId].votesFor * MAX_PERCENT / totalVotes > SUPER_MAJORITY;
     }
 
     function _votingState(uint256 requestId) internal view returns (bool) {
@@ -680,17 +656,17 @@ contract WalletHunters is
         internal
         view
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (address payable)
+        returns (address)
     {
-        return ERC2771ContextUpgradeable._msgSender();
+        return super._msgSender();
     }
 
     function _msgData()
         internal
         view
         override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (bytes memory)
+        returns (bytes calldata)
     {
-        return ERC2771ContextUpgradeable._msgData();
+        return super._msgData();
     }
 }

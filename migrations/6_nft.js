@@ -7,6 +7,7 @@ const RewardItems = artifacts.require("RewardItems")
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
+    // Deploy contract, proxy contract and proxy admin (if not deployed)
     const rewardItems = await deployProxy(RewardItems, [
             owner,
         ], {deployer}

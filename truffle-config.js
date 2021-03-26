@@ -56,11 +56,11 @@ module.exports = {
         // NB: It's important to wrap the provider as a function.
         ropsten: {
             provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://ropsten.infura.io/v3/${process.env.INFURA_KEY}`),
-            network_id: 3,       // Ropsten's id
-            gas: 5_500_000,        // Ropsten has a lower block limit than mainnet
-            confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-            timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-            skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+            network_id: 3,
+            gas: 5_500_000,
+            confirmations: 2,
+            timeoutBlocks: 200,
+            skipDryRun: true
         },
         rinkeby: {
             provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://rinkeby.infura.io/v3/${process.env.INFURA_KEY}`),
@@ -69,6 +69,15 @@ module.exports = {
             confirmations: 2,    // # of confs to wait between deployments. (default: 0)
             timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
             skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+        },
+        mainnet: {
+            provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`),
+            network_id: 1,
+            gas: 10_000_000,
+            confirmations: 2,
+            timeoutBlocks: 200,
+            skipDryRun: true,
+            // gasPrice: 20000000000
         },
         // Useful for private networks
         // private: {
@@ -81,7 +90,7 @@ module.exports = {
     // Configure your compilers
     compilers: {
         solc: {
-            version: "0.7.6",    // Fetch exact version from solc-bin (default: truffle's version)
+            version: "0.8.3",    // Fetch exact version from solc-bin (default: truffle's version)
             // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
             settings: {          // See the solidity docs for advice about optimization and evmVersion
                 optimizer: {

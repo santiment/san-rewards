@@ -1,7 +1,7 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0x66b3b9f5919f1204CA7abc806846E83ba862982b"
+            "address": "0x24DE1b03b53B8D299f5482ab8793bc021e71b691"
         }
     },
     "abi": [
@@ -308,35 +308,6 @@
             "type": "function",
             "constant": true,
             "signature": "0x70a08231"
-        },
-        {
-            "inputs": [],
-            "name": "baseURI",
-            "outputs": [
-                {
-                    "internalType": "string",
-                    "name": "",
-                    "type": "string"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x6c0360eb"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "tokenId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "burn",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function",
-            "signature": "0x42966c68"
         },
         {
             "inputs": [
@@ -681,27 +652,6 @@
             "signature": "0xa22cb465"
         },
         {
-            "inputs": [
-                {
-                    "internalType": "bytes4",
-                    "name": "interfaceId",
-                    "type": "bytes4"
-                }
-            ],
-            "name": "supportsInterface",
-            "outputs": [
-                {
-                    "internalType": "bool",
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x01ffc9a7"
-        },
-        {
             "inputs": [],
             "name": "symbol",
             "outputs": [
@@ -764,27 +714,6 @@
             "signature": "0x2f745c59"
         },
         {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "tokenId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "tokenURI",
-            "outputs": [
-                {
-                    "internalType": "string",
-                    "name": "",
-                    "type": "string"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0xc87b56dd"
-        },
-        {
             "inputs": [],
             "name": "totalSupply",
             "outputs": [
@@ -824,21 +753,6 @@
             "signature": "0x23b872dd"
         },
         {
-            "inputs": [],
-            "name": "trustedForwarder",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x7da0a877"
-        },
-        {
             "inputs": [
                 {
                     "internalType": "address",
@@ -872,6 +786,20 @@
             "signature": "0xd0def521"
         },
         {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "burn",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function",
+            "signature": "0x42966c68"
+        },
+        {
             "inputs": [],
             "name": "pause",
             "outputs": [],
@@ -900,6 +828,63 @@
             "stateMutability": "nonpayable",
             "type": "function",
             "signature": "0xda742228"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "bytes4",
+                    "name": "interfaceId",
+                    "type": "bytes4"
+                }
+            ],
+            "name": "supportsInterface",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x01ffc9a7"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "tokenURI",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0xc87b56dd"
+        },
+        {
+            "inputs": [],
+            "name": "getInterfaceId",
+            "outputs": [
+                {
+                    "internalType": "bytes4",
+                    "name": "",
+                    "type": "bytes4"
+                }
+            ],
+            "stateMutability": "pure",
+            "type": "function",
+            "constant": true,
+            "signature": "0x6b9241fc"
         }
     ]
 }

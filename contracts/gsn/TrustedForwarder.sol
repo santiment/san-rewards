@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
-// solhint-disable-next-line compiler-version
-pragma abicoder v2;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -21,7 +19,7 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         _;
     }
 
-    constructor(address _sanToken) {
+    constructor(address _sanToken) MinimalForwarder("TrustedForwarder", "1.0.0") {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
         _setupRole(RELAYER_ROLE, _msgSender());
@@ -40,5 +38,13 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         }
 
         (success, ret) = super.execute(req, signature);
+    }
+
+    function getChainId() public view returns (uint256 chainId) {
+        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            chainId := chainid()
+        }
     }
 }
