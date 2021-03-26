@@ -7,6 +7,7 @@ const RewardItems = artifacts.require("RewardItems")
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
+    // Deploy contract, proxy contract and proxy admin (if not deployed)
     const rewardItems = await deployProxy(RewardItems, [
             owner,
         ], {deployer}
@@ -14,11 +15,11 @@ module.exports = async (deployer, network, accounts) => {
 
     await saveContract("RewardItems", rewardItems.abi, network, rewardItems.address)
 
-    // if (isTestnet(network)) {
-    //     const devAddresses = process.env.DEV_ADDRESSES.split(",")
+    if (isTestnet(network)) {
+        const devAddresses = process.env.DEV_ADDRESSES.split(",")
 
-    //     for (const addr of devAddresses) {
-    //         await rewardItems.grantRole(await rewardItems.MINTER_ROLE(), addr, {from: owner})
-    //     }
-    // }
+        for (const addr of devAddresses) {
+            await rewardItems.grantRole(await rewardItems.MINTER_ROLE(), addr, {from: owner})
+        }
+    }
 }
