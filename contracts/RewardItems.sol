@@ -23,7 +23,7 @@ contract RewardItems is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     string public constant IPFS = "ipfs://";
     string private constant ERC721_NAME = "San Promo Access";
-    string private constant ERC721_SYMBOL = "SRI";
+    string private constant ERC721_SYMBOL = "ASAN";
 
     CountersUpgradeable.Counter private _tokenIdTracker;
 
