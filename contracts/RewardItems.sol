@@ -28,7 +28,7 @@ contract RewardItems is
     CountersUpgradeable.Counter private _tokenIdTracker;
 
     modifier onlyRole(bytes32 role) {
-        require(hasRole(role, _msgSender()), "Must have appropriate role");
+        require(hasRole(role, _msgSender()), "Sender must have access role");
         _;
     }
 
