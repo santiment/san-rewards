@@ -19,7 +19,9 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         _;
     }
 
-    constructor(address _sanToken) MinimalForwarder("TrustedForwarder", "1.0.0") {
+    constructor(address _sanToken)
+        MinimalForwarder("TrustedForwarder", "1.0.0")
+    {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
         _setupRole(RELAYER_ROLE, _msgSender());

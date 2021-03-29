@@ -174,7 +174,7 @@ contract RewardsDistributor is
         pure
         returns (uint256)
     {
-        return totalShare * rate / MATH_PRECISION;
+        return (totalShare * rate) / MATH_PRECISION;
     }
 
     function claimRewards(address user, uint256[] calldata rewardIds)
@@ -234,13 +234,14 @@ contract RewardsDistributor is
             );
         }
 
-        uint256 toBalance = snapshotToken.balanceOfAt(user, _reward.toSnapshotId);
+        uint256 toBalance =
+            snapshotToken.balanceOfAt(user, _reward.toSnapshotId);
         uint256 share = toBalance - fromBalance;
 
         if (share == 0) {
             return 0;
         } else {
-            return share * _reward.totalReward / _reward.totalShare;
+            return (share * _reward.totalReward) / _reward.totalShare;
         }
     }
 

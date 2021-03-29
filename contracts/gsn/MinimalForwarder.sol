@@ -28,7 +28,9 @@ contract MinimalForwarder is EIP712 {
 
     mapping(address => uint256) private _nonces;
 
-    constructor(string memory name, string memory version) EIP712(name, version) {}
+    constructor(string memory name, string memory version)
+        EIP712(name, version)
+    {}
 
     function getNonce(address from) public view returns (uint256) {
         return _nonces[from];

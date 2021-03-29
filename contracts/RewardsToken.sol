@@ -22,7 +22,6 @@ contract RewardsToken is
     ERC20PausableUpgradeable,
     ERC20SnapshotUpgradeable
 {
-
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant SNAPSHOTER_ROLE = keccak256("SNAPSHOTER_ROLE");

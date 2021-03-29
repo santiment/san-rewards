@@ -214,12 +214,14 @@ contract WalletHunters is
 
         if (voteFor) {
             _requestVotings[requestId].votes[sheriff].voteFor = true;
-            _requestVotings[requestId].votesFor = _requestVotings[requestId]
-                .votesFor + amount;
+            _requestVotings[requestId].votesFor =
+                _requestVotings[requestId].votesFor +
+                amount;
         } else {
             _requestVotings[requestId].votes[sheriff].voteFor = false;
-            _requestVotings[requestId].votesAgainst = _requestVotings[requestId]
-                .votesAgainst + amount;
+            _requestVotings[requestId].votesAgainst =
+                _requestVotings[requestId].votesAgainst +
+                amount;
         }
 
         emit Voted(requestId, sheriff, amount, voteFor);
@@ -492,7 +494,10 @@ contract WalletHunters is
         }
 
         if (_walletApproved(requestId)) {
-            return _requests[requestId].reward * (MAX_PERCENT - _requests[requestId].sheriffsRewardShare) / MAX_PERCENT;
+            return
+                (_requests[requestId].reward *
+                    (MAX_PERCENT - _requests[requestId].sheriffsRewardShare)) /
+                MAX_PERCENT;
         } else {
             return 0;
         }
@@ -526,7 +531,9 @@ contract WalletHunters is
             uint256 reward = _requests[requestId].reward;
             uint256 votes = _requestVotings[requestId].votes[sheriff].amount;
             uint256 totalVotes = _requestVotings[requestId].votesFor;
-            uint256 actualReward = reward * votes / totalVotes * _requests[requestId].sheriffsRewardShare / MAX_PERCENT;
+            uint256 actualReward =
+                (((reward * votes) / totalVotes) *
+                    _requests[requestId].sheriffsRewardShare) / MAX_PERCENT;
             return MathUpgradeable.max(actualReward, actualReward);
         } else if (
             !walletApproved &&
@@ -636,11 +643,14 @@ contract WalletHunters is
 
     function _walletApproved(uint256 requestId) internal view returns (bool) {
         uint256 totalVotes =
-            _requestVotings[requestId].votesFor + _requestVotings[requestId].votesAgainst;
+            _requestVotings[requestId].votesFor +
+                _requestVotings[requestId].votesAgainst;
         if (totalVotes < configuration.minimalVotesForRequest) {
             return false;
         }
-        return _requestVotings[requestId].votesFor * MAX_PERCENT / totalVotes > SUPER_MAJORITY;
+        return
+            (_requestVotings[requestId].votesFor * MAX_PERCENT) / totalVotes >
+            SUPER_MAJORITY;
     }
 
     function _votingState(uint256 requestId) internal view returns (bool) {
