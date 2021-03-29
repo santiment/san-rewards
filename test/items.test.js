@@ -57,7 +57,7 @@ contract("RewardItems", async function (accounts) {
 
     it("Mint item", async () => {
 
-        await expectRevert(this.items.mint(user1, this.itemPath, {from: user1}), "Must have appropriate role")
+        await expectRevert(this.items.mint(user1, this.itemPath, {from: user1}), "Sender must have access role.")
 
         let receipt = await this.items.mint(user1, this.itemPath, {from: minter})
         expectEvent(receipt, "Transfer", {

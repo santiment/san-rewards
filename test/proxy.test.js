@@ -44,7 +44,7 @@ contract("Proxy", async function (accounts) {
     it("Check RewardItems", async () => {
         expect(await this.admin.getProxyAdmin(this.items.address)).to.be.equal(this.admin.address)
 
-        expect(await this.items.name()).to.be.equal("Reward Items")
-        expect(await this.items.symbol()).to.be.equal("SRI")
+        expect(await this.items.name()).to.be.equal("Access San")
+        expect(await this.items.symbol()).to.be.equal("ASAN")
     })
 })
