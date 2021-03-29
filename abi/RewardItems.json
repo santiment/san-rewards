@@ -1,7 +1,10 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0x24DE1b03b53B8D299f5482ab8793bc021e71b691"
+            "address": "0x958E2928FB030C8D9e675407de1Cef313CeD6D80"
+        },
+        "mainnet": {
+            "address": "0x31000bd224352Ebb3Cd5035725850d1ECd68b18e"
         }
     },
     "abi": [
@@ -870,21 +873,6 @@
             "type": "function",
             "constant": true,
             "signature": "0xc87b56dd"
-        },
-        {
-            "inputs": [],
-            "name": "getInterfaceId",
-            "outputs": [
-                {
-                    "internalType": "bytes4",
-                    "name": "",
-                    "type": "bytes4"
-                }
-            ],
-            "stateMutability": "pure",
-            "type": "function",
-            "constant": true,
-            "signature": "0x6b9241fc"
         }
     ]
 }
