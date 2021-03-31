@@ -1,6 +1,8 @@
 node_modules
 build
 .env
+.env.mainnet
+.env.rinkeby
 .idea
 .openzeppelin/unknown-*.json
 flattens
