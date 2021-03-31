@@ -1,6 +1,7 @@
 const ipfsClient = require('ipfs-http-client')
+const { globSource } = ipfsClient
 
-const INFURA_IPFS_URL = "https://ipfs.infura.io:5001/api/v0/"
+const INFURA_IPFS_URL = "https://ipfs.infura.io:5001"
 const LOCAL_IPFS_URL = "http://127.0.0.1:5001"
 
 class ContentClient {
@@ -11,6 +12,10 @@ class ContentClient {
 
     async add(obj) {
         return await this.client.add(JSON.stringify(obj))
+    }
+
+    async addFile(file) {
+        return await this.client.add(globSource(file))
     }
 
     async get(cid) {
