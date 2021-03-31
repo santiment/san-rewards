@@ -154,9 +154,9 @@ contract('WalletHunters', function (accounts) {
 
             const receipt = await this.hunters.vote(sheriff, requestId, voteFor, {from: sheriff})
             expectEvent(receipt, "Voted", {sheriff, amount: votes, voteFor})
-            const vote = await this.hunters.getVote(sheriff, requestId);
-            expect(vote['voteFor']).to.be.equal(voteFor)
-            expect(vote['votes']).to.be.bignumber.equal(votes)
+            const vote = await this.hunters.getVote(requestId, sheriff);
+            expect(vote.voteFor).to.be.equal(voteFor)
+            expect(vote.amount).to.be.bignumber.equal(votes)
 
             await expectRevert(this.hunters.vote(sheriff, requestId, voteFor, {from: sheriff}), "User is already participated")
             await expectRevert(this.hunters.vote(deployer, requestId, voteFor, {from: sheriff}), "Sender must be sheriff")
@@ -312,6 +312,22 @@ contract('WalletHunters', function (accounts) {
 
         expect(await this.realToken.balanceOf(sheriff3)).to.be.bignumber.equal(sheriffsSanTokens[2])
         expect(await this.rewardsToken.balanceOf(sheriff3)).to.be.bignumber.equal(bn('10909090909090909090908'))
+    })
+
+    it("Fetch all votes", async () => {
+
+        for (let {requestId} of walletRequests) {
+
+            const amountOfVotes = await this.hunters.getVotesLength(requestId)
+            const votes = await this.hunters.getVotes(requestId, 0, amountOfVotes)
+
+            for (let vote of votes) {
+                expect(vote.requestId).to.be.bignumber.equal(requestId)
+                expect(sheriffs.includes(vote.sheriff)).to.be.true
+                expect(vote.amount).to.not.bignumber.equal(`0`)
+                expect(vote.voteFor).to.not.equal(undefined)
+            }
+        }
     })
 
     it("Fetch all proposals", async () => {
