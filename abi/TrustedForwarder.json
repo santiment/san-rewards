@@ -2,6 +2,9 @@
     "networks": {
         "rinkeby": {
             "address": "0xe7a5Dd4Cb1Fa66dFeD27eC68ae5Bb90FE6d27b1b"
+        },
+        "ropsten": {
+            "address": "0xda93EF7B728ef2ed7c7fbcd591ce53e969B1BC13"
         }
     },
     "abi": [
@@ -126,21 +129,6 @@
             "signature": "0x926d7d7f"
         },
         {
-            "inputs": [],
-            "name": "getChainId",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "chainId",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x3408e470"
-        },
-        {
             "inputs": [
                 {
                     "internalType": "address",
@@ -181,53 +169,6 @@
             "type": "function",
             "constant": true,
             "signature": "0x248a9ca3"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "bytes32",
-                    "name": "role",
-                    "type": "bytes32"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "index",
-                    "type": "uint256"
-                }
-            ],
-            "name": "getRoleMember",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x9010d07c"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "bytes32",
-                    "name": "role",
-                    "type": "bytes32"
-                }
-            ],
-            "name": "getRoleMemberCount",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0xca15c873"
         },
         {
             "inputs": [
@@ -326,6 +267,27 @@
             "type": "function",
             "constant": true,
             "signature": "0xb18925af"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "bytes4",
+                    "name": "interfaceId",
+                    "type": "bytes4"
+                }
+            ],
+            "name": "supportsInterface",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x01ffc9a7"
         },
         {
             "inputs": [
@@ -446,6 +408,21 @@
             "stateMutability": "nonpayable",
             "type": "function",
             "signature": "0x47153f82"
+        },
+        {
+            "inputs": [],
+            "name": "getChainId",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "chainId",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x3408e470"
         }
     ]
 }

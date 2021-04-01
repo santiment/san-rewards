@@ -2,6 +2,9 @@
     "networks": {
         "rinkeby": {
             "address": "0x772e255402EEE3Fa243CB17AF58001f40Da78d90"
+        },
+        "ropsten": {
+            "address": "0x63c65fD98380fF02935840090Eab0fAC491eb030"
         }
     },
     "abi": [
@@ -619,53 +622,6 @@
                     "type": "bytes32"
                 },
                 {
-                    "internalType": "uint256",
-                    "name": "index",
-                    "type": "uint256"
-                }
-            ],
-            "name": "getRoleMember",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x9010d07c"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "bytes32",
-                    "name": "role",
-                    "type": "bytes32"
-                }
-            ],
-            "name": "getRoleMemberCount",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0xca15c873"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "bytes32",
-                    "name": "role",
-                    "type": "bytes32"
-                },
-                {
                     "internalType": "address",
                     "name": "account",
                     "type": "address"
@@ -833,6 +789,27 @@
             "signature": "0x72f702f3"
         },
         {
+            "inputs": [
+                {
+                    "internalType": "bytes4",
+                    "name": "interfaceId",
+                    "type": "bytes4"
+                }
+            ],
+            "name": "supportsInterface",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x01ffc9a7"
+        },
+        {
             "inputs": [],
             "name": "symbol",
             "outputs": [
@@ -916,21 +893,6 @@
             "stateMutability": "nonpayable",
             "type": "function",
             "signature": "0x23b872dd"
-        },
-        {
-            "inputs": [],
-            "name": "trustedForwarder",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x7da0a877"
         },
         {
             "inputs": [
@@ -1371,6 +1333,128 @@
         {
             "inputs": [
                 {
+                    "internalType": "uint256",
+                    "name": "requestId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getVotesLength",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0xfa06ab7f"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "requestId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "startIndex",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "pageSize",
+                    "type": "uint256"
+                }
+            ],
+            "name": "getVotes",
+            "outputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "uint256",
+                            "name": "requestId",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "sheriff",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "voteFor",
+                            "type": "bool"
+                        }
+                    ],
+                    "internalType": "struct IWalletHunters.WalletVote[]",
+                    "name": "",
+                    "type": "tuple[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x809b2cb1"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "requestId",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "address",
+                    "name": "sheriff",
+                    "type": "address"
+                }
+            ],
+            "name": "getVote",
+            "outputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "uint256",
+                            "name": "requestId",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "sheriff",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "voteFor",
+                            "type": "bool"
+                        }
+                    ],
+                    "internalType": "struct IWalletHunters.WalletVote",
+                    "name": "",
+                    "type": "tuple"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0xbc3f931f"
+        },
+        {
+            "inputs": [
+                {
                     "internalType": "address",
                     "name": "user",
                     "type": "address"
@@ -1558,37 +1642,6 @@
             "type": "function",
             "constant": true,
             "signature": "0x0ec6eb73"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "sheriff",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "requestId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "getVote",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "votes",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "bool",
-                    "name": "voteFor",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x6b0dd90f"
         },
         {
             "inputs": [

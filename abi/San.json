@@ -5,6 +5,9 @@
         },
         "mainnet": {
             "address": "0x7C5A0CE9267ED19B22F8cae653F198e3E8daf098"
+        },
+        "ropsten": {
+            "address": "0xF1681aE1C717113C2D240338c3D8E6bb50f8C478"
         }
     },
     "abi": [
