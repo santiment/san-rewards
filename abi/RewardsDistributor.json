@@ -2,6 +2,9 @@
     "networks": {
         "rinkeby": {
             "address": "0x4793D1B4C8cf454bb9B5Dc67ba1A8c0F15908De2"
+        },
+        "ropsten": {
+            "address": "0x529b17b22eE9baE5F113ddcBac07FEfb1f6897dF"
         }
     },
     "abi": [
@@ -217,53 +220,6 @@
                     "type": "bytes32"
                 },
                 {
-                    "internalType": "uint256",
-                    "name": "index",
-                    "type": "uint256"
-                }
-            ],
-            "name": "getRoleMember",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x9010d07c"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "bytes32",
-                    "name": "role",
-                    "type": "bytes32"
-                }
-            ],
-            "name": "getRoleMemberCount",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0xca15c873"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "bytes32",
-                    "name": "role",
-                    "type": "bytes32"
-                },
-                {
                     "internalType": "address",
                     "name": "account",
                     "type": "address"
@@ -421,19 +377,25 @@
             "signature": "0xd01cfc2d"
         },
         {
-            "inputs": [],
-            "name": "trustedForwarder",
+            "inputs": [
+                {
+                    "internalType": "bytes4",
+                    "name": "interfaceId",
+                    "type": "bytes4"
+                }
+            ],
+            "name": "supportsInterface",
             "outputs": [
                 {
-                    "internalType": "address",
+                    "internalType": "bool",
                     "name": "",
-                    "type": "address"
+                    "type": "bool"
                 }
             ],
             "stateMutability": "view",
             "type": "function",
             "constant": true,
-            "signature": "0x7da0a877"
+            "signature": "0x01ffc9a7"
         },
         {
             "inputs": [

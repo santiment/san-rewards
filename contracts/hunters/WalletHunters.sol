@@ -25,6 +25,7 @@ contract WalletHunters is
     using SafeERC20Upgradeable for IERC20Mintable;
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
     using AddressUpgradeable for address;
 
     struct Request {
@@ -40,6 +41,7 @@ contract WalletHunters is
     struct RequestVoting {
         uint256 votesFor;
         uint256 votesAgainst;
+        EnumerableSetUpgradeable.AddressSet voters;
         mapping(address => SheriffVote) votes;
     }
 
@@ -209,6 +211,10 @@ contract WalletHunters is
         require(
             _activeRequests[sheriff].add(requestId),
             "User is already participated"
+        );
+        require(
+            _requestVotings[requestId].voters.add(sheriff),
+            "Sheriff is already participated"
         );
         _requestVotings[requestId].votes[sheriff].amount = amount;
 
@@ -433,6 +439,49 @@ contract WalletHunters is
         proposal.state = _walletState(requestId);
     }
 
+    function getVotesLength(uint256 requestId) external view override returns (uint256) {
+        return _requestVotings[requestId].voters.length();
+    }
+
+    function getVotes(uint256 requestId, uint256 startIndex, uint256 pageSize) external view override returns (WalletVote[] memory) {
+        require(
+            startIndex + pageSize <= _requestVotings[requestId].voters.length(),
+            "Read index out of bounds"
+        );
+
+        WalletVote[] memory result = new WalletVote[](pageSize);
+
+        for (uint256 i = 0; i < pageSize; i++) {
+            address voter = _requestVotings[requestId].voters.at(startIndex + i);
+            _getVote(requestId, voter, result[i]);
+        }
+
+        return result;
+    }
+
+    function getVote(uint256 requestId, address sheriff)
+        external
+        view
+        override
+        returns (WalletVote memory)
+    {
+        WalletVote memory _vote;
+
+        _getVote(requestId, sheriff, _vote);
+
+        return _vote;
+    }
+
+    function _getVote(uint256 requestId, address sheriff, WalletVote memory _vote) internal view {
+        require(requestId < _requestCounter.current(), "Request doesn't exist");
+
+        _vote.requestId = requestId;
+        _vote.sheriff = sheriff;
+
+        _vote.amount = _requestVotings[requestId].votes[sheriff].amount;
+        _vote.voteFor = _requestVotings[requestId].votes[sheriff].voteFor;
+    }
+
     function userRewards(address user)
         external
         view
@@ -589,15 +638,6 @@ contract WalletHunters is
         return _activeRequests[user].length();
     }
 
-    function getVote(address sheriff, uint256 requestId)
-        external
-        view
-        override
-        returns (uint256 votes, bool voteFor)
-    {
-        votes = _requestVotings[requestId].votes[sheriff].amount;
-        voteFor = _requestVotings[requestId].votes[sheriff].voteFor;
-    }
 
     function isSheriff(address sheriff) public view override returns (bool) {
         return balanceOf(sheriff) >= configuration.minimalDepositForSheriff;

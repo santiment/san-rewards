@@ -2,6 +2,9 @@
     "networks": {
         "rinkeby": {
             "address": "0xF506748c96820ee5BfC867f65801BB1483d72623"
+        },
+        "ropsten": {
+            "address": "0xf45Ec0affded7134907C602D484C5fB045F0CE1a"
         }
     },
     "abi": [
@@ -398,53 +401,6 @@
                     "type": "bytes32"
                 },
                 {
-                    "internalType": "uint256",
-                    "name": "index",
-                    "type": "uint256"
-                }
-            ],
-            "name": "getRoleMember",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x9010d07c"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "bytes32",
-                    "name": "role",
-                    "type": "bytes32"
-                }
-            ],
-            "name": "getRoleMemberCount",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0xca15c873"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "bytes32",
-                    "name": "role",
-                    "type": "bytes32"
-                },
-                {
                     "internalType": "address",
                     "name": "account",
                     "type": "address"
@@ -582,6 +538,27 @@
             "signature": "0xd547741f"
         },
         {
+            "inputs": [
+                {
+                    "internalType": "bytes4",
+                    "name": "interfaceId",
+                    "type": "bytes4"
+                }
+            ],
+            "name": "supportsInterface",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function",
+            "constant": true,
+            "signature": "0x01ffc9a7"
+        },
+        {
             "inputs": [],
             "name": "symbol",
             "outputs": [
@@ -665,21 +642,6 @@
             "stateMutability": "nonpayable",
             "type": "function",
             "signature": "0x23b872dd"
-        },
-        {
-            "inputs": [],
-            "name": "trustedForwarder",
-            "outputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x7da0a877"
         },
         {
             "inputs": [

@@ -18,6 +18,13 @@ interface IWalletHunters {
         uint256 fixedSheriffReward;
     }
 
+    struct WalletVote {
+        uint256 requestId;
+        address sheriff;
+        uint256 amount;
+        bool voteFor;
+    }
+
     event NewWalletRequest(
         uint256 indexed requestId,
         address indexed hunter,
@@ -285,15 +292,27 @@ interface IWalletHunters {
 
     /**
      * @dev        Get sheriff vote information for wallet request.
-     * @param      sheriff    The sheriff address
      * @param      requestId  The request id
-     * @return     votes      The amount of votes
-     * @return     voteFor    true - vote for, false - against
+     * @param      sheriff    The sheriff address
      */
-    function getVote(address sheriff, uint256 requestId)
+    function getVote(uint256 requestId, address sheriff)
         external
         view
-        returns (uint256 votes, bool voteFor);
+        returns (WalletVote memory);
+
+    /**
+     * @dev        Get amount of votes for request.
+     * @param      requestId  The request id
+     */
+    function getVotesLength(uint256 requestId) external view returns (uint256);
+
+    /**
+     * @dev        Get list of votes for request.
+     * @param      requestId   The request id
+     * @param      startIndex  The start index. Can be 0
+     * @param      pageSize    The page size. Can be #getVotesLength
+     */
+    function getVotes(uint256 requestId, uint256 startIndex, uint256 pageSize) external view returns (WalletVote[] memory);
 
     /**
      * @dev        Get amount of locked balance for user, see #vote.
