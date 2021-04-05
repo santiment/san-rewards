@@ -56,6 +56,7 @@ contract WalletHunters is
         uint256 fixedSheriffReward;
         uint256 minimalVotesForRequest;
         uint256 minimalDepositForSheriff;
+        uint256 requestReward;
     }
 
     uint256 public constant MAX_PERCENT = 10000; // 100%
@@ -88,7 +89,8 @@ contract WalletHunters is
         uint256 sheriffsRewardShare_,
         uint256 fixedSheriffReward_,
         uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_
+        uint256 minimalDepositForSheriff_,
+        uint256 requestReward_
     ) external initializer {
         __WalletHunters_init(
             admin_,
@@ -98,7 +100,8 @@ contract WalletHunters is
             sheriffsRewardShare_,
             fixedSheriffReward_,
             minimalVotesForRequest_,
-            minimalDepositForSheriff_
+            minimalDepositForSheriff_,
+            requestReward_
         );
     }
 
@@ -110,7 +113,8 @@ contract WalletHunters is
         uint256 sheriffsRewardShare_,
         uint256 fixedSheriffReward_,
         uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_
+        uint256 minimalDepositForSheriff_,
+        uint256 requestReward_
     ) internal initializer {
         __AccountingToken_init(ERC20_NAME, ERC20_SYMBOL);
         __RelayRecipientUpgradeable_init();
@@ -124,7 +128,8 @@ contract WalletHunters is
             sheriffsRewardShare_,
             fixedSheriffReward_,
             minimalVotesForRequest_,
-            minimalDepositForSheriff_
+            minimalDepositForSheriff_,
+            requestReward_
         );
     }
 
@@ -136,7 +141,8 @@ contract WalletHunters is
         uint256 sheriffsRewardShare_,
         uint256 fixedSheriffReward_,
         uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_
+        uint256 minimalDepositForSheriff_,
+        uint256 requestReward_
     ) internal initializer {
         require(rewardsToken_.isContract(), "RewardsToken must be contract");
         require(stakingToken_.isContract(), "StakingToken must be contract");
@@ -152,11 +158,12 @@ contract WalletHunters is
             sheriffsRewardShare_,
             fixedSheriffReward_,
             minimalVotesForRequest_,
-            minimalDepositForSheriff_
+            minimalDepositForSheriff_,
+            requestReward_
         );
     }
 
-    function submitRequest(address hunter, uint256 reward)
+    function submitRequest(address hunter)
         external
         override
         returns (uint256)
@@ -169,7 +176,7 @@ contract WalletHunters is
         Request storage _request = _requests[id];
 
         _request.hunter = hunter;
-        _request.reward = reward;
+        _request.reward = configuration.requestReward;
         _request.discarded = false;
         _request.sheriffsRewardShare = configuration.sheriffsRewardShare;
         _request.fixedSheriffReward = configuration.fixedSheriffReward;
@@ -180,7 +187,7 @@ contract WalletHunters is
         // ignore return
         _activeRequests[hunter].add(id);
 
-        emit NewWalletRequest(id, hunter, reward);
+        emit NewWalletRequest(id, hunter, configuration.requestReward);
 
         return id;
     }
@@ -338,14 +345,16 @@ contract WalletHunters is
         uint256 _sheriffsRewardShare,
         uint256 _fixedSheriffReward,
         uint256 _minimalVotesForRequest,
-        uint256 _minimalDepositForSheriff
+        uint256 _minimalDepositForSheriff,
+        uint256 _requestReward
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _updateConfiguration(
             _votingDuration,
             _sheriffsRewardShare,
             _fixedSheriffReward,
             _minimalVotesForRequest,
-            _minimalDepositForSheriff
+            _minimalDepositForSheriff,
+            _requestReward
         );
     }
 
@@ -354,10 +363,11 @@ contract WalletHunters is
         uint256 _sheriffsRewardShare,
         uint256 _fixedSheriffReward,
         uint256 _minimalVotesForRequest,
-        uint256 _minimalDepositForSheriff
+        uint256 _minimalDepositForSheriff,
+        uint256 _requestReward
     ) internal {
         require(
-            _votingDuration >= 1 hours && _votingDuration <= 1 weeks,
+            _votingDuration >= 10 minutes && _votingDuration <= 1 weeks,
             "Voting duration too long"
         );
         require(
@@ -370,13 +380,15 @@ contract WalletHunters is
         configuration.fixedSheriffReward = _fixedSheriffReward;
         configuration.minimalVotesForRequest = _minimalVotesForRequest;
         configuration.minimalDepositForSheriff = _minimalDepositForSheriff;
+        configuration.requestReward = _requestReward;
 
         emit ConfigurationChanged(
             _votingDuration,
             _sheriffsRewardShare,
             _fixedSheriffReward,
             _minimalVotesForRequest,
-            _minimalDepositForSheriff
+            _minimalDepositForSheriff,
+            _requestReward
         );
     }
 

@@ -1,7 +1,7 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0x772e255402EEE3Fa243CB17AF58001f40Da78d90"
+            "address": "0xA02a47f7ee790c9836D7fE2aAE9e9972f9349336"
         },
         "ropsten": {
             "address": "0x63c65fD98380fF02935840090Eab0fAC491eb030"
@@ -66,11 +66,17 @@
                     "internalType": "uint256",
                     "name": "minimalDepositForSheriff",
                     "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "requestReward",
+                    "type": "uint256"
                 }
             ],
             "name": "ConfigurationChanged",
             "type": "event",
-            "signature": "0xda4281c14b22d30368ef10494e51dffececd1b7d8e9fcffd1da22890398d4260"
+            "signature": "0x34eabf6ce26618d827a5f39d913b92218ef543e3b7d20c654c167e645c91fabe"
         },
         {
             "anonymous": false,
@@ -546,6 +552,11 @@
                     "internalType": "uint256",
                     "name": "minimalDepositForSheriff",
                     "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "requestReward",
+                    "type": "uint256"
                 }
             ],
             "stateMutability": "view",
@@ -935,13 +946,18 @@
                     "internalType": "uint256",
                     "name": "minimalDepositForSheriff_",
                     "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "requestReward_",
+                    "type": "uint256"
                 }
             ],
             "name": "initialize",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function",
-            "signature": "0xdf8fa430"
+            "signature": "0xbb4a2509"
         },
         {
             "inputs": [
@@ -949,11 +965,6 @@
                     "internalType": "address",
                     "name": "hunter",
                     "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "reward",
-                    "type": "uint256"
                 }
             ],
             "name": "submitRequest",
@@ -966,7 +977,7 @@
             ],
             "stateMutability": "nonpayable",
             "type": "function",
-            "signature": "0x8c3cbe3a"
+            "signature": "0x2c62c181"
         },
         {
             "inputs": [
@@ -1146,13 +1157,18 @@
                     "internalType": "uint256",
                     "name": "_minimalDepositForSheriff",
                     "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_requestReward",
+                    "type": "uint256"
                 }
             ],
             "name": "updateConfiguration",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function",
-            "signature": "0xe59375f1"
+            "signature": "0x0cff5166"
         },
         {
             "inputs": [],

@@ -17,6 +17,7 @@ module.exports = async (deployer, network, accounts) => {
     const fixedSheriffReward = token(10)
     const minimalVotesForRequest = token(150)
     const minimalDepositForSheriff = token(50)
+    const requestReward = token(300)
 
     const hunters = await deployProxy(WalletHunters, [
         owner,
@@ -26,7 +27,8 @@ module.exports = async (deployer, network, accounts) => {
         sheriffsRewardShare,
         fixedSheriffReward,
         minimalVotesForRequest,
-        minimalDepositForSheriff
+        minimalDepositForSheriff,
+        requestReward
     ], {deployer})
 
     await saveContract("WalletHunters", hunters.abi, network, hunters.address)
@@ -38,6 +40,7 @@ module.exports = async (deployer, network, accounts) => {
 
         for (const addr of devAddresses) {
             await hunters.grantRole(await hunters.MAYOR_ROLE(), addr, {from: owner})
+            await hunters.grantRole(await hunters.DEFAULT_ADMIN_ROLE(), addr, {from: owner})
         }
     }
 }

@@ -19,9 +19,10 @@ contract('WalletHunters', function (accounts) {
 
     const votingDuration = bn(24 * 60 * 60) // 1 day
     const sheriffsRewardShare = bn(20 * 100) // 20%
-    const fixedSheriffReward = bn(10).mul(bn(10).pow(bn(18)))
-    const minimalVotesForRequest = bn(150).mul(bn(10).pow(bn(18)))
-    const minimalDepositForSheriff = bn(50).mul(bn(10).pow(bn(18)))
+    const fixedSheriffReward = token(`10`)
+    const minimalVotesForRequest = token(`150`)
+    const minimalDepositForSheriff = token(`50`)
+    const requestReward = token(`300`)
 
     before(async () => {
         this.rewardsToken = await RewardsToken.deployed()
@@ -47,6 +48,7 @@ contract('WalletHunters', function (accounts) {
         expect(configuration.fixedSheriffReward).to.be.bignumber.equal(fixedSheriffReward)
         expect(configuration.minimalVotesForRequest).to.be.bignumber.equal(minimalVotesForRequest)
         expect(configuration.minimalDepositForSheriff).to.be.bignumber.equal(minimalDepositForSheriff)
+        expect(configuration.requestReward).to.be.bignumber.equal(requestReward)
     })
 
     it("Check forbidden methods", async () => {
@@ -116,10 +118,37 @@ contract('WalletHunters', function (accounts) {
         reward: token('10000').mul(bn(n + 1))
     }))
 
+    const updateConfiguration = async (newConfiguration) => {
+
+        const config = await this.hunters.configuration()
+
+        const configuration = {
+            votingDuration: config.votingDuration,
+            sheriffsRewardShare: config.sheriffsRewardShare,
+            fixedSheriffReward: config.fixedSheriffReward,
+            minimalVotesForRequest: config.minimalVotesForRequest,
+            minimalDepositForSheriff: config.minimalDepositForSheriff,
+            requestReward: config.requestReward
+        }
+
+        Object.assign(configuration, newConfiguration)
+
+        let receipt = await this.hunters.updateConfiguration(
+            configuration.votingDuration,
+            configuration.sheriffsRewardShare,
+            configuration.fixedSheriffReward,
+            configuration.minimalVotesForRequest,
+            configuration.minimalDepositForSheriff,
+            configuration.requestReward
+        )
+
+        expectEvent(receipt, "ConfigurationChanged", configuration)
+    }
+
     const submitNewWallet = async (reward, requestId) => {
         const hunterBalanceTracker = await balance.tracker(hunter)
 
-        const calldata = this.hunters.contract.methods["submitRequest"](hunter, reward).encodeABI()
+        const calldata = this.hunters.contract.methods["submitRequest"](hunter).encodeABI()
         let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
 
         await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {reward, requestId})
@@ -172,6 +201,7 @@ contract('WalletHunters', function (accounts) {
     walletRequests.forEach(({requestId, reward}, requestIndex) => {
 
         it(`Submit a new wallet #${requestId}`, async () => {
+            await updateConfiguration({requestReward: reward})
             await submitNewWallet(reward, requestId);
         })
 
@@ -227,6 +257,7 @@ contract('WalletHunters', function (accounts) {
     const discardedRequestId = bn(3)
 
     it("Submit fourth wallet", async () => {
+        await updateConfiguration({requestReward: token('10000')})
         await submitNewWallet(token('10000'), discardedRequestId)
     })
 

@@ -67,7 +67,8 @@ interface IWalletHunters {
         uint256 sheriffsRewardShare,
         uint256 fixedSheriffReward,
         uint256 minimalVotesForRequest,
-        uint256 minimalDepositForSheriff
+        uint256 minimalDepositForSheriff,
+        uint256 requestReward
     );
 
     /**
@@ -75,11 +76,10 @@ interface IWalletHunters {
      * from 0. Request automatically moved in active state, see enum #State. Caller must be hunter.
      * Emit #NewWalletRequest.
      * @param      hunter  The hunter address, which will get reward.
-     * @param      reward  The total reward for this request. Part of it will be shared
      * for sheriffs reward in approve case.
      * @return     request id for submitted request.
      */
-    function submitRequest(address hunter, uint256 reward)
+    function submitRequest(address hunter)
         external
         returns (uint256);
 
@@ -226,24 +226,28 @@ interface IWalletHunters {
             uint256 sheriffsRewardShare,
             uint256 fixedSheriffReward,
             uint256 minimalVotesForRequest,
-            uint256 minimalDepositForSheriff
+            uint256 minimalDepositForSheriff,
+            uint256 requestReward
         );
 
     /**
      * @dev        Update wallet hunters configuration. Must have access role. Emit
      * #ConfigurationChanged.
-     * @param      votingDuration            The voting duration.
-     * @param      sheriffsRewardShare       The sheriffs reward share.
-     * @param      fixedSheriffReward        The fixed sheriff reward in case of disapprove request.
+     * @param      votingDuration            The voting duration for next request.
+     * @param      sheriffsRewardShare       The sheriffs reward share for next request.
+     * @param      fixedSheriffReward        The fixed sheriff reward in case of disapprove request
+     * for next request.
      * @param      minimalVotesForRequest    The minimal votes for request to be approved.
      * @param      minimalDepositForSheriff  The minimal deposit to become sheriff.
+     * @param      requestReward             The reward for next request;
      */
     function updateConfiguration(
         uint256 votingDuration,
         uint256 sheriffsRewardShare,
         uint256 fixedSheriffReward,
         uint256 minimalVotesForRequest,
-        uint256 minimalDepositForSheriff
+        uint256 minimalDepositForSheriff,
+        uint256 requestReward
     ) external;
 
     /**
