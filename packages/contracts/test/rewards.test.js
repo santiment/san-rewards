@@ -3,7 +3,8 @@ const {expect} = require('chai')
 const {expectEvent, expectRevert, send, ether} = require('@openzeppelin/test-helpers')
 const Wallet = require('ethereumjs-wallet').default;
 const ethers = require('ethers')
-const {SanToken} = require("../src/contracts/SanToken.js")
+const {SanToken} = require("san-rewards-wrappers/src/contracts/SanToken.js")
+
 const {token, bn, relay} = require("./utils")
 
 const RewardsDistributorContract = artifacts.require("RewardsDistributor")

@@ -2,10 +2,10 @@
 const {expect} = require('chai')
 const {expectEvent, expectRevert} = require('@openzeppelin/test-helpers')
 
-const {ContentClient, LOCAL_IPFS_URL} = require("../src/content/upload");
+const {ContentClient, LOCAL_IPFS_URL} = require("san-rewards-wrappers/src/content/upload");
+const { RewardItems } = require("san-rewards-wrappers/src/contracts/RewardItems")
+const interfaceIds = require("san-rewards-wrappers/src/contracts/interfaceIds")
 const {bn, ZERO_ADDRESS} = require("./utils")
-const { RewardItems } = require("../src/contracts/RewardItems")
-const interfaceId = require("../src/contracts/interfaceIds")
 
 const RewardItemsContract = artifacts.require("RewardItems")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
@@ -22,12 +22,12 @@ contract("RewardItems", async function (accounts) {
     })
 
     it("Check supports interfaces", async () => {
-        expect(await this.items.supportsInterface(interfaceId.IERC165)).to.be.true
-        expect(await this.items.supportsInterface(interfaceId.IERC721)).to.be.true
-        expect(await this.items.supportsInterface(interfaceId.IERC721Metadata)).to.be.true
-        expect(await this.items.supportsInterface(interfaceId.IERC721Enumerable)).to.be.true
-        expect(await this.items.supportsInterface(interfaceId.IAccessControl)).to.be.true
-        expect(await this.items.supportsInterface(interfaceId.IAccessControlEnumerable)).to.be.true
+        expect(await this.items.supportsInterface(interfaceIds.IERC165)).to.be.true
+        expect(await this.items.supportsInterface(interfaceIds.IERC721)).to.be.true
+        expect(await this.items.supportsInterface(interfaceIds.IERC721Metadata)).to.be.true
+        expect(await this.items.supportsInterface(interfaceIds.IERC721Enumerable)).to.be.true
+        expect(await this.items.supportsInterface(interfaceIds.IAccessControl)).to.be.true
+        expect(await this.items.supportsInterface(interfaceIds.IAccessControlEnumerable)).to.be.true
     })
 
     it("Check access roles after deploy", async () => {

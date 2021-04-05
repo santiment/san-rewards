@@ -1,0 +1,15 @@
+{
+  "name": "san-rewards-cli",
+  "version": "1.0.0",
+  "description": "Utility cli for san-rewards",
+  "main": "index.js",
+  "scripts": {
+    "airdrop": "node ./src/index.js airdrop ./src/airdrop.json",
+    "ipfs-add": "node ./src/index.js ipfs-add ./src/reward-item.json"
+  },
+  "author": "Nail Khafizov <nailkhaf@pm.me>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^7.0.0"
+  }
+}

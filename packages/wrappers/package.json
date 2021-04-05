@@ -1,0 +1,14 @@
+{
+  "name": "san-rewards-wrappers",
+  "version": "1.0.0",
+  "description": "Wrapper classes for san-rewards-contracts",
+  "scripts": {
+  },
+  "author": "Nail Khafizov <nailkhaf@pm.me>",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^5.0.31",
+    "ipfs-http-client": "^49.0.2",
+    "web3": "^1.3.4"
+  }
+}

@@ -163,11 +163,7 @@ contract WalletHunters is
         );
     }
 
-    function submitRequest(address hunter)
-        external
-        override
-        returns (uint256)
-    {
+    function submitRequest(address hunter) external override returns (uint256) {
         require(_msgSender() == hunter, "Sender must be hunter");
 
         uint256 id = _requestCounter.current();
@@ -451,11 +447,20 @@ contract WalletHunters is
         proposal.state = _walletState(requestId);
     }
 
-    function getVotesLength(uint256 requestId) external view override returns (uint256) {
+    function getVotesLength(uint256 requestId)
+        external
+        view
+        override
+        returns (uint256)
+    {
         return _requestVotings[requestId].voters.length();
     }
 
-    function getVotes(uint256 requestId, uint256 startIndex, uint256 pageSize) external view override returns (WalletVote[] memory) {
+    function getVotes(
+        uint256 requestId,
+        uint256 startIndex,
+        uint256 pageSize
+    ) external view override returns (WalletVote[] memory) {
         require(
             startIndex + pageSize <= _requestVotings[requestId].voters.length(),
             "Read index out of bounds"
@@ -464,7 +469,8 @@ contract WalletHunters is
         WalletVote[] memory result = new WalletVote[](pageSize);
 
         for (uint256 i = 0; i < pageSize; i++) {
-            address voter = _requestVotings[requestId].voters.at(startIndex + i);
+            address voter =
+                _requestVotings[requestId].voters.at(startIndex + i);
             _getVote(requestId, voter, result[i]);
         }
 
@@ -484,7 +490,11 @@ contract WalletHunters is
         return _vote;
     }
 
-    function _getVote(uint256 requestId, address sheriff, WalletVote memory _vote) internal view {
+    function _getVote(
+        uint256 requestId,
+        address sheriff,
+        WalletVote memory _vote
+    ) internal view {
         require(requestId < _requestCounter.current(), "Request doesn't exist");
 
         _vote.requestId = requestId;
@@ -649,7 +659,6 @@ contract WalletHunters is
     {
         return _activeRequests[user].length();
     }
-
 
     function isSheriff(address sheriff) public view override returns (bool) {
         return balanceOf(sheriff) >= configuration.minimalDepositForSheriff;

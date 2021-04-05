@@ -1,8 +1,9 @@
 const {Contract} = require('ethers')
 const utils = require('./utils')
 
-const {abi, networks} = require('../../abi/RewardsDistributor.json')
-class RewardsDistributor {
+const {abi, networks} = require('san-rewards-contracts/abi/WalletHunters.json')
+
+class WalletHunters {
 
     constructor(address, provider) {
         this.contract = new Contract(address, abi, provider);
@@ -18,5 +19,5 @@ class RewardsDistributor {
 }
 
 module.exports = {
-    RewardsDistributor
+    WalletHunters
 }

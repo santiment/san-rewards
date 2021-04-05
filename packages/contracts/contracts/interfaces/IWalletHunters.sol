@@ -79,9 +79,7 @@ interface IWalletHunters {
      * for sheriffs reward in approve case.
      * @return     request id for submitted request.
      */
-    function submitRequest(address hunter)
-        external
-        returns (uint256);
+    function submitRequest(address hunter) external returns (uint256);
 
     /**
      * @dev        Discard wallet request and move request at discarded state, see enum #State.
@@ -316,7 +314,11 @@ interface IWalletHunters {
      * @param      startIndex  The start index. Can be 0
      * @param      pageSize    The page size. Can be #getVotesLength
      */
-    function getVotes(uint256 requestId, uint256 startIndex, uint256 pageSize) external view returns (WalletVote[] memory);
+    function getVotes(
+        uint256 requestId,
+        uint256 startIndex,
+        uint256 pageSize
+    ) external view returns (WalletVote[] memory);
 
     /**
      * @dev        Get amount of locked balance for user, see #vote.

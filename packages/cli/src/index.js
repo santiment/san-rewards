@@ -1,9 +1,9 @@
 const {program} = require('commander');
-const {createDistribution} = require('../src/create-distribution')
 const fs = require('fs')
 const util = require('util');
 
-const {ContentClient, LOCAL_IPFS_URL, INFURA_IPFS_URL} = require("../src/content/upload")
+const {createDistribution} = require('san-rewards-wrappers/src/create-distribution')
+const {ContentClient, LOCAL_IPFS_URL, INFURA_IPFS_URL} = require("san-rewards-wrappers/src/content/upload")
 
 const readAsync = util.promisify(fs.readFile)
 const writeAsync = util.promisify(fs.writeFile)
@@ -20,7 +20,7 @@ const distribute = async (input, output) => {
 }
 
 const createTokenUri = async (input, output) => {
-    const content = new ContentClient(INFURA_IPFS_URL)
+    const content = new ContentClient(LOCAL_IPFS_URL)
     const item = JSON.parse(await readAsync(input))
     const cid = await content.add(item)
     
@@ -29,7 +29,7 @@ const createTokenUri = async (input, output) => {
 }
 
 const createFileUri = async (input, output) => {
-    const content = new ContentClient(INFURA_IPFS_URL)
+    const content = new ContentClient(LOCAL_IPFS_URL)
     const cid = await content.addFile(input)
 
     console.log(cid.cid.toString())
@@ -41,22 +41,22 @@ async function main() {
     program
         .command('airdrop <input> [output]')
         .description("create airdrop distribution", {
-            input: "file in format [{address, earnings}], example: scripts/airdrop-example.json",
-            output: "file distribution with merkle root and proofs, example: scripts/distribution-example.json",
+            input: "file in format [{address, earnings}], example: src/airdrop-example.json",
+            output: "file distribution with merkle root and proofs, example: src/distribution-example.json",
         })
         .action(async (input, output) => {
-            output = output ?? "scripts/distribution.json"
+            output = output ?? "src/distribution.json"
             await distribute(input, output)
         })
 
     program
         .command('ipfs-add <input> [output]')
         .description("create ipfs tokenuri from input", {
-            input: "file in json format, example: scripts/reward-item-example.json",
-            output: "file ipfs tokenuri, example: scripts/tokenuri-example.json",
+            input: "file in json format, example: src/reward-item-example.json",
+            output: "file ipfs tokenuri, example: src/tokenuri-example.json",
         })
         .action(async (input, output) => {
-            output = output ?? "scripts/tokenuri.txt"
+            output = output ?? "src/tokenuri.txt"
 
             if (input.endsWith('.json')) {
                 await createTokenUri(input, output)

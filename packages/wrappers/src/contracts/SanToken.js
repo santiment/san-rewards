@@ -1,7 +1,8 @@
 const {Contract} = require('ethers')
 const utils = require('./utils')
 
-const {abi, networks} = require('../../abi/San.json')
+const {abi, networks} = require('san-rewards-contracts/abi/San.json')
+
 class SanToken {
 
     constructor(address, provider) {

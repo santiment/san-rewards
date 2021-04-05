@@ -1,7 +1,7 @@
 const {Contract} = require('ethers')
 const utils = require('./utils')
 
-const {abi, networks} = require('../../abi/RewardItems.json')
+const {abi, networks} = require('san-rewards-contracts/abi/RewardItems.json')
 
 const rewardItemTemplate = {
     name: "Santiment",

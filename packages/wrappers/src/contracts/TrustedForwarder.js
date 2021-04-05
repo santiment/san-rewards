@@ -2,7 +2,7 @@ const {Contract} = require('ethers')
 const utils = require('./utils')
 const {EIP712Domain, ForwardRequest} = require("./signingTypes");
 
-const {abi, networks} = require('../../abi/TrustedForwarder.json')
+const {abi, networks} = require('san-rewards-contracts/abi/TrustedForwarder.json')
 
 class TrustedForwarder {
 
