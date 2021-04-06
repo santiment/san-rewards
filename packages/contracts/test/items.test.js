@@ -3,7 +3,7 @@ const {expect} = require('chai')
 const {expectEvent, expectRevert} = require('@openzeppelin/test-helpers')
 
 const {ContentClient, LOCAL_IPFS_URL} = require("san-rewards-wrappers/src/content/upload");
-const { RewardItems } = require("san-rewards-wrappers/src/contracts/RewardItems")
+const {RewardItems} = require("san-rewards-wrappers/src/contracts/RewardItems")
 const interfaceIds = require("san-rewards-wrappers/src/contracts/interfaceIds")
 const {bn, ZERO_ADDRESS} = require("./utils")
 

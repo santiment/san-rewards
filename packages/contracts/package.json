@@ -1,6 +1,6 @@
 {
   "name": "san-rewards-contracts",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "Smart Contracts for san-rewards",
   "files": [
       "/abi"

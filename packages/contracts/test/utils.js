@@ -1,6 +1,8 @@
 const {BN, ether, constants: {MAX_UINT256, ZERO_ADDRESS}} = require('@openzeppelin/test-helpers')
 const ethSigUtil = require('eth-sig-util')
 
+const {TrustedForwarder} = require('san-rewards-wrappers/src/contracts/TrustedForwarder')
+
 const bn = (n) => new BN(n)
 const token = (n) => ether(n)
 const ZERO = new BN(0)
@@ -49,6 +51,8 @@ async function relay(forwarder, relayer, fromWallet, to, calldata, fee) {
 }
 
 async function makeRelayArguments(forwarder, relayer, fromWallet, to, calldata, gas) {
+
+    TrustedForwarder.createRelayRequest
 
     const from = fromWallet.getAddressString()
 

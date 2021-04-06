@@ -1,0 +1,31 @@
+{
+  "name": "san-rewards-relay",
+  "version": "1.0.0",
+  "description": "San rewards relay server",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./src/index.js",
+    "watch": "nodemon ./src/index.js -w ./src",
+    "test": "mocha"
+  },
+  "author": "Nail Khafizov <nailkhaf@pm.me>",
+  "license": "MIT",
+  "dependencies": {
+    "@koa/router": "^10.0.0",
+    "defender-relay-client": "^1.5.0",
+    "ethers": "^5.0.31",
+    "koa": "^2.13.1",
+    "koa-json": "^2.0.2",
+    "koa-json-body": "^5.3.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
+    "dotenv": "^8.2.0",
+    "ethereumjs-wallet": "^1.0.1",
+    "mocha": "^8.3.2",
+    "nodemon": "^2.0.7",
+    "eth-sig-util": "^3.0.1",
+    "ethers": "^5.0.31"
+  }
+}
