@@ -1,8 +1,5 @@
-const {Contract, BigNumber} = require('ethers')
+const {BigNumber} = require('ethers')
 const {TrustedForwarder} = require('san-rewards-wrappers/src/contracts/TrustedForwarder')
-const {DefenderRelaySigner, DefenderRelayProvider} = require('defender-relay-client/lib/ethers')
-
-const Wallet = require('ethereumjs-wallet').default
 
 class Forwarder {
 

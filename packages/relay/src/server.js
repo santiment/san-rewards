@@ -1,5 +1,3 @@
-require('dotenv').config()
-
 const Koa = require('koa')
 const Router = require('@koa/router')
 const json = require('koa-json')
@@ -36,7 +34,7 @@ app.use(router.routes())
 async function main() {
     await setup()
     return {
-        app: app.listen(PORT),
+        app: app.listen(PORT, () => console.log(`Listen on ${PORT}`)),
         forwarder,
         provider
     }

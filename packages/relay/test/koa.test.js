@@ -1,7 +1,8 @@
+require('dotenv').config()
+
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const {expect} = require('chai')
-const ethers = require('ethers')
 
 const {TrustedForwarder} = require('san-rewards-wrappers/src/contracts/TrustedForwarder')
 const {WalletHunters} = require('san-rewards-wrappers/src/contracts/WalletHunters')

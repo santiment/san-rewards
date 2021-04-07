@@ -1,6 +1,10 @@
 {
     "name": "san-rewards",
     "description": "Santiment rewards smart contracts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/santiment/san-rewards"
+    },
     "keywords": [
         "SAN",
         "Santiment",
