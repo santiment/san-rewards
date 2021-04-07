@@ -1,6 +1,6 @@
 {
   "name": "san-rewards-wrappers",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "Wrapper classes for san-rewards-contracts",
   "scripts": {
   },
