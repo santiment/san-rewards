@@ -29,6 +29,22 @@ describe("Test api", function () {
         this.hunters = new WalletHunters(this.huntersAddress, provider.getProvider())
     })
 
+    it('relayer info', async () => {
+        const result = await chai.request(this.app)
+            .get(`/relayer`)
+
+        const relayer = JSON.parse(result.text)
+
+        expect(relayer.network).to.be.equal('rinkeby')
+        expect(relayer.paused).to.be.false
+
+        expect(relayer.relayerId).to.not.equal(undefined)
+        expect(relayer.name).to.not.equal(undefined)
+        expect(relayer.address).to.not.equal(undefined)
+        expect(relayer.createdAt).to.not.equal(undefined)
+        expect(relayer.pendingTxCost).to.not.equal(undefined)
+    })
+
     it('relay', async () => {
 
         const calldata = this.hunters.contract.interface.encodeFunctionData("submitRequest", [user])

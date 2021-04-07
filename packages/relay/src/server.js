@@ -25,6 +25,10 @@ router.post('/sign', async ctx => {
 
 })
 
+router.get('/relayer', async ctx => {
+    ctx.body = await provider.getRelayer().getRelayer()
+})
+
 router.get('/transaction/:id', async ctx => {
     ctx.body = await provider.getRelayer().query(ctx.params.id)
 })
