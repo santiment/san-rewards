@@ -11,7 +11,7 @@ slaveTemplates.dockerTemplate { label ->
       container('docker') {
         def scmVars = checkout scm
 
-        if (env.BRANCH_NAME == "master") {
+        if (scmVars.GIT_TAG_NAME.contains('relay')) {
           withCredentials([
             string(
               credentialsId: 'SECRET_KEY_BASE',
