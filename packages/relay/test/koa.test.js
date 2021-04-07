@@ -9,7 +9,7 @@ const {WalletHunters} = require('san-rewards-wrappers/src/contracts/WalletHunter
 const ethSigUtil = require('eth-sig-util')
 const Wallet = require('ethereumjs-wallet').default
 
-const main = require('../src/index.js')
+const main = require('../src/server.js')
 
 chai.use(chaiHttp)
 
