@@ -4,17 +4,13 @@ const {DefenderRelaySigner, DefenderRelayProvider} = require('defender-relay-cli
 
 const Wallet = require('ethereumjs-wallet').default
 
-class Relayer {
+class Forwarder {
 
 	constructor() {
 		this.forwarder = undefined
 	}
 
 	async createForwarder(provider) {
-		if (this.forwarder) {
-			// close forwarder
-		}
-		provider.getNetwork = () => ({name:"rinkeby"}) // TODO
 		const forwarderAddress = await TrustedForwarder.getAddress(provider)
 		this.forwarder = new TrustedForwarder(forwarderAddress, provider)
 	}
@@ -31,8 +27,8 @@ class Relayer {
 
 		await this.forwarder.contract.verify(...args)
 
-		return await this.forwarder.contract.execute(...args, {gasLimit: 10000000})
+		return await this.forwarder.contract.execute(...args, {gasLimit: 10000000}) // estimate gas limit
 	}
 }
 
-module.exports.Relayer = Relayer
+module.exports.Forwarder = Forwarder

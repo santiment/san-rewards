@@ -1,6 +1,10 @@
 const {DefenderRelaySigner, DefenderRelayProvider} = require('defender-relay-client/lib/ethers')
+const {Relayer} = require('defender-relay-client')
+
+
 
 const DEFENDER_SPEED = process.env.DEFENDER_SPEED
+const NETWORK = process.env.NETWORK
 
 class DefenderProvider {
 
@@ -15,13 +19,19 @@ class DefenderProvider {
 		return this.provider
 	}
 
-	createProvider(credentials) {
-		if (this.provider) {
-			// close provider
+	getRelayer() {
+		if (!this.relayer) {
+			throw new Error("Relayer is not created")
 		}
+		return this.relayer
+	}
 
+	createProvider(credentials) {
 	    const provider = new DefenderRelayProvider(credentials)
 	    this.provider = new DefenderRelaySigner(credentials, provider, { speed: DEFENDER_SPEED })
+	    this.provider.getNetwork = () => ({name: NETWORK})
+		const relayer = new Relayer(credentials)
+		this.relayer = relayer
 	}
 }
 

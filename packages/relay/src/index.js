@@ -6,7 +6,7 @@ const json = require('koa-json')
 const body = require('koa-json-body')
 
 const {DefenderProvider} = require('./provider.js')
-const {Relayer} = require('./relayer.js')
+const {Forwarder} = require('./forwarder.js')
 
 const DEFENDER_API_KEY = process.env.DEFENDER_API_KEY
 const DEFENDER_API_SECRET = process.env.DEFENDER_API_SECRET
@@ -15,10 +15,10 @@ const PORT = process.env.PORT
 const app = new Koa()
 const router = new Router()
 const provider = new DefenderProvider()
-const relayer = new Relayer()
+const forwarder = new Forwarder()
 
 router.post('/relay', async ctx => {
-    ctx.body = await relayer.relay(ctx.request.body)
+    ctx.body = await forwarder.relay(ctx.request.body)
 })
 
 router.post('/sign', async ctx => {
@@ -26,7 +26,7 @@ router.post('/sign', async ctx => {
 })
 
 router.get('/transaction/:id', async ctx => {
-    ctx.body = await provider.getProvider().query(ctx.params.id)
+    ctx.body = await provider.getRelayer().query(ctx.params.id)
 })
 
 app.use(body())
@@ -37,8 +37,8 @@ async function main() {
     await setup()
     return {
         app: app.listen(PORT),
-        relayer: relayer,
-        provider: provider
+        forwarder,
+        provider
     }
 }
 
@@ -52,5 +52,5 @@ async function setup() {
     let credentials = { apiKey: DEFENDER_API_KEY, apiSecret: DEFENDER_API_SECRET }
 
     provider.createProvider(credentials)
-    await relayer.createForwarder(provider.getProvider())
+    await forwarder.createForwarder(provider.getProvider())
 }
