@@ -1,4 +1,4 @@
-const {Contract} = require('ethers')
+const {Contract, BigNumber} = require('ethers')
 const {TrustedForwarder} = require('san-rewards-wrappers/src/contracts/TrustedForwarder')
 const {DefenderRelaySigner, DefenderRelayProvider} = require('defender-relay-client/lib/ethers')
 
@@ -27,7 +27,12 @@ class Forwarder {
 
         await this.forwarder.contract.verify(...args)
 
-        return await this.forwarder.contract.execute(...args, {gasLimit: 10000000}) // estimate gas limit
+        const estimatedGas = await this.forwarder.contract.estimateGas.execute(...args)
+
+        return await this.forwarder.contract.execute(...args, {
+                gasLimit: estimatedGas.mul(BigNumber.from('110')).div(BigNumber.from('100'))
+            }
+        )
     }
 }
 

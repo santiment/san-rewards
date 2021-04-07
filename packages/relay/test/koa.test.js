@@ -82,6 +82,7 @@ describe("Test api", function () {
         expect(receipt.validUntil).to.not.equal(undefined)
 
         this.transactionId = receipt.transactionId
+        console.log(`txhash=${receipt.hash}`)
     })
 
     it('transaction id', async () => {
@@ -109,17 +110,17 @@ describe("Test api", function () {
         expect(receipt.validUntil).to.not.equal(undefined)
     })
 
-    it('wait while tx get mined', async () => {
+    // it('wait while tx get mined', async () => {
 
-        notMined = true
-        while(notMined) {
-            const receipt = await this.provider.getRelayer().query(this.transactionId)
-            if (receipt.status === 'mined') {
-                notMined = false
-            }
-            await delay(10000)
-        }
-    })
+    //     notMined = true
+    //     while(notMined) {
+    //         const receipt = await this.provider.getRelayer().query(this.transactionId)
+    //         if (receipt.status === 'mined') {
+    //             notMined = false
+    //         }
+    //         await delay(10000)
+    //     }
+    // })
 })
 
 function delay(time) {
