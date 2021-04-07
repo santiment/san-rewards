@@ -21,10 +21,6 @@ router.post('/relay', async ctx => {
     ctx.body = await forwarder.relay(ctx.request.body)
 })
 
-router.post('/sign', async ctx => {
-
-})
-
 router.get('/relayer', async ctx => {
     ctx.body = await provider.getRelayer().getRelayer()
 })
