@@ -18,6 +18,8 @@ async function main() {
     const provider = new DefenderProvider()
     const forwarder = new Forwarder()
 
+    await setup(provider, forwarder)
+
     router.post('/relay', async ctx => {
         ctx.body = await forwarder.relay(ctx.request.body)
     })
@@ -35,7 +37,7 @@ async function main() {
     app.use(json())
     app.use(router.routes())
 
-    await setup(provider, forwarder)
+
     return {
         app: app.listen(PORT, () => console.log(`Listen on ${PORT}`)),
         forwarder,
@@ -52,6 +54,6 @@ async function setup(provider, forwarder) {
 
     let credentials = { apiKey: DEFENDER_API_KEY, apiSecret: DEFENDER_API_SECRET }
 
-    provider.createProvider(credentials)
+    await provider.createProvider(credentials)
     await forwarder.createForwarder(provider.getProvider())
 }

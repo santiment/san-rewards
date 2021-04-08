@@ -2,7 +2,6 @@ const {DefenderRelaySigner, DefenderRelayProvider} = require('defender-relay-cli
 const {Relayer} = require('defender-relay-client')
 
 const DEFENDER_SPEED = process.env.DEFENDER_SPEED
-const NETWORK = process.env.NETWORK
 const TX_VALID_FOR_SECONDS = process.env.TX_VALID_FOR_SECONDS
 
 class DefenderProvider {
@@ -25,15 +24,17 @@ class DefenderProvider {
         return this.relayer
     }
 
-    createProvider(credentials) {
+    async createProvider(credentials) {
+        const relayer = new Relayer(credentials)
+        const {network} = await relayer.getRelayer()
+        this.relayer = relayer
+
         const provider = new DefenderRelayProvider(credentials)
         this.provider = new DefenderRelaySigner(credentials, provider, {
             speed: DEFENDER_SPEED,
             validForSeconds: TX_VALID_FOR_SECONDS
         })
-        this.provider.getNetwork = () => ({name: NETWORK})
-        const relayer = new Relayer(credentials)
-        this.relayer = relayer
+        this.provider.getNetwork = () => ({name: network})
     }
 }
 
