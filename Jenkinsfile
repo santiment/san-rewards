@@ -26,8 +26,8 @@ slaveTemplates.dockerTemplate { label ->
             // at launch time.
             def awsRegistry = "${env.aws_account_id}.dkr.ecr.eu-central-1.amazonaws.com"
             docker.withRegistry("https://${awsRegistry}", "ecr:eu-central-1:ecr-credentials") {
-              sh "docker build -t ${awsRegistry}/san-rewards-relay_${scmVars.GIT_TAG_NAME} ."
-              sh "docker push ${awsRegistry}/san-rewards-relay_${scmVars.GIT_TAG_NAME}"
+              sh "docker build -t ${awsRegistry}/san-rewards-relay:${scmVars.GIT_TAG_NAME} ."
+              sh "docker push ${awsRegistry}/san-rewards-relay:${scmVars.GIT_TAG_NAME}"
             }
           }
         }
