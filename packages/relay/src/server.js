@@ -2,6 +2,7 @@ const Koa = require('koa')
 const Router = require('@koa/router')
 const json = require('koa-json')
 const body = require('koa-json-body')
+const logger = require('koa-logger')
 
 const {DefenderProvider} = require('./provider.js')
 const {Forwarder} = require('./forwarder.js')
@@ -29,6 +30,7 @@ async function main() {
         ctx.body = await provider.getRelayer().query(ctx.params.id)
     })
 
+    app.use(logger())
     app.use(body())
     app.use(json())
     app.use(router.routes())

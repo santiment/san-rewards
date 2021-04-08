@@ -11,7 +11,7 @@
         "Smart Contracts"
     ],
     "scripts": {
-      "docker-dev": "docker-compose build san-rewards-relay && docker-compose run san-rewards-relay"
+        "docker-dev": "docker-compose build san-rewards-relay && docker-compose run san-rewards-relay"
     },
     "author": "Nail Khafizov <nailkhaf@pm.me>",
     "license": "MIT",
