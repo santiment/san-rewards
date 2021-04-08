@@ -110,6 +110,14 @@ describe("Test api", function () {
         expect(receipt.validUntil).to.not.equal(undefined)
     })
 
+    it('404', async () => {
+        const result = await chai.request(this.app).get(`/someroute`)
+
+        expect(result.text).to.be.equal('Not Found')
+        expect(result.res.statusCode).to.be.equal(404)
+    })
+
+
     // it('wait while tx get mined', async () => {
 
     //     notMined = true
