@@ -1,13 +1,9 @@
 version: "3.3"
 services:
-  relayer:
+  san-rewards-relay:
     image: "san-rewards-relay"
-    environment:
-      - PORT=5000
-      - NETWORK=rinkeby
-      - TX_VALID_FOR_SECONDS=600
-      - DEFENDER_SPEED=fastest
-      # - DEFENDER_API_KEY=
-      # - DEFENDER_API_SECRET=
+    build: .
+    env_file:
+      - "./packages/relay/.env"
     ports:
-      - "5000:5000"
+      -  3000:3000

@@ -16,6 +16,8 @@ RUN npm install --only=production
 # If you are building your code for production
 # RUN npm ci --only=production
 
+EXPOSE 3000
+
 # Bundle app source
 COPY packages/relay/src ./packages/relay/src
 COPY packages/wrappers/src ./packages/wrappers/src

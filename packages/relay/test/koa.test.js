@@ -31,8 +31,7 @@ describe("Test api", function () {
     })
 
     it('relayer info', async () => {
-        const result = await chai.request(this.app)
-            .get(`/relayer`)
+        const result = await chai.request(this.app).get(`/`)
 
         const relayer = JSON.parse(result.text)
 
