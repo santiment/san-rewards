@@ -11,7 +11,9 @@ slaveTemplates.dockerTemplate { label ->
       container('docker') {
         def scmVars = checkout scm
 
-        if (env.BRANCH_NAME == "main" && scmVars.GIT_TAG_NAME.contains('relay')) {
+        if (env.BRANCH_NAME == "main"
+            && scmVars.GIT_TAG_NAME != null
+            && scmVars.GIT_TAG_NAME.contains('relay')) {
           withCredentials([
             string(
               credentialsId: 'aws_account_id',
