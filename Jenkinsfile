@@ -14,10 +14,6 @@ slaveTemplates.dockerTemplate { label ->
         if (env.BRANCH_NAME == "main" && scmVars.GIT_TAG_NAME.contains('relay')) {
           withCredentials([
             string(
-              credentialsId: 'SECRET_KEY_BASE',
-              variable: 'SECRET_KEY_BASE'
-            ),
-            string(
               credentialsId: 'aws_account_id',
               variable: 'aws_account_id'
             )
