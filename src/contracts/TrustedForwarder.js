@@ -32,7 +32,7 @@ class TrustedForwarder {
 
 async function _createRelayRequest(forwarder, from, to, calldata, gas) {
     const nonce = await forwarder.getNonce(from).then(nonce => nonce.toString())
-    const chainId = await forwarder.getChainId()
+    const chainId = await forwarder.getChainId().then(chainId => chainId.toString())
 
     const request = {
         from,
