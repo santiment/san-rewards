@@ -60,6 +60,7 @@ contract('WalletHunters', function (accounts) {
 
     it("Grant relayer role", async () => {
         expect(await this.hunters.isTrustedForwarder(this.forwarder.address)).to.be.true
+        expect(await this.forwarder.registeredContracts(this.hunters.address)).to.be.true
 
         let receipt = await this.forwarder.grantRole(await this.forwarder.RELAYER_ROLE(), relayer, {from: deployer})
         expectEvent(receipt, "RoleGranted", {
@@ -255,6 +256,16 @@ contract('WalletHunters', function (accounts) {
     })
 
     const discardedRequestId = bn(3)
+
+    it("Check forwarder restrict transactions to unregistered tx", async () => {
+        let receipt = await this.forwarder.unregisterContracts([this.hunters.address])
+        expectEvent(receipt, "UnregisteredContracts", {contracts: [this.hunters.address]})
+
+        await expectRevert(submitNewWallet(token('10000'), discardedRequestId), "Contract must be registered")
+        
+        receipt = await this.forwarder.registerContracts([this.hunters.address])
+        expectEvent(receipt, "RegisteredContracts", {contracts: [this.hunters.address]})
+    })
 
     it("Submit fourth wallet", async () => {
         await updateConfiguration({requestReward: token('10000')})
