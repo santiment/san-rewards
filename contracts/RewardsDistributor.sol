@@ -49,14 +49,16 @@ contract RewardsDistributor is
 
     function initialize(
         address admin,
+        address trustedForwarder_,
         address rewardsToken_,
         address snapshotToken_
     ) external initializer {
-        __RewardsDistributor_init(admin, rewardsToken_, snapshotToken_);
+        __RewardsDistributor_init(admin, trustedForwarder_, rewardsToken_, snapshotToken_);
     }
 
     function __RewardsDistributor_init(
         address admin,
+        address trustedForwarder_,
         address rewardsToken_,
         address snapshotToken_
     ) internal initializer {
@@ -65,6 +67,7 @@ contract RewardsDistributor is
 
         __RewardsDistributor_init_unchained(
             admin,
+            trustedForwarder_,
             rewardsToken_,
             snapshotToken_
         );
@@ -72,16 +75,20 @@ contract RewardsDistributor is
 
     function __RewardsDistributor_init_unchained(
         address admin,
+        address trustedForwarder_,
         address rewardsToken_,
         address snapshotToken_
     ) internal initializer {
         require(rewardsToken_.isContract(), "RewardsToken must be contract");
         require(snapshotToken_.isContract(), "SnapshotToken must be contract");
+        require(trustedForwarder_.isContract(), "SnapshotToken must be contract");
 
         rewardsToken = IERC20Upgradeable(rewardsToken_);
         snapshotToken = IERC20Snapshot(snapshotToken_);
 
         lastSnapshotId = 0;
+
+        super._setTrustedForwarder(trustedForwarder_);
 
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _setupRole(DISTRIBUTOR_ROLE, admin);

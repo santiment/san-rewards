@@ -38,6 +38,7 @@ contract MinimalForwarder is EIP712 {
 
     function verify(ForwardRequest calldata req, bytes calldata signature)
         public
+        virtual
         view
         returns (bool)
     {

@@ -83,6 +83,7 @@ contract WalletHunters is
 
     function initialize(
         address admin_,
+        address trustedForwarder_,
         address stakingToken_,
         address rewardsToken_,
         uint256 votingDuration_,
@@ -94,6 +95,7 @@ contract WalletHunters is
     ) external initializer {
         __WalletHunters_init(
             admin_,
+            trustedForwarder_,
             stakingToken_,
             rewardsToken_,
             votingDuration_,
@@ -107,6 +109,7 @@ contract WalletHunters is
 
     function __WalletHunters_init(
         address admin_,
+        address trustedForwarder_,
         address stakingToken_,
         address rewardsToken_,
         uint256 votingDuration_,
@@ -122,6 +125,7 @@ contract WalletHunters is
 
         __WalletHunters_init_unchained(
             admin_,
+            trustedForwarder_,
             stakingToken_,
             rewardsToken_,
             votingDuration_,
@@ -135,6 +139,7 @@ contract WalletHunters is
 
     function __WalletHunters_init_unchained(
         address admin,
+        address trustedForwarder_,
         address stakingToken_,
         address rewardsToken_,
         uint256 votingDuration_,
@@ -146,12 +151,15 @@ contract WalletHunters is
     ) internal initializer {
         require(rewardsToken_.isContract(), "RewardsToken must be contract");
         require(stakingToken_.isContract(), "StakingToken must be contract");
+        require(trustedForwarder_.isContract(), "StakingToken must be contract");
 
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _setupRole(MAYOR_ROLE, admin);
 
         stakingToken = IERC20Upgradeable(stakingToken_);
         rewardsToken = IERC20Mintable(rewardsToken_);
+
+        super._setTrustedForwarder(trustedForwarder_);
 
         _updateConfiguration(
             votingDuration_,

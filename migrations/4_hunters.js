@@ -5,12 +5,14 @@ const {deployProxy} = require('@openzeppelin/truffle-upgrades');
 const WalletHunters = artifacts.require("WalletHunters")
 const RewardsToken = artifacts.require("RewardsToken")
 const RealTokenMock = artifacts.require("RealTokenMock")
+const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
     const rewardsToken = await RewardsToken.deployed()
     const realTokenMock = await RealTokenMock.deployed()
+    const forwarder = await TrustedForwarder.deployed()
 
     const votingDuration = bn(24 * 60 * 60) // 1 day
     const sheriffsRewardShare = bn(20 * 100) // 20%
@@ -21,6 +23,7 @@ module.exports = async (deployer, network, accounts) => {
 
     const hunters = await deployProxy(WalletHunters, [
         owner,
+        forwarder.address,
         realTokenMock.address,
         rewardsToken.address,
         votingDuration,
