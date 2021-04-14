@@ -12,7 +12,6 @@ import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 
 import "../interfaces/IWalletHunters.sol";
 import "../utils/AccountingTokenUpgradeable.sol";
-import "../interfaces/IERC20Mintable.sol";
 import "../gsn/RelayRecipientUpgradeable.sol";
 
 contract WalletHunters is
@@ -22,7 +21,6 @@ contract WalletHunters is
     AccessControlUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using SafeERC20Upgradeable for IERC20Mintable;
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
@@ -67,14 +65,13 @@ contract WalletHunters is
     string private constant ERC20_SYMBOL = "WHST";
 
     IERC20Upgradeable public stakingToken;
-    IERC20Mintable public rewardsToken;
 
     Configuration public override configuration;
+    uint256 public rewardsPool;
     CountersUpgradeable.Counter private _requestCounter;
     mapping(uint256 => Request) private _requests;
     mapping(uint256 => RequestVoting) private _requestVotings;
-    mapping(address => EnumerableSetUpgradeable.UintSet)
-        private _activeRequests;
+    mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
@@ -85,7 +82,6 @@ contract WalletHunters is
         address admin_,
         address trustedForwarder_,
         address stakingToken_,
-        address rewardsToken_,
         uint256 votingDuration_,
         uint256 sheriffsRewardShare_,
         uint256 fixedSheriffReward_,
@@ -97,7 +93,6 @@ contract WalletHunters is
             admin_,
             trustedForwarder_,
             stakingToken_,
-            rewardsToken_,
             votingDuration_,
             sheriffsRewardShare_,
             fixedSheriffReward_,
@@ -111,7 +106,6 @@ contract WalletHunters is
         address admin_,
         address trustedForwarder_,
         address stakingToken_,
-        address rewardsToken_,
         uint256 votingDuration_,
         uint256 sheriffsRewardShare_,
         uint256 fixedSheriffReward_,
@@ -127,7 +121,6 @@ contract WalletHunters is
             admin_,
             trustedForwarder_,
             stakingToken_,
-            rewardsToken_,
             votingDuration_,
             sheriffsRewardShare_,
             fixedSheriffReward_,
@@ -141,7 +134,6 @@ contract WalletHunters is
         address admin,
         address trustedForwarder_,
         address stakingToken_,
-        address rewardsToken_,
         uint256 votingDuration_,
         uint256 sheriffsRewardShare_,
         uint256 fixedSheriffReward_,
@@ -149,7 +141,6 @@ contract WalletHunters is
         uint256 minimalDepositForSheriff_,
         uint256 requestReward_
     ) internal initializer {
-        require(rewardsToken_.isContract(), "RewardsToken must be contract");
         require(stakingToken_.isContract(), "StakingToken must be contract");
         require(trustedForwarder_.isContract(), "StakingToken must be contract");
 
@@ -157,7 +148,6 @@ contract WalletHunters is
         _setupRole(MAYOR_ROLE, admin);
 
         stakingToken = IERC20Upgradeable(stakingToken_);
-        rewardsToken = IERC20Mintable(rewardsToken_);
 
         super._setTrustedForwarder(trustedForwarder_);
 
@@ -278,6 +268,16 @@ contract WalletHunters is
         withdraw(sheriff, balanceOf(sheriff));
     }
 
+    function replenishRewardPool(
+        address from, uint256 amount
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        rewardsPool += amount;
+
+        stakingToken.safeTransferFrom(from, address(this), amount);
+
+        emit ReplenishedRewardPool(from, amount);
+    }
+
     function claimRewards(address user, uint256[] calldata requestIds)
         public
         override
@@ -296,7 +296,7 @@ contract WalletHunters is
         }
 
         if (totalReward > 0) {
-            rewardsToken.mint(user, totalReward);
+            _transferReward(user, totalReward);
         }
 
         emit UserRewardPaid(user, requestIds, totalReward);
@@ -319,7 +319,7 @@ contract WalletHunters is
         }
 
         if (totalReward > 0) {
-            rewardsToken.mint(hunter, totalReward);
+            _transferReward(hunter, totalReward);
         }
 
         emit HunterRewardPaid(hunter, requestIds, totalReward);
@@ -342,7 +342,7 @@ contract WalletHunters is
         }
 
         if (totalReward > 0) {
-            rewardsToken.mint(sheriff, totalReward);
+            _transferReward(sheriff, totalReward);
         }
 
         emit SheriffRewardPaid(sheriff, requestIds, totalReward);
@@ -490,6 +490,14 @@ contract WalletHunters is
         _getVote(requestId, sheriff, _vote);
 
         return _vote;
+    }
+
+    function _transferReward(address destination, uint256 amount) internal {
+        require(amount <= rewardsPool, "Don't enough tokens in reward pool");
+        
+        rewardsPool -= amount;
+
+        stakingToken.safeTransfer(destination, amount);
     }
 
     function _getVote(uint256 requestId, address sheriff, WalletVote memory _vote) internal view {

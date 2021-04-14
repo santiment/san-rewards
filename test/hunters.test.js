@@ -5,7 +5,6 @@ const Wallet = require('ethereumjs-wallet').default
 
 const {bn, token, ZERO, relay} = require("./utils")
 
-const RewardsToken = artifacts.require("RewardsToken")
 const RealTokenMock = artifacts.require("RealTokenMock")
 const WalletHunters = artifacts.require("WalletHunters")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
@@ -25,7 +24,6 @@ contract('WalletHunters', function (accounts) {
     const requestReward = token(`300`)
 
     before(async () => {
-        this.rewardsToken = await RewardsToken.deployed()
         this.realToken = await RealTokenMock.deployed()
         this.hunters = await WalletHunters.deployed()
         this.forwarder = await TrustedForwarder.deployed()
@@ -34,13 +32,11 @@ contract('WalletHunters', function (accounts) {
     it(`Check access roles after deploy`, async () => {
         await this.hunters.grantRole(await this.hunters.MAYOR_ROLE(), mayor, {from: deployer})
 
-        expect(await this.rewardsToken.hasRole(await this.rewardsToken.MINTER_ROLE(), this.hunters.address)).to.be.true
         expect(await this.hunters.hasRole(await this.hunters.MAYOR_ROLE(), mayor)).to.be.true
         expect(await this.hunters.hasRole(await this.hunters.MAYOR_ROLE(), deployer)).to.be.true
     })
 
     it("Check hunters state", async () => {
-        expect(await this.hunters.rewardsToken()).to.be.equal(this.rewardsToken.address)
         expect(await this.hunters.stakingToken()).to.be.equal(this.realToken.address)
         const configuration = await this.hunters.configuration()
         expect(configuration.votingDuration).to.be.bignumber.equal(votingDuration)
@@ -71,6 +67,11 @@ contract('WalletHunters', function (accounts) {
         expect(await this.forwarder.hasRole(await this.forwarder.RELAYER_ROLE(), relayer)).to.be.true
     })
 
+    const walletRequests = [0, 1, 2].map(n => ({
+        requestId: bn(n),
+        reward: token('10000').mul(bn(n + 1))
+    }))
+
     it(`Mint staking tokens`, async () => {
         // fetch before balances
         const beforeBalances = await Promise.all(sheriffs.map(async sheriff => await this.realToken.balanceOf(sheriff)))
@@ -84,6 +85,14 @@ contract('WalletHunters', function (accounts) {
         for (const {sheriff, index} of sheriffs.map((sheriff, index) => ({sheriff, index}))) {
             expect(await this.realToken.balanceOf(sheriff)).to.be.bignumber.equal(beforeBalances[index].add(sheriffsSanTokens[index]))
         }
+
+        const totalReward = walletRequests.reduce((total, {reward}) => total.add(reward), token('0'))
+
+        expect(await this.hunters.rewardsPool()).to.be.bignumber.equal(ZERO)
+        await this.realToken.approve(this.hunters.address, totalReward, {from: deployer})
+        let receipt = await this.hunters.replenishRewardPool(deployer, totalReward)
+        expectEvent(receipt, "ReplenishedRewardPool", {from: deployer, amount: totalReward})
+        expect(await this.hunters.rewardsPool()).to.be.bignumber.equal(totalReward)
     })
 
     it("Staking a sheriff", async () => {
@@ -113,11 +122,6 @@ contract('WalletHunters', function (accounts) {
             expect(await this.hunters.balanceOf(sheriff)).to.be.bignumber.equal(sheriffsSanTokens[index])
         }
     })
-
-    const walletRequests = [0, 1, 2].map(n => ({
-        requestId: bn(n),
-        reward: token('10000').mul(bn(n + 1))
-    }))
 
     const updateConfiguration = async (newConfiguration) => {
 
@@ -247,11 +251,11 @@ contract('WalletHunters', function (accounts) {
                 await expectRevert(this.hunters.claimSheriffRewards(sheriff, [requestId], {from: deployer}), "Sender must be sheriff")
             }
 
-            const balanceBefore = await this.rewardsToken.balanceOf(sheriff1)
+            const balanceBefore = await this.realToken.balanceOf(sheriff1)
 
             await withdrawReward(sheriff1)
 
-            expect(await this.rewardsToken.balanceOf(sheriff1)).to.be.bignumber.equal(balanceBefore.add(sheriff1Rewards[requestIndex]))
+            expect(await this.realToken.balanceOf(sheriff1)).to.be.bignumber.equal(balanceBefore.add(sheriff1Rewards[requestIndex]))
         })
     })
 
@@ -294,7 +298,7 @@ contract('WalletHunters', function (accounts) {
 
     it(`Withdraw hunter reward`, async () => {
         const hunterBalanceTracker = await balance.tracker(hunter)
-        const balanceBefore = await this.rewardsToken.balanceOf(hunter)
+        const balanceBefore = await this.realToken.balanceOf(hunter)
 
         let actualReward = bn(0)
         const requestIds = []
@@ -316,11 +320,14 @@ contract('WalletHunters', function (accounts) {
         await expectEvent.inTransaction(receipt.tx, this.hunters, "HunterRewardPaid", {totalReward: actualReward})
         await expectRevert(relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0')), "Already rewarded")
 
-        expect(await this.rewardsToken.balanceOf(hunter)).to.be.bignumber.equal(balanceBefore.add(actualReward))
+        expect(await this.realToken.balanceOf(hunter)).to.be.bignumber.equal(balanceBefore.add(actualReward))
         expect(await hunterBalanceTracker.delta()).to.be.bignumber.equal('0')
     })
 
     it("Withdraw sheriff's deposit", async () => {
+        const sheriff1BalanceBefore = await realToken.balanceOf(sheriff1)
+        const sheriff2BalanceBefore = await realToken.balanceOf(sheriff2)
+
         const withdraw = async sheriff => {
             const balance = await this.hunters.balanceOf(sheriff)
             const receipt = await this.hunters.withdraw(sheriff, balance, {from: sheriff})
@@ -336,11 +343,8 @@ contract('WalletHunters', function (accounts) {
         expect(await this.hunters.balanceOf(sheriff1)).to.be.bignumber.equal(ZERO)
         expect(await this.hunters.balanceOf(sheriff2)).to.be.bignumber.equal(ZERO)
 
-        expect(await this.realToken.balanceOf(sheriff1)).to.be.bignumber.equal(sheriffsSanTokens[0])
-        expect(await this.realToken.balanceOf(sheriff2)).to.be.bignumber.equal(sheriffsSanTokens[1])
-
-        expect(await this.rewardsToken.balanceOf(sheriff1)).to.be.bignumber.equal(bn('1090909090909090909089'))
-        expect(await this.rewardsToken.balanceOf(sheriff2)).to.be.bignumber.equal(ZERO)
+        expect(await this.realToken.balanceOf(sheriff1)).to.be.bignumber.equal(bn('1090909090909090909089').add(sheriffsSanTokens[0]))
+        expect(await this.realToken.balanceOf(sheriff2)).to.be.bignumber.equal(ZERO.add(sheriffsSanTokens[1]))
     })
 
     it("Exit sheriff3", async () => {
@@ -352,8 +356,13 @@ contract('WalletHunters', function (accounts) {
 
         expect(await this.hunters.balanceOf(sheriff3)).to.be.bignumber.equal(ZERO)
 
-        expect(await this.realToken.balanceOf(sheriff3)).to.be.bignumber.equal(sheriffsSanTokens[2])
-        expect(await this.rewardsToken.balanceOf(sheriff3)).to.be.bignumber.equal(bn('10909090909090909090908'))
+        expect(await this.realToken.balanceOf(sheriff3)).to.be.bignumber.equal(bn('10909090909090909090908').add(sheriffsSanTokens[2]))
+    })
+
+    it("Check staking token balance for hunters contract", async () => {
+        expect(await this.hunters.rewardsPool()).to.be.bignumber.equal('3') // rest after rounding
+        expect(await this.hunters.totalSupply()).to.be.bignumber.equal(ZERO)
+        expect(await this.realToken.balanceOf(this.hunters.address)).to.be.bignumber.equal('3')
     })
 
     it("Fetch all votes", async () => {

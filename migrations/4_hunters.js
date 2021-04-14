@@ -3,14 +3,12 @@ const {isTestnet, saveContract, bn, token} = require("./utils")
 const {deployProxy} = require('@openzeppelin/truffle-upgrades');
 
 const WalletHunters = artifacts.require("WalletHunters")
-const RewardsToken = artifacts.require("RewardsToken")
 const RealTokenMock = artifacts.require("RealTokenMock")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
-    const rewardsToken = await RewardsToken.deployed()
     const realTokenMock = await RealTokenMock.deployed()
     const forwarder = await TrustedForwarder.deployed()
 
@@ -25,7 +23,6 @@ module.exports = async (deployer, network, accounts) => {
         owner,
         forwarder.address,
         realTokenMock.address,
-        rewardsToken.address,
         votingDuration,
         sheriffsRewardShare,
         fixedSheriffReward,
@@ -35,8 +32,6 @@ module.exports = async (deployer, network, accounts) => {
     ], {deployer})
 
     await saveContract("WalletHunters", hunters.abi, network, hunters.address)
-
-    await rewardsToken.grantRole(await rewardsToken.MINTER_ROLE(), WalletHunters.address, {from: owner})
 
     if (isTestnet(network)) {
         const devAddresses = process.env.DEV_ADDRESSES.split(",")
