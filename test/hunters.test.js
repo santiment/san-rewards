@@ -88,7 +88,11 @@ contract('WalletHunters', function (accounts) {
 
         const totalReward = walletRequests.reduce((total, {reward}) => total.add(reward), token('0'))
 
-        await this.realToken.transfer(this.hunters.address, totalReward, {from: deployer})
+        expect(await this.hunters.rewardsPool()).to.be.bignumber.equal(ZERO)
+        await this.realToken.approve(this.hunters.address, totalReward, {from: deployer})
+        let receipt = await this.hunters.replenishRewardPool(deployer, totalReward)
+        expectEvent(receipt, "ReplenishedRewardPool", {from: deployer, amount: totalReward})
+        expect(await this.hunters.rewardsPool()).to.be.bignumber.equal(totalReward)
     })
 
     it("Staking a sheriff", async () => {
@@ -353,6 +357,12 @@ contract('WalletHunters', function (accounts) {
         expect(await this.hunters.balanceOf(sheriff3)).to.be.bignumber.equal(ZERO)
 
         expect(await this.realToken.balanceOf(sheriff3)).to.be.bignumber.equal(bn('10909090909090909090908').add(sheriffsSanTokens[2]))
+    })
+
+    it("Check staking token balance for hunters contract", async () => {
+        expect(await this.hunters.rewardsPool()).to.be.bignumber.equal('3') // rest after rounding
+        expect(await this.hunters.totalSupply()).to.be.bignumber.equal(ZERO)
+        expect(await this.realToken.balanceOf(this.hunters.address)).to.be.bignumber.equal('3')
     })
 
     it("Fetch all votes", async () => {

@@ -67,11 +67,11 @@ contract WalletHunters is
     IERC20Upgradeable public stakingToken;
 
     Configuration public override configuration;
+    uint256 public rewardsPool;
     CountersUpgradeable.Counter private _requestCounter;
     mapping(uint256 => Request) private _requests;
     mapping(uint256 => RequestVoting) private _requestVotings;
-    mapping(address => EnumerableSetUpgradeable.UintSet)
-        private _activeRequests;
+    mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
@@ -266,6 +266,16 @@ contract WalletHunters is
     {
         claimRewards(sheriff, requestIds);
         withdraw(sheriff, balanceOf(sheriff));
+    }
+
+    function replenishRewardPool(
+        address from, uint256 amount
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        rewardsPool += amount;
+
+        stakingToken.safeTransferFrom(from, address(this), amount);
+
+        emit ReplenishedRewardPool(from, amount);
     }
 
     function claimRewards(address user, uint256[] calldata requestIds)
@@ -483,9 +493,9 @@ contract WalletHunters is
     }
 
     function _transferReward(address destination, uint256 amount) internal {
-        uint256 stakedTokens = totalSupply();
-        uint256 totalTokens = stakingToken.balanceOf(address(this));
-        require(totalTokens - stakedTokens >= amount, "Don't enough tokens");
+        require(amount <= rewardsPool, "Don't enough tokens in reward pool");
+        
+        rewardsPool -= amount;
 
         stakingToken.safeTransfer(destination, amount);
     }

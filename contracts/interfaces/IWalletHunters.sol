@@ -71,6 +71,8 @@ interface IWalletHunters {
         uint256 requestReward
     );
 
+    event ReplenishedRewardPool(address from, uint256 amount);
+
     /**
      * @dev        Submit a new wallet request. Increment request id and return it. Counter starts
      * from 0. Request automatically moved in active state, see enum #State. Caller must be hunter.
@@ -162,10 +164,17 @@ interface IWalletHunters {
     function activeRequestsLength(address user) external view returns (uint256);
 
     /**
+     * @dev        Replinish reward pool in staking tokens.
+     * @param      from    The address from whom tokens will be transfered
+     * @param      amount  The amount of tokens
+     */
+    function replenishRewardPool(address from, uint256 amount) external;
+
+    /**
      * @dev        Claim hunter and sheriff rewards. Mint reward tokens. Should be used all
      * available request ids in not active state for user, even if #hunterReward equal 0 for
      * specific request id. Emit #UserRewardPaid. Remove requestIds from #activeRequests set.
-     * @param      user        The user address.
+     * @param      user        The user address
      * @param      requestIds  The request ids
      */
     function claimRewards(address user, uint256[] calldata requestIds) external;
