@@ -1,7 +1,7 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0xA02a47f7ee790c9836D7fE2aAE9e9972f9349336"
+            "address": "0xddEF50B1729187CC52E9575A91942319e65F8284"
         },
         "ropsten": {
             "address": "0x63c65fD98380fF02935840090Eab0fAC491eb030"
@@ -129,6 +129,26 @@
             "name": "NewWalletRequest",
             "type": "event",
             "signature": "0x76664a8bf74c8214a2779a595bbec0820521931eb7ffac23a597467fcbd83f2e"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "ReplenishedRewardPool",
+            "type": "event",
+            "signature": "0xb961e2159a7491c1a401138c6695540ae92d19c5f6b83b927d3440b53eeb3e66"
         },
         {
             "anonymous": false,
@@ -771,18 +791,18 @@
         },
         {
             "inputs": [],
-            "name": "rewardsToken",
+            "name": "rewardsPool",
             "outputs": [
                 {
-                    "internalType": "contract IERC20Mintable",
+                    "internalType": "uint256",
                     "name": "",
-                    "type": "address"
+                    "type": "uint256"
                 }
             ],
             "stateMutability": "view",
             "type": "function",
             "constant": true,
-            "signature": "0xd1af0c7d"
+            "signature": "0x0359fea9"
         },
         {
             "inputs": [],
@@ -914,12 +934,12 @@
                 },
                 {
                     "internalType": "address",
-                    "name": "stakingToken_",
+                    "name": "trustedForwarder_",
                     "type": "address"
                 },
                 {
                     "internalType": "address",
-                    "name": "rewardsToken_",
+                    "name": "stakingToken_",
                     "type": "address"
                 },
                 {
@@ -1073,6 +1093,25 @@
             "stateMutability": "nonpayable",
             "type": "function",
             "signature": "0xb8f4b730"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "replenishRewardPool",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function",
+            "signature": "0xfcffdfca"
         },
         {
             "inputs": [
