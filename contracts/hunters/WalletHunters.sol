@@ -68,7 +68,8 @@ contract WalletHunters is
     CountersUpgradeable.Counter private _requestCounter;
     mapping(uint256 => Request) private _requests;
     mapping(uint256 => RequestVoting) private _requestVotings;
-    mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
+    mapping(address => EnumerableSetUpgradeable.UintSet)
+        private _activeRequests;
     Configuration[] private _configurations;
 
     modifier onlyRole(bytes32 role) {
@@ -140,7 +141,10 @@ contract WalletHunters is
         uint256 requestReward_
     ) internal initializer {
         require(stakingToken_.isContract(), "StakingToken must be contract");
-        require(trustedForwarder_.isContract(), "StakingToken must be contract");
+        require(
+            trustedForwarder_.isContract(),
+            "StakingToken must be contract"
+        );
 
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _setupRole(MAYOR_ROLE, admin);
@@ -159,11 +163,7 @@ contract WalletHunters is
         );
     }
 
-    function submitRequest(address hunter)
-        external
-        override
-        returns (uint256)
-    {
+    function submitRequest(address hunter) external override returns (uint256) {
         require(_msgSender() == hunter, "Sender must be hunter");
 
         uint256 id = _requestCounter.current();
@@ -266,9 +266,11 @@ contract WalletHunters is
         withdraw(sheriff, balanceOf(sheriff));
     }
 
-    function replenishRewardPool(
-        address from, uint256 amount
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function replenishRewardPool(address from, uint256 amount)
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         rewardsPool += amount;
 
         stakingToken.safeTransferFrom(from, address(this), amount);
@@ -368,15 +370,17 @@ contract WalletHunters is
         external
         view
         override
-    returns (
-        uint256 votingDuration,
-        uint256 sheriffsRewardShare,
-        uint256 fixedSheriffReward,
-        uint256 minimalVotesForRequest,
-        uint256 minimalDepositForSheriff,
-        uint256 requestReward
-    ) {
-        Configuration storage _configuration = _configurations[_currentConfigurationIndex()];
+        returns (
+            uint256 votingDuration,
+            uint256 sheriffsRewardShare,
+            uint256 fixedSheriffReward,
+            uint256 minimalVotesForRequest,
+            uint256 minimalDepositForSheriff,
+            uint256 requestReward
+        )
+    {
+        Configuration storage _configuration =
+            _configurations[_currentConfigurationIndex()];
 
         votingDuration = _configuration.votingDuration;
         sheriffsRewardShare = _configuration.sheriffsRewardShare;
@@ -389,15 +393,19 @@ contract WalletHunters is
     function configurationAt(uint256 index)
         external
         view
-    returns (
-        uint256 votingDuration,
-        uint256 sheriffsRewardShare,
-        uint256 fixedSheriffReward,
-        uint256 minimalVotesForRequest,
-        uint256 minimalDepositForSheriff,
-        uint256 requestReward
-    ) {
-        require(index <= _currentConfigurationIndex(), "Configuration doesn't exist");
+        returns (
+            uint256 votingDuration,
+            uint256 sheriffsRewardShare,
+            uint256 fixedSheriffReward,
+            uint256 minimalVotesForRequest,
+            uint256 minimalDepositForSheriff,
+            uint256 requestReward
+        )
+    {
+        require(
+            index <= _currentConfigurationIndex(),
+            "Configuration doesn't exist"
+        );
         Configuration storage _configuration = _configurations[index];
 
         votingDuration = _configuration.votingDuration;
@@ -408,10 +416,7 @@ contract WalletHunters is
         requestReward = _configuration.requestReward;
     }
 
-    function _currentConfigurationIndex()
-        internal
-        view
-    returns (uint256) {
+    function _currentConfigurationIndex() internal view returns (uint256) {
         return _configurations.length - 1;
     }
 
@@ -432,14 +437,16 @@ contract WalletHunters is
             "Sheriff share too much"
         );
 
-        _configurations.push(Configuration({
-            votingDuration: _votingDuration,
-            sheriffsRewardShare: _sheriffsRewardShare,
-            fixedSheriffReward: _fixedSheriffReward,
-            minimalVotesForRequest: _minimalVotesForRequest,
-            minimalDepositForSheriff: _minimalDepositForSheriff,
-            requestReward: _requestReward
-        }));
+        _configurations.push(
+            Configuration({
+                votingDuration: _votingDuration,
+                sheriffsRewardShare: _sheriffsRewardShare,
+                fixedSheriffReward: _fixedSheriffReward,
+                minimalVotesForRequest: _minimalVotesForRequest,
+                minimalDepositForSheriff: _minimalDepositForSheriff,
+                requestReward: _requestReward
+            })
+        );
 
         emit ConfigurationChanged(
             _votingDuration,
@@ -500,11 +507,15 @@ contract WalletHunters is
         proposal.creationTime = _requests[requestId].creationTime;
 
         uint256 configurationIndex = _requests[requestId].configurationIndex;
-        
-        proposal.finishTime = _requests[requestId].creationTime + _configurations[configurationIndex].votingDuration;
-        
-        proposal.sheriffsRewardShare = _configurations[configurationIndex].sheriffsRewardShare;
-        proposal.fixedSheriffReward = _configurations[configurationIndex].fixedSheriffReward;
+
+        proposal.finishTime =
+            _requests[requestId].creationTime +
+            _configurations[configurationIndex].votingDuration;
+
+        proposal.sheriffsRewardShare = _configurations[configurationIndex]
+            .sheriffsRewardShare;
+        proposal.fixedSheriffReward = _configurations[configurationIndex]
+            .fixedSheriffReward;
 
         proposal.votesFor = _requestVotings[requestId].votesFor;
         proposal.votesAgainst = _requestVotings[requestId].votesAgainst;
@@ -514,11 +525,20 @@ contract WalletHunters is
         proposal.state = _walletState(requestId);
     }
 
-    function getVotesLength(uint256 requestId) external view override returns (uint256) {
+    function getVotesLength(uint256 requestId)
+        external
+        view
+        override
+        returns (uint256)
+    {
         return _requestVotings[requestId].voters.length();
     }
 
-    function getVotes(uint256 requestId, uint256 startIndex, uint256 pageSize) external view override returns (WalletVote[] memory) {
+    function getVotes(
+        uint256 requestId,
+        uint256 startIndex,
+        uint256 pageSize
+    ) external view override returns (WalletVote[] memory) {
         require(
             startIndex + pageSize <= _requestVotings[requestId].voters.length(),
             "Read index out of bounds"
@@ -527,7 +547,8 @@ contract WalletHunters is
         WalletVote[] memory result = new WalletVote[](pageSize);
 
         for (uint256 i = 0; i < pageSize; i++) {
-            address voter = _requestVotings[requestId].voters.at(startIndex + i);
+            address voter =
+                _requestVotings[requestId].voters.at(startIndex + i);
             _getVote(requestId, voter, result[i]);
         }
 
@@ -549,13 +570,17 @@ contract WalletHunters is
 
     function _transferReward(address destination, uint256 amount) internal {
         require(amount <= rewardsPool, "Don't enough tokens in reward pool");
-        
+
         rewardsPool -= amount;
 
         stakingToken.safeTransfer(destination, amount);
     }
 
-    function _getVote(uint256 requestId, address sheriff, WalletVote memory _vote) internal view {
+    function _getVote(
+        uint256 requestId,
+        address sheriff,
+        WalletVote memory _vote
+    ) internal view {
         require(requestId < _requestCounter.current(), "Request doesn't exist");
 
         _vote.requestId = requestId;
@@ -626,12 +651,13 @@ contract WalletHunters is
         }
 
         if (_isEnoughVotes(requestId) && _walletApproved(requestId)) {
-            uint256 sheriffsRewardShare = _configurations[_requests[requestId].configurationIndex].sheriffsRewardShare;
+            uint256 sheriffsRewardShare =
+                _configurations[_requests[requestId].configurationIndex]
+                    .sheriffsRewardShare;
 
             return
                 (_requests[requestId].reward *
-                    (MAX_PERCENT - sheriffsRewardShare)) /
-                MAX_PERCENT;
+                    (MAX_PERCENT - sheriffsRewardShare)) / MAX_PERCENT;
         } else {
             return 0;
         }
@@ -659,16 +685,22 @@ contract WalletHunters is
 
         if (
             _isEnoughVotes(requestId) &&
-            _walletApproved(requestId) && 
+            _walletApproved(requestId) &&
             _requestVotings[requestId].votes[sheriff].voteFor
         ) {
             uint256 reward = _requests[requestId].reward;
             uint256 votes = _requestVotings[requestId].votes[sheriff].amount;
             uint256 totalVotes = _requestVotings[requestId].votesFor;
-            uint256 sheriffsRewardShare = _configurations[_requests[requestId].configurationIndex].sheriffsRewardShare;
-            uint256 fixedSheriffReward = _configurations[_requests[requestId].configurationIndex].fixedSheriffReward;
+            uint256 sheriffsRewardShare =
+                _configurations[_requests[requestId].configurationIndex]
+                    .sheriffsRewardShare;
+            uint256 fixedSheriffReward =
+                _configurations[_requests[requestId].configurationIndex]
+                    .fixedSheriffReward;
 
-            uint256 actualReward = (((reward * votes) / totalVotes) * sheriffsRewardShare) / MAX_PERCENT;
+            uint256 actualReward =
+                (((reward * votes) / totalVotes) * sheriffsRewardShare) /
+                    MAX_PERCENT;
 
             return MathUpgradeable.max(actualReward, fixedSheriffReward);
         } else if (
@@ -676,8 +708,9 @@ contract WalletHunters is
             !_walletApproved(requestId) &&
             !_requestVotings[requestId].votes[sheriff].voteFor
         ) {
-
-            return _configurations[_requests[requestId].configurationIndex].fixedSheriffReward;
+            return
+                _configurations[_requests[requestId].configurationIndex]
+                    .fixedSheriffReward;
         } else {
             return 0;
         }
@@ -727,9 +760,11 @@ contract WalletHunters is
         return _activeRequests[user].length();
     }
 
-
     function isSheriff(address sheriff) public view override returns (bool) {
-        return balanceOf(sheriff) >= _configurations[_currentConfigurationIndex()].minimalDepositForSheriff;
+        return
+            balanceOf(sheriff) >=
+            _configurations[_currentConfigurationIndex()]
+                .minimalDepositForSheriff;
     }
 
     function lockedBalance(address user)
@@ -775,7 +810,9 @@ contract WalletHunters is
             _requestVotings[requestId].votesFor +
                 _requestVotings[requestId].votesAgainst;
 
-        uint256 minimalVotesForRequest = _configurations[_requests[requestId].configurationIndex].minimalVotesForRequest;
+        uint256 minimalVotesForRequest =
+            _configurations[_requests[requestId].configurationIndex]
+                .minimalVotesForRequest;
 
         return totalVotes >= minimalVotesForRequest;
     }
@@ -794,10 +831,13 @@ contract WalletHunters is
         require(requestId < _requestCounter.current(), "Request doesn't exist");
 
         // solhint-disable-next-line not-rely-on-time
-        uint256 votingDuration = _configurations[_requests[requestId].configurationIndex].votingDuration;
+        uint256 votingDuration =
+            _configurations[_requests[requestId].configurationIndex]
+                .votingDuration;
 
         return
-            block.timestamp < _requests[requestId].creationTime + votingDuration &&
+            block.timestamp <
+            _requests[requestId].creationTime + votingDuration &&
             !_requests[requestId].discarded;
     }
 
