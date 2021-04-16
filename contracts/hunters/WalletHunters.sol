@@ -646,11 +646,11 @@ contract WalletHunters is
             "Already rewarded"
         );
 
-        if (_requests[requestId].discarded) {
+        if (!_isEnoughVotes(requestId) || _requests[requestId].discarded) {
             return 0;
         }
 
-        if (_isEnoughVotes(requestId) && _walletApproved(requestId)) {
+        if (_walletApproved(requestId)) {
             uint256 sheriffsRewardShare =
                 _configurations[_requests[requestId].configurationIndex]
                     .sheriffsRewardShare;
@@ -679,13 +679,14 @@ contract WalletHunters is
             "Already rewarded"
         );
 
-        if (_requests[requestId].discarded) {
+        if (!_isEnoughVotes(requestId) || _requests[requestId].discarded) {
             return 0;
         }
 
+        bool walletApproved = _walletApproved(requestId);
+
         if (
-            _isEnoughVotes(requestId) &&
-            _walletApproved(requestId) &&
+            walletApproved &&
             _requestVotings[requestId].votes[sheriff].voteFor
         ) {
             uint256 reward = _requests[requestId].reward;
@@ -704,8 +705,7 @@ contract WalletHunters is
 
             return MathUpgradeable.max(actualReward, fixedSheriffReward);
         } else if (
-            _isEnoughVotes(requestId) &&
-            !_walletApproved(requestId) &&
+            !walletApproved &&
             !_requestVotings[requestId].votes[sheriff].voteFor
         ) {
             return
