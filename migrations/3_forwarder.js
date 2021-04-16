@@ -12,7 +12,7 @@ module.exports = async (deployer, network, accounts) => {
     const forwarder = await deployer.deploy(
         TrustedForwarder, 
         realTokenMock.address, 
-        '0x9361D8308619e66649798efc719E2DDE9B28d3b0', // relayer address
+        process.env.DEFENDER_ADDRESS,
         {from: owner}
     )
     await saveContract("TrustedForwarder", forwarder.abi, network, forwarder.address)
