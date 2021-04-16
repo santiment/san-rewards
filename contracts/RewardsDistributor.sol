@@ -53,7 +53,12 @@ contract RewardsDistributor is
         address rewardsToken_,
         address snapshotToken_
     ) external initializer {
-        __RewardsDistributor_init(admin, trustedForwarder_, rewardsToken_, snapshotToken_);
+        __RewardsDistributor_init(
+            admin,
+            trustedForwarder_,
+            rewardsToken_,
+            snapshotToken_
+        );
     }
 
     function __RewardsDistributor_init(
@@ -81,7 +86,10 @@ contract RewardsDistributor is
     ) internal initializer {
         require(rewardsToken_.isContract(), "RewardsToken must be contract");
         require(snapshotToken_.isContract(), "SnapshotToken must be contract");
-        require(trustedForwarder_.isContract(), "SnapshotToken must be contract");
+        require(
+            trustedForwarder_.isContract(),
+            "SnapshotToken must be contract"
+        );
 
         rewardsToken = IERC20Upgradeable(rewardsToken_);
         snapshotToken = IERC20Snapshot(snapshotToken_);

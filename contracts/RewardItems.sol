@@ -105,7 +105,11 @@ contract RewardItems is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(AccessControlEnumerableUpgradeable, ERC721Upgradeable, ERC721EnumerableUpgradeable)
+        override(
+            AccessControlEnumerableUpgradeable,
+            ERC721Upgradeable,
+            ERC721EnumerableUpgradeable
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

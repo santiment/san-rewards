@@ -9,7 +9,12 @@ module.exports = async (deployer, network, accounts) => {
 
     const realTokenMock = await RealTokenMock.deployed()
 
-    const forwarder = await deployer.deploy(TrustedForwarder, realTokenMock.address, {from: owner})
+    const forwarder = await deployer.deploy(
+        TrustedForwarder, 
+        realTokenMock.address, 
+        process.env.DEFENDER_ADDRESS,
+        {from: owner}
+    )
     await saveContract("TrustedForwarder", forwarder.abi, network, forwarder.address)
 
     if (isTestnet(network)) {

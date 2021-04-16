@@ -19,7 +19,7 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
     mapping(address => bool) public registeredContracts;
 
     event RegisteredContracts(address[] contracts);
-    
+
     event UnregisteredContracts(address[] contracts);
 
     modifier onlyRole(bytes32 role) {
@@ -27,7 +27,7 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         _;
     }
 
-    constructor(address _sanToken)
+    constructor(address _sanToken, address relayer)
         MinimalForwarder("TrustedForwarder", "1.0.0")
     {
         require(_sanToken.isContract(), "SanToken must be contract");
@@ -36,17 +36,18 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(RELAYER_ROLE, _msgSender());
+        _setupRole(RELAYER_ROLE, relayer);
     }
 
     function verify(ForwardRequest calldata req, bytes calldata signature)
         public
-        override
         view
+        override
         returns (bool)
     {
         require(registeredContracts[req.to], "Contract must be registered");
 
-        return super.verify(req, signature);        
+        return super.verify(req, signature);
     }
 
     function execute(ForwardRequest calldata req, bytes calldata signature)
@@ -62,21 +63,33 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         (success, ret) = super.execute(req, signature);
     }
 
-    function registerContracts(address[] calldata contracts) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function registerContracts(address[] calldata contracts)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         for (uint256 i = 0; i < contracts.length; i++) {
             address _contract = contracts[i];
             require(_contract.isContract(), "Address must be contract");
-            require(!registeredContracts[_contract], "Address is already registered");
+            require(
+                !registeredContracts[_contract],
+                "Address is already registered"
+            );
             registeredContracts[_contract] = true;
         }
 
         emit RegisteredContracts(contracts);
     }
 
-    function unregisterContracts(address[] calldata contracts) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function unregisterContracts(address[] calldata contracts)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         for (uint256 i = 0; i < contracts.length; i++) {
             address _contract = contracts[0];
-            require(registeredContracts[_contract], "Address is not registered");
+            require(
+                registeredContracts[_contract],
+                "Address is not registered"
+            );
             registeredContracts[_contract] = false;
         }
 
