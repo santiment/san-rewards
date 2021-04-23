@@ -11,7 +11,12 @@ class TrustedForwarder {
     }
 
     async createRelayRequest(from, to, calldata, gas) {
-        return _createRelayRequest(this.contract, from, to, calldata, gas)
+        const nonce = await this.contract.getNonce(from).then(nonce => nonce.toString())
+        return _createRelayRequest(this.contract, from, to, calldata, gas, nonce)
+    }
+
+    async createRelayRequestWithNonce(from, to, calldata, gas, nonce) {
+        return _createRelayRequest(this.contract, from, to, calldata, gas, nonce)
     }
 
     async execute(args) {
@@ -31,7 +36,6 @@ class TrustedForwarder {
 }
 
 async function _createRelayRequest(forwarder, from, to, calldata, gas) {
-    const nonce = await forwarder.getNonce(from).then(nonce => nonce.toString())
     const chainId = await forwarder.getChainId().then(chainId => chainId.toString())
 
     const request = {
