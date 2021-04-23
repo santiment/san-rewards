@@ -271,6 +271,7 @@ contract WalletHunters is
         override
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
+        require(from == _msgSender(), "Sender must be from address");
         rewardsPool += amount;
 
         stakingToken.safeTransferFrom(from, address(this), amount);
