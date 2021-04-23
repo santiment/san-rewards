@@ -71,9 +71,8 @@ contract MinimalForwarder is EIP712 {
         );
         _nonces[req.from] = req.nonce + 1;
 
-        bytes memory returndata =
-            req.to.functionCall(abi.encodePacked(req.data, req.from));
+        (bool success, bytes memory returndata) = req.to.call(abi.encodePacked(req.data, req.from));
 
-        return (true, returndata);
+        return (success, returndata);
     }
 }

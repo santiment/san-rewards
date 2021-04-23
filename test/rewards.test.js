@@ -136,10 +136,11 @@ contract("RewardsDistributor", async function (accounts) {
         const rewardIdsStr = rewardIds.map(it => it.toString(10)).reverse();
 
         let calldata = this.rewards.contract.methods["claimRewards"](user2, rewardIdsStr).encodeABI()
-        await expectRevert(relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata, token('0')), "Sender must be user")
+        let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata, token('0'))
+        await expectEvent(receipt, "Executed", {success: false})
 
         calldata = this.rewards.contract.methods["claimRewards"](user3, rewardIdsStr).encodeABI()
-        let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata, token('0'))
+        receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata, token('0'))
         await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
             reward: balanceBeforeUser3.add(expectedReward)
         })

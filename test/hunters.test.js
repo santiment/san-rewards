@@ -318,7 +318,8 @@ contract('WalletHunters', function (accounts) {
         const calldata = this.hunters.contract.methods["claimHunterReward"](hunter, requestIds).encodeABI()
         let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
         await expectEvent.inTransaction(receipt.tx, this.hunters, "HunterRewardPaid", {totalReward: actualReward})
-        await expectRevert(relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0')), "Already rewarded")
+        receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
+        await expectEvent(receipt, "Executed", { success: false })
 
         expect(await this.realToken.balanceOf(hunter)).to.be.bignumber.equal(balanceBefore.add(actualReward))
         expect(await hunterBalanceTracker.delta()).to.be.bignumber.equal('0')

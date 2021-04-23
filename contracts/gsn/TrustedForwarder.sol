@@ -18,6 +18,8 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
 
     mapping(address => bool) public registeredContracts;
 
+    event Executed(bool success, bytes returnData);
+
     event RegisteredContracts(address[] contracts);
 
     event UnregisteredContracts(address[] contracts);
@@ -61,6 +63,8 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         }
 
         (success, ret) = super.execute(req, signature);
+
+        emit Executed(success, ret);
     }
 
     function registerContracts(address[] calldata contracts)
