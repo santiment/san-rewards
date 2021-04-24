@@ -42,24 +42,28 @@ const buildPermit = async (token, owner, spender, value, version = '1', deadline
     }
 }
 
-async function relay(forwarder, relayer, fromWallet, to, calldata, fee) {
-    const args = await makeRelayArguments(forwarder, relayer, fromWallet, to, calldata, fee)
+async function relay(forwarder, relayer, fromWallet, to, calldata, nonce) {
+    const args = await makeRelayArguments(forwarder, relayer, fromWallet.wallet, to, calldata, fromWallet.nonce)
 
-    return await forwarder.execute(...args, {from: relayer})
+    const result = await forwarder.execute(...args, {from: relayer})
+
+    fromWallet.nonce = fromWallet.nonce + 1
+    return result
 }
 
-async function makeRelayArguments(forwarder, relayer, fromWallet, to, calldata, gas) {
+async function makeRelayArguments(forwarder, relayer, fromWallet, to, calldata, nonce) {
 
     const from = fromWallet.getAddressString()
 
-    const nonce = await forwarder.getNonce(from).then(nonce => nonce.toString())
+    const events = await forwarder.getPastEvents('ForwardRequestExecuted', {filters : { from }})
+
     const chainId = await forwarder.getChainId()
 
     const request = {
         from,
         to,
         value: 0,
-        gas: `0x${gas.toString(16)}`,
+        gas: 0,
         nonce,
         data: calldata
     }

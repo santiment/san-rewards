@@ -11,8 +11,8 @@ const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 contract('WalletHunters', function (accounts) {
     const [deployer, mayor, relayer, sheriff1, sheriff2, sheriff3] = accounts
-    const hunterWallet = Wallet.generate()
-    const hunter = hunterWallet.getAddressString()
+    const hunterWallet = { wallet: Wallet.generate(), nonce: 0 }
+    const hunter = hunterWallet.wallet.getAddressString()
     const sheriffs = [sheriff1, sheriff2, sheriff3]
     const sheriffsSanTokens = [token('1000'), token('5000'), token('10000')]
 
@@ -154,7 +154,7 @@ contract('WalletHunters', function (accounts) {
         const hunterBalanceTracker = await balance.tracker(hunter)
 
         const calldata = this.hunters.contract.methods["submitRequest"](hunter).encodeABI()
-        let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
+        let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
 
         await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {reward, requestId})
 
@@ -316,10 +316,10 @@ contract('WalletHunters', function (accounts) {
         expect(await this.hunters.userRewards(hunter)).to.be.bignumber.equal(actualReward)
 
         const calldata = this.hunters.contract.methods["claimHunterReward"](hunter, requestIds).encodeABI()
-        let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
+        let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
         await expectEvent.inTransaction(receipt.tx, this.hunters, "HunterRewardPaid", {totalReward: actualReward})
-        receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata, token('0'))
-        await expectEvent(receipt, "Executed", { success: false })
+        receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
+        await expectEvent(receipt, "ForwardRequestExecuted", { success: false })
 
         expect(await this.realToken.balanceOf(hunter)).to.be.bignumber.equal(balanceBefore.add(actualReward))
         expect(await hunterBalanceTracker.delta()).to.be.bignumber.equal('0')
@@ -405,3 +405,16 @@ contract('WalletHunters', function (accounts) {
         }
     })
 })
+
+// export function decodeRevertReason (revertBytes: PrefixedHexString, throwOnError = false): string | null {
+//   if (revertBytes == null) { return null }
+//   if (!revertBytes.startsWith('0x08c379a0')) {
+//     if (throwOnError) {
+//       throw new Error('invalid revert bytes: ' + revertBytes)
+//     }
+//     return revertBytes
+//   }
+//   // @ts-ignore
+//   return abi.decodeParameter('string', '0x' + revertBytes.slice(10)) as any
+// }
+

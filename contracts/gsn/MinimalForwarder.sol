@@ -16,25 +16,20 @@ contract MinimalForwarder is EIP712 {
         address from;
         address to;
         uint256 value;
-        uint256 gas; // amount of san tokens
+        uint256 gas;
         uint256 nonce;
         bytes data;
     }
 
-    bytes32 private constant TYPEHASH =
-        keccak256(
-            "ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)"
-        );
+    bytes32 private constant TYPEHASH = keccak256(
+        "ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)"
+    );
 
-    mapping(address => uint256) private _nonces;
+    mapping(address => mapping(uint256 => bool)) private _nonces;
 
     constructor(string memory name, string memory version)
         EIP712(name, version)
     {}
-
-    function getNonce(address from) public view returns (uint256) {
-        return _nonces[from];
-    }
 
     function verify(ForwardRequest calldata req, bytes calldata signature)
         public
@@ -57,7 +52,7 @@ contract MinimalForwarder is EIP712 {
                 )
             )
                 .recover(signature);
-        return _nonces[req.from] == req.nonce && signer == req.from;
+        return !_nonces[req.from][req.nonce] && signer == req.from;
     }
 
     function execute(ForwardRequest calldata req, bytes calldata signature)
@@ -69,7 +64,7 @@ contract MinimalForwarder is EIP712 {
             verify(req, signature),
             "MinimalForwarder: signature does not match request"
         );
-        _nonces[req.from] = req.nonce + 1;
+        _nonces[req.from][req.nonce] = true;
 
         (bool success, bytes memory returndata) = req.to.call(abi.encodePacked(req.data, req.from));
 

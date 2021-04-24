@@ -18,7 +18,7 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
 
     mapping(address => bool) public registeredContracts;
 
-    event Executed(bool success, bytes returnData);
+    event ForwardRequestExecuted(address indexed from, uint256 nonce, bool success, bytes returnData);
 
     event RegisteredContracts(address[] contracts);
 
@@ -58,13 +58,10 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         onlyRole(RELAYER_ROLE)
         returns (bool success, bytes memory ret)
     {
-        if (req.gas != 0) {
-            sanToken.safeTransferFrom(req.from, address(0), req.gas);
-        }
 
         (success, ret) = super.execute(req, signature);
 
-        emit Executed(success, ret);
+        emit ForwardRequestExecuted(req.from, req.nonce, success, ret);
     }
 
     function registerContracts(address[] calldata contracts)

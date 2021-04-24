@@ -13,11 +13,11 @@ const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 contract("RewardsDistributor", async function (accounts) {
     const [deployer, relayer, user1, user2, user5] = accounts
-    const user3Wallet = Wallet.generate()
-    const user3 = user3Wallet.getAddressString()
+    const user3Wallet = { wallet: Wallet.generate(), nonce: 0 }
+    const user3 = user3Wallet.wallet.getAddressString()
 
-    const user4Wallet = Wallet.generate()
-    const user4 = user4Wallet.getAddressString()
+    const user4Wallet = { wallet: Wallet.generate(), nonce: 0 }
+    const user4 = user4Wallet.wallet.getAddressString()
 
     before(async () => {
         this.rewards = await RewardsDistributorContract.deployed()
@@ -136,11 +136,11 @@ contract("RewardsDistributor", async function (accounts) {
         const rewardIdsStr = rewardIds.map(it => it.toString(10)).reverse();
 
         let calldata = this.rewards.contract.methods["claimRewards"](user2, rewardIdsStr).encodeABI()
-        let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata, token('0'))
-        await expectEvent(receipt, "Executed", {success: false})
+        let receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata)
+        await expectEvent(receipt, "ForwardRequestExecuted", {success: false})
 
         calldata = this.rewards.contract.methods["claimRewards"](user3, rewardIdsStr).encodeABI()
-        receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata, token('0'))
+        receipt = await relay(this.forwarder, relayer, user3Wallet, this.rewards.address, calldata)
         await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
             reward: balanceBeforeUser3.add(expectedReward)
         })
@@ -148,28 +148,28 @@ contract("RewardsDistributor", async function (accounts) {
         expect(await this.realTokenMock.balanceOf(user3)).to.be.bignumber.equal(balanceBeforeUser3.add(expectedReward))
     })
 
-    it("Claim all user rewards through relay and pay SAN", async () => {
-        const sanFee = '100'
-        await send.ether(deployer, user4, ether('1'))
-        await this.realTokenMock.transfer(user4, token(sanFee), {from: deployer})
+    // it("Claim all user rewards through relay and pay SAN", async () => {
+    //     const sanFee = '100'
+    //     await send.ether(deployer, user4, ether('1'))
+    //     await this.realTokenMock.transfer(user4, token(sanFee), {from: deployer})
 
-        const rewardIdsStr = rewardIds.map(it => it.toString(10)).reverse();
+    //     const rewardIdsStr = rewardIds.map(it => it.toString(10)).reverse();
 
-        const calldata = this.rewards.contract.methods["claimRewards"](user4, rewardIdsStr).encodeABI()
-        await expectRevert(relay(this.forwarder, relayer, user4Wallet, this.rewards.address, calldata, token(sanFee)), "ERC20: burn amount exceeds allowance")
+    //     const calldata = this.rewards.contract.methods["claimRewards"](user4, rewardIdsStr).encodeABI()
+    //     await expectRevert(relay(this.forwarder, relayer, user4Wallet, this.rewards.address, calldata, token(sanFee)), "ERC20: burn amount exceeds allowance")
 
-        await _approveSanUsingWallet(user4Wallet, sanFee)
+    //     await _approveSanUsingWallet(user4Wallet, sanFee)
 
-        const expectedReward = token('10000').mul(bn(rewardIds.length))
-        const balanceBeforeUser4 = await this.realTokenMock.balanceOf(user4)
+    //     const expectedReward = token('10000').mul(bn(rewardIds.length))
+    //     const balanceBeforeUser4 = await this.realTokenMock.balanceOf(user4)
 
-        let receipt = await relay(this.forwarder, relayer, user4Wallet, this.rewards.address, calldata, token(sanFee))
-        await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
-            reward: expectedReward
-        })
+    //     let receipt = await relay(this.forwarder, relayer, user4Wallet, this.rewards.address, calldata, token(sanFee))
+    //     await expectEvent.inTransaction(receipt.tx, this.rewards, "RewardPaid", {
+    //         reward: expectedReward
+    //     })
 
-        expect(await this.realTokenMock.balanceOf(user4)).to.be.bignumber.equal(balanceBeforeUser4.add(expectedReward).sub(token(sanFee)))
-    })
+    //     expect(await this.realTokenMock.balanceOf(user4)).to.be.bignumber.equal(balanceBeforeUser4.add(expectedReward).sub(token(sanFee)))
+    // })
 })
 
 async function _approveSanUsingWallet(wallet, sanFee) {
