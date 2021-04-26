@@ -1,7 +1,7 @@
 {
     "networks": {
         "rinkeby": {
-            "address": "0x3059A0Af722C6bf0b28ba22265291bB65bf3F690"
+            "address": "0x9efDCA8066F25bA416469D2bFaf8B3f3bFe81e62"
         },
         "ropsten": {
             "address": "0xda93EF7B728ef2ed7c7fbcd591ce53e969B1BC13"
@@ -12,13 +12,45 @@
             "inputs": [
                 {
                     "internalType": "address",
-                    "name": "_sanToken",
+                    "name": "relayer",
                     "type": "address"
                 }
             ],
             "stateMutability": "nonpayable",
             "type": "constructor",
             "signature": "constructor"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "nonce",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "bool",
+                    "name": "success",
+                    "type": "bool"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "bytes",
+                    "name": "returnData",
+                    "type": "bytes"
+                }
+            ],
+            "name": "ForwardRequestExecuted",
+            "type": "event",
+            "signature": "0x8333520345928a6991070ea50329e6671cd7b70e494f8ce6e3642a8770a1dc59"
         },
         {
             "anonymous": false,
@@ -159,27 +191,6 @@
         {
             "inputs": [
                 {
-                    "internalType": "address",
-                    "name": "from",
-                    "type": "address"
-                }
-            ],
-            "name": "getNonce",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0x2d0335ab"
-        },
-        {
-            "inputs": [
-                {
                     "internalType": "bytes32",
                     "name": "role",
                     "type": "bytes32"
@@ -301,21 +312,6 @@
             "stateMutability": "nonpayable",
             "type": "function",
             "signature": "0xd547741f"
-        },
-        {
-            "inputs": [],
-            "name": "sanToken",
-            "outputs": [
-                {
-                    "internalType": "contract IERC20",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function",
-            "constant": true,
-            "signature": "0xb18925af"
         },
         {
             "inputs": [

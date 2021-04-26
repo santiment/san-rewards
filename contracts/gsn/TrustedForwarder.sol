@@ -14,8 +14,6 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
 
     bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
 
-    IERC20 public immutable sanToken;
-
     mapping(address => bool) public registeredContracts;
 
     event ForwardRequestExecuted(address indexed from, uint256 nonce, bool success, bytes returnData);
@@ -29,12 +27,9 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         _;
     }
 
-    constructor(address _sanToken, address relayer)
+    constructor(address relayer)
         MinimalForwarder("TrustedForwarder", "1.0.0")
     {
-        require(_sanToken.isContract(), "SanToken must be contract");
-
-        sanToken = IERC20(_sanToken);
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(RELAYER_ROLE, _msgSender());

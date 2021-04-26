@@ -2,20 +2,22 @@
 const {isTestnet, saveContract} = require("./utils")
 
 const TrustedForwarder = artifacts.require("TrustedForwarder")
-const RealTokenMock = artifacts.require("RealTokenMock")
+const WalletHunters = artifacts.require("WalletHunters")
 
 module.exports = async (deployer, network, accounts) => {
     const [owner] = accounts
 
-    const realTokenMock = await RealTokenMock.deployed()
+    const hunters = await WalletHunters.at('0x244d7B189CB0fc5fff6cb22893862aE581e0dbC3')
 
     const forwarder = await deployer.deploy(
         TrustedForwarder, 
-        realTokenMock.address, 
         process.env.DEFENDER_ADDRESS,
         {from: owner}
     )
-    await saveContract("TrustedForwarder", forwarder.abi, network, forwarder.address)
+
+    await saveContract("TrustedForwarder", TrustedForwarder.abi, network, forwarder.address)
+
+    await hunters.setTrustedForwarder(forwarder.address)
 
     if (isTestnet(network)) {
         const devAddresses = process.env.DEV_ADDRESSES.split(",")
