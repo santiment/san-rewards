@@ -13,7 +13,7 @@ async function getAddress(network, contractNetworks) {
 }
 
 async function getImplementationAddress(network, contractNetworks) {
-    const networkKey = `${network.name}`
+    const networkKey = network.name === 'homestead' ? 'mainnet' : network.name
 
     await check(Object.keys(contractNetworks).includes(networkKey), `Contract is not deployed at ${networkKey}`)
 
