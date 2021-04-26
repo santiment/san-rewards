@@ -77,7 +77,7 @@ module.exports = {
             confirmations: 2,
             timeoutBlocks: 200,
             skipDryRun: true,
-            gasPrice: 125000000000
+            gasPrice: 50000000000
         },
         // Useful for private networks
         // private: {

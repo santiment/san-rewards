@@ -5,11 +5,19 @@
         },
         "ropsten": {
             "address": "0xda93EF7B728ef2ed7c7fbcd591ce53e969B1BC13"
+        },
+        "mainnet": {
+            "address": "0x12b823B7446bf660862A7D32dc329a5715a32429"
         }
     },
     "abi": [
         {
             "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "admin",
+                    "type": "address"
+                },
                 {
                     "internalType": "address",
                     "name": "relayer",
