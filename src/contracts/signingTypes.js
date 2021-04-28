@@ -19,11 +19,42 @@ const ForwardRequest = [
     {name: 'value', type: 'uint256'},
     {name: 'gas', type: 'uint256'},
     {name: 'nonce', type: 'uint256'},
-    {name: 'data', type: 'bytes'}
+    {name: 'data', type: 'bytes'},
 ]
+
+const Submit = [
+    {name: 'hunter', type: 'address'},
+    {name: 'reward', type: 'uint256'},
+    {name: 'nonce', type: 'uint256'},
+]
+
+const buildPermit = (name, version, chainId, verifyingContract, owner, spender, value, nonce, deadline) => ({
+    primaryType: 'Permit',
+    types: {EIP712Domain, Permit},
+    domain: {name, version, chainId, verifyingContract},
+    message: {owner, spender, value, nonce, deadline},
+})
+
+const buildSubmit = (name, version, chainId, verifyingContract, hunter, reward, nonce) => ({
+    primaryType: 'Submit',
+    types: {EIP712Domain, Submit},
+    domain: {name, version, chainId, verifyingContract},
+    message: {hunter, reward, nonce},
+})
+
+const buildForwardRequest = (name, version, chainId, verifyingContract, from, to, value, gas, nonce, data) => ({
+    primaryType: 'ForwardRequest',
+    types: {EIP712Domain, ForwardRequest},
+    domain: {name, version, chainId, verifyingContract},
+    message: {from, to, value, gas, nonce, data}
+})
 
 module.exports = {
     EIP712Domain,
     Permit,
-    ForwardRequest
+    ForwardRequest,
+    Submit,
+    buildPermit,
+    buildSubmit,
+    buildForwardRequest
 }
