@@ -11,11 +11,9 @@ class WalletHunters {
     }
 
     async createSubmit(hunter, reward, nonce) {
-        const {chainId} = await this.network()
+        const {chainId} = await this.network
 
-        const data = buildSubmit(
-            "Wallet Hunters, Sheriff Token",
-            "1.0.0",
+        const data = _createSubmit(
             chainId,
             this.contract.address,
             hunter,
@@ -32,12 +30,28 @@ class WalletHunters {
     static async getAddress(provider) {
         return await utils.getAddress(await provider.getNetwork(), networks)
     }
+}
 
-    static async getImplementationAddress(provider) {
-        return await utils.getImplementationAddress(await provider.getNetwork(), networks)
+function _createSubmit(chainId, verifier, hunter, reward, nonce) {
+
+    const data = buildSubmit(
+        "Wallet Hunters, Sheriff Token",
+        "1.0.0",
+        chainId,
+        verifier,
+        hunter,
+        reward,
+        nonce
+    )
+
+    return {
+        request: data.message,
+        signingData: data
     }
 }
 
+
 module.exports = {
-    WalletHunters
+    WalletHunters,
+    createSubmit: _createSubmit,
 }

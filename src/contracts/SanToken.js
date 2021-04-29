@@ -11,10 +11,6 @@ class SanToken {
     static async getAddress(provider) {
         return await utils.getAddress(await provider.getNetwork(), networks)
     }
-
-    static async getImplementationAddress(provider) {
-        return await utils.getImplementationAddress(await provider.getNetwork(), networks)
-    }
 }
 
 module.exports = {

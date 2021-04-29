@@ -21,10 +21,6 @@ class RewardItems {
         return await utils.getAddress(await provider.getNetwork(), networks)
     }
 
-    static async getImplementationAddress(provider) {
-        return await utils.getImplementationAddress(await provider.getNetwork(), networks)
-    }
-
     static createRewardItem(attributes = []) {
         return _createRewardItem(attributes)
     }

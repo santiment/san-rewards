@@ -13,43 +13,46 @@ class TrustedForwarder {
     }
 
     async createRelayRequest(from, to, calldata, gas, nonce) {
-        const {chainId} = await this.network()
+        const {chainId} = await this.network
 
-        const data = buildForwardRequest(
-            "TrustedForwarder",
-            "1.0.0",
+        return _createRelayRequest(
             chainId,
-            forwarder.address,
+            this.contract.address,
             from,
             to,
-            0,
+            calldata,
             gas,
-            nonce,
-            calldata
+            nonce
         )
-
-        return {
-            request: data.message,
-            signingData: data,
-        }
-    }
-
-    async execute(args) {
-
-        await this.contract.verify(...args)
-
-        return await this.contract.execute(...args)
     }
 
     static async getAddress(provider) {
         return await utils.getAddress(await provider.getNetwork(), networks)
     }
+}
 
-    static async getImplementationAddress(provider) {
-        return await utils.getImplementationAddress(await provider.getNetwork(), networks)
+function _createRelayRequest(chainId, verifier, from, to, calldata, gas, nonce) {
+
+    const data = buildForwardRequest(
+        "TrustedForwarder",
+        "1.0.0",
+        chainId,
+        verifier,
+        from,
+        to,
+        0,
+        gas,
+        nonce,
+        calldata
+    )
+
+    return {
+        request: data.message,
+        signingData: data,
     }
 }
 
 module.exports = {
-    TrustedForwarder
+    TrustedForwarder,
+    createRelayRequest: _createRelayRequest,
 }
