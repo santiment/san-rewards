@@ -2,7 +2,7 @@
 const {isTestnet, saveContract} = require("./utils")
 
 const TrustedForwarder = artifacts.require("TrustedForwarder")
-const WalletHunters = artifacts.require("WalletHunters")
+const WalletHunters = artifacts.require("WalletHuntersV2")
 const RewardsDistributor = artifacts.require("RewardsDistributor")
 
 module.exports = async (deployer, network, accounts) => {

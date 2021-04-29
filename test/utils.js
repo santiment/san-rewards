@@ -1,5 +1,6 @@
 const {BN, ether, constants: {MAX_UINT256, ZERO_ADDRESS}} = require('@openzeppelin/test-helpers')
 const ethSigUtil = require('eth-sig-util')
+const {buildSubmit} = require("../src/contracts/signingTypes")
 
 const bn = (n) => new BN(n)
 const token = (n) => ether(n)
@@ -12,14 +13,6 @@ const EIP712Domain = [
     {name: 'verifyingContract', type: 'address'},
 ]
 
-const Permit = [
-    {name: 'owner', type: 'address'},
-    {name: 'spender', type: 'address'},
-    {name: 'value', type: 'uint256'},
-    {name: 'nonce', type: 'uint256'},
-    {name: 'deadline', type: 'uint256'},
-]
-
 const ForwardRequest = [
     {name: 'from', type: 'address'},
     {name: 'to', type: 'address'},
@@ -29,17 +22,25 @@ const ForwardRequest = [
     {name: 'data', type: 'bytes'}
 ]
 
-const buildPermit = async (token, owner, spender, value, version = '1', deadline = MAX_UINT256) => {
-    const chainId = await token.getChainId()
-    const name = await token.name()
-    const nonce = await token.nonces(owner)
-    const verifyingContract = token.address
-    return {
-        primaryType: 'Permit',
-        types: {EIP712Domain, Permit},
-        domain: {name, version, chainId, verifyingContract},
-        message: {owner, spender, value, nonce, deadline},
-    }
+async function signSubmit(signerWallet, verifier, hunter, reward, chainId) {
+
+    const nonce = signerWallet.nonce.toString()
+
+    const data = buildSubmit(
+        "Wallet Hunters, Sheriff Token",
+        "1.0.0",
+        chainId,
+        verifier,
+        hunter,
+        reward,
+        nonce
+    )
+
+    const signature = ethSigUtil.signTypedData_v4(signerWallet.wallet.getPrivateKey(), {data})
+
+    signerWallet.nonce = signerWallet.nonce + 300
+
+    return [hunter, reward, nonce, signature]
 }
 
 async function relay(forwarder, relayer, fromWallet, to, calldata, nonce) {
@@ -47,15 +48,13 @@ async function relay(forwarder, relayer, fromWallet, to, calldata, nonce) {
 
     const result = await forwarder.execute(...args, {from: relayer})
 
-    fromWallet.nonce = fromWallet.nonce + 1
+    fromWallet.nonce = fromWallet.nonce + 300
     return result
 }
 
 async function makeRelayArguments(forwarder, relayer, fromWallet, to, calldata, nonce) {
 
     const from = fromWallet.getAddressString()
-
-    const events = await forwarder.getPastEvents('ForwardRequestExecuted', {filters : { from }})
 
     const chainId = await forwarder.getChainId()
 
@@ -91,10 +90,9 @@ module.exports = {
     bn,
     token,
     ZERO,
-    Permit,
     ForwardRequest,
     EIP712Domain,
-    buildPermit,
     relay,
-    ZERO_ADDRESS
+    ZERO_ADDRESS,
+    signSubmit
 }

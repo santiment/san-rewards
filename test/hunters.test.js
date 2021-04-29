@@ -3,16 +3,21 @@ const {balance, expectEvent, expectRevert, time} = require('@openzeppelin/test-h
 const {expect} = require('chai')
 const Wallet = require('ethereumjs-wallet').default
 
-const {bn, token, ZERO, relay} = require("./utils")
+const {bn, token, ZERO, relay, signSubmit} = require("./utils")
 
 const RealTokenMock = artifacts.require("RealTokenMock")
-const WalletHunters = artifacts.require("WalletHunters")
+const WalletHunters = artifacts.require("WalletHuntersV2")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 contract('WalletHunters', function (accounts) {
     const [deployer, mayor, relayer, sheriff1, sheriff2, sheriff3] = accounts
+
     const hunterWallet = { wallet: Wallet.generate(), nonce: 0 }
     const hunter = hunterWallet.wallet.getAddressString()
+
+    const walletSignerWallet = { wallet: Wallet.generate(), nonce: 0 }
+    const walletSigner = walletSignerWallet.wallet.getAddressString()
+
     const sheriffs = [sheriff1, sheriff2, sheriff3]
     const sheriffsSanTokens = [token('1000'), token('5000'), token('10000')]
 
@@ -31,9 +36,11 @@ contract('WalletHunters', function (accounts) {
 
     it(`Check access roles after deploy`, async () => {
         await this.hunters.grantRole(await this.hunters.MAYOR_ROLE(), mayor, {from: deployer})
+        await this.hunters.grantRole(await this.hunters.WALLET_SIGNER_ROLE(), walletSigner, {from: deployer})
 
         expect(await this.hunters.hasRole(await this.hunters.MAYOR_ROLE(), mayor)).to.be.true
         expect(await this.hunters.hasRole(await this.hunters.MAYOR_ROLE(), deployer)).to.be.true
+        expect(await this.hunters.hasRole(await this.hunters.WALLET_SIGNER_ROLE(), walletSigner)).to.be.true
     })
 
     it("Check hunters state", async () => {
@@ -153,9 +160,14 @@ contract('WalletHunters', function (accounts) {
     const submitNewWallet = async (reward, requestId) => {
         const hunterBalanceTracker = await balance.tracker(hunter)
 
-        const calldata = this.hunters.contract.methods["submitRequest"](hunter).encodeABI()
+        const chainId = (await this.forwarder.getChainId()).toString()
+
+        const args = await signSubmit(walletSignerWallet, this.hunters.address, hunter, reward, chainId)
+
+        const calldata = this.hunters.contract.methods["submitRequest"](...args).encodeABI()
         let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
 
+        await expectEvent.inTransaction(receipt.tx, this.forwarder, "ForwardRequestExecuted", {success: true})
         await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {reward, requestId})
 
         const proposal = await this.hunters.walletProposal(requestId)
@@ -188,7 +200,7 @@ contract('WalletHunters', function (accounts) {
 
             const receipt = await this.hunters.vote(sheriff, requestId, voteFor, {from: sheriff})
             expectEvent(receipt, "Voted", {sheriff, amount: votes, voteFor})
-            const vote = await this.hunters.getVote(requestId, sheriff);
+            const vote = await this.hunters.getVote(requestId, sheriff)
             expect(vote.voteFor).to.be.equal(voteFor)
             expect(vote.amount).to.be.bignumber.equal(votes)
 
@@ -206,12 +218,11 @@ contract('WalletHunters', function (accounts) {
     walletRequests.forEach(({requestId, reward}, requestIndex) => {
 
         it(`Submit a new wallet #${requestId}`, async () => {
-            await updateConfiguration({requestReward: reward})
-            await submitNewWallet(reward, requestId);
+            await submitNewWallet(reward, requestId)
         })
 
         it(`Voting #${requestId}`, async () => {
-            await voteFor(requestId);
+            await voteFor(requestId)
         })
 
         it(`Wait finish voting #${requestId}`, async () => {
@@ -272,7 +283,6 @@ contract('WalletHunters', function (accounts) {
     })
 
     it("Submit fourth wallet", async () => {
-        await updateConfiguration({requestReward: token('10000')})
         await submitNewWallet(token('10000'), discardedRequestId)
     })
 
@@ -406,15 +416,7 @@ contract('WalletHunters', function (accounts) {
     })
 })
 
-// export function decodeRevertReason (revertBytes: PrefixedHexString, throwOnError = false): string | null {
-//   if (revertBytes == null) { return null }
-//   if (!revertBytes.startsWith('0x08c379a0')) {
-//     if (throwOnError) {
-//       throw new Error('invalid revert bytes: ' + revertBytes)
-//     }
-//     return revertBytes
-//   }
-//   // @ts-ignore
-//   return abi.decodeParameter('string', '0x' + revertBytes.slice(10)) as any
-// }
+function decodeRevertReason(revertBytes) {
+    return we3b.eth.abi.decodeParameter('string', '0x' + revertBytes.slice(10))
+}
 

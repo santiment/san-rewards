@@ -79,6 +79,18 @@ module.exports = {
             skipDryRun: true,
             gasPrice: 50000000000
         },
+        kovan: {
+            provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://kovan.infura.io/v3/${process.env.INFURA_KEY}`),
+            network_id: 42,       // Ropsten's id
+            gas: 4_000_000,        // Ropsten has a lower block limit than mainnet
+            confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+            timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+            skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+        },
+        kovanopt: {
+            provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://kovan.optimism.io`),
+            network_id: 1337
+        }
         // Useful for private networks
         // private: {
         // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
