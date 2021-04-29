@@ -1,8 +1,9 @@
 /* global artifacts */
 const {isTestnet, saveContract, bn, token} = require("./utils")
-const {deployProxy} = require('@openzeppelin/truffle-upgrades');
+const {deployProxy, upgradeProxy} = require('@openzeppelin/truffle-upgrades');
 
 const WalletHunters = artifacts.require("WalletHunters")
+const WalletHuntersV2 = artifacts.require("WalletHuntersV2")
 const RealTokenMock = artifacts.require("RealTokenMock")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
 
@@ -19,7 +20,7 @@ module.exports = async (deployer, network, accounts) => {
     const minimalDepositForSheriff = token(50)
     const requestReward = token(300)
 
-    const hunters = await deployProxy(WalletHunters, [
+    let hunters = await deployProxy(WalletHunters, [
         owner,
         forwarder.address,
         realTokenMock.address,
@@ -31,7 +32,10 @@ module.exports = async (deployer, network, accounts) => {
         requestReward
     ], {deployer})
 
+    hunters = await upgradeProxy(hunters.address, WalletHuntersV2, { deployer })
+
     await saveContract("WalletHunters", hunters.abi, network, hunters.address)
+
 
     if (isTestnet(network)) {
         const devAddresses = process.env.DEV_ADDRESSES.split(",")

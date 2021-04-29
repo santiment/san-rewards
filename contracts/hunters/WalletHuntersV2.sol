@@ -9,13 +9,15 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
-import "../interfaces/IWalletHunters.sol";
+import "../interfaces/IWalletHuntersV2.sol";
 import "../utils/AccountingTokenUpgradeable.sol";
 import "../gsn/RelayRecipientUpgradeable.sol";
+import "../utils/UintBitmap.sol";
 
-contract WalletHunters is
-    IWalletHunters,
+contract WalletHuntersV2 is
+    IWalletHuntersV2,
     AccountingTokenUpgradeable,
     RelayRecipientUpgradeable,
     AccessControlUpgradeable
@@ -25,6 +27,7 @@ contract WalletHunters is
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
     using AddressUpgradeable for address;
+    using UintBitmap for UintBitmap.Bitmap;
 
     struct Request {
         address hunter;
@@ -59,8 +62,10 @@ contract WalletHunters is
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
 
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
+    bytes32 public constant WALLET_SIGNER_ROLE = keccak256("WALLET_SIGNER_ROLE");
     string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
     string private constant ERC20_SYMBOL = "WHST";
+    bytes32 private constant SUBMIT_TYPEHASH = keccak256("Submit(address hunter,uint256 reward,uint256 nonce)");
 
     IERC20Upgradeable public stakingToken;
 
@@ -68,103 +73,41 @@ contract WalletHunters is
     CountersUpgradeable.Counter private _requestCounter;
     mapping(uint256 => Request) private _requests;
     mapping(uint256 => RequestVoting) private _requestVotings;
-    mapping(address => EnumerableSetUpgradeable.UintSet)
-        private _activeRequests;
+    mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
     Configuration[] private _configurations;
+
+    bytes32 private constant EIP712_TYPE_HASH = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+
+    UintBitmap.Bitmap private _walletSignerNonces;
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
         _;
     }
 
-    function initialize(
-        address admin_,
-        address trustedForwarder_,
-        address stakingToken_,
-        uint256 votingDuration_,
-        uint256 sheriffsRewardShare_,
-        uint256 fixedSheriffReward_,
-        uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_,
-        uint256 requestReward_
-    ) external initializer {
-        __WalletHunters_init(
-            admin_,
-            trustedForwarder_,
-            stakingToken_,
-            votingDuration_,
-            sheriffsRewardShare_,
-            fixedSheriffReward_,
-            minimalVotesForRequest_,
-            minimalDepositForSheriff_,
-            requestReward_
-        );
-    }
-
-    function __WalletHunters_init(
-        address admin_,
-        address trustedForwarder_,
-        address stakingToken_,
-        uint256 votingDuration_,
-        uint256 sheriffsRewardShare_,
-        uint256 fixedSheriffReward_,
-        uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_,
-        uint256 requestReward_
-    ) internal initializer {
-        __AccountingToken_init(ERC20_NAME, ERC20_SYMBOL);
-        __RelayRecipientUpgradeable_init();
-        __AccessControl_init();
-
-        __WalletHunters_init_unchained(
-            admin_,
-            trustedForwarder_,
-            stakingToken_,
-            votingDuration_,
-            sheriffsRewardShare_,
-            fixedSheriffReward_,
-            minimalVotesForRequest_,
-            minimalDepositForSheriff_,
-            requestReward_
-        );
-    }
-
-    function __WalletHunters_init_unchained(
-        address admin,
-        address trustedForwarder_,
-        address stakingToken_,
-        uint256 votingDuration_,
-        uint256 sheriffsRewardShare_,
-        uint256 fixedSheriffReward_,
-        uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_,
-        uint256 requestReward_
-    ) internal initializer {
-        require(stakingToken_.isContract(), "StakingToken must be contract");
-        require(
-            trustedForwarder_.isContract(),
-            "StakingToken must be contract"
-        );
-
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
-        _setupRole(MAYOR_ROLE, admin);
-
-        stakingToken = IERC20Upgradeable(stakingToken_);
-
-        super._setTrustedForwarder(trustedForwarder_);
-
-        _updateConfiguration(
-            votingDuration_,
-            sheriffsRewardShare_,
-            fixedSheriffReward_,
-            minimalVotesForRequest_,
-            minimalDepositForSheriff_,
-            requestReward_
-        );
-    }
-
-    function submitRequest(address hunter) external override returns (uint256) {
+    function submitRequest(address hunter, uint256 reward, uint256 nonce, bytes memory signature) external override returns (uint256) {
         require(_msgSender() == hunter, "Sender must be hunter");
+
+        bytes32 structHash = keccak256(abi.encode(
+            SUBMIT_TYPEHASH,
+            hunter,
+            reward,
+            nonce
+        ));
+
+        bytes32 hash = _hashTypedDataV4(structHash);
+
+        address signer = ECDSAUpgradeable.recover(hash, signature);
+
+        require(hasRole(WALLET_SIGNER_ROLE, signer), "Signer must have appropriate role");
+        require(!_walletSignerNonces.isSet(nonce), "Nonce is invalid");
+
+        _walletSignerNonces.set(nonce);
+
+        return _submitRequest(hunter, reward);
+    }
+
+    function _submitRequest(address hunter, uint256 reward) internal returns (uint256) {
 
         uint256 id = _requestCounter.current();
         _requestCounter.increment();
@@ -174,7 +117,7 @@ contract WalletHunters is
         uint256 configurationIndex = _currentConfigurationIndex();
 
         _request.hunter = hunter;
-        _request.reward = _configurations[configurationIndex].requestReward;
+        _request.reward = reward;
         _request.configurationIndex = configurationIndex;
         _request.discarded = false;
         // solhint-disable-next-line not-rely-on-time
@@ -183,7 +126,7 @@ contract WalletHunters is
         // ignore return
         _activeRequests[hunter].add(id);
 
-        emit NewWalletRequest(id, hunter, _request.reward);
+        emit NewWalletRequest(id, hunter, reward);
 
         return id;
     }
@@ -367,60 +310,6 @@ contract WalletHunters is
         );
     }
 
-    function configuration()
-        external
-        view
-        override
-        returns (
-            uint256 votingDuration,
-            uint256 sheriffsRewardShare,
-            uint256 fixedSheriffReward,
-            uint256 minimalVotesForRequest,
-            uint256 minimalDepositForSheriff,
-            uint256 requestReward
-        )
-    {
-        Configuration storage _configuration =
-            _configurations[_currentConfigurationIndex()];
-
-        votingDuration = _configuration.votingDuration;
-        sheriffsRewardShare = _configuration.sheriffsRewardShare;
-        fixedSheriffReward = _configuration.fixedSheriffReward;
-        minimalVotesForRequest = _configuration.minimalVotesForRequest;
-        minimalDepositForSheriff = _configuration.minimalDepositForSheriff;
-        requestReward = _configuration.requestReward;
-    }
-
-    function configurationAt(uint256 index)
-        external
-        view
-        returns (
-            uint256 votingDuration,
-            uint256 sheriffsRewardShare,
-            uint256 fixedSheriffReward,
-            uint256 minimalVotesForRequest,
-            uint256 minimalDepositForSheriff,
-            uint256 requestReward
-        )
-    {
-        require(
-            index <= _currentConfigurationIndex(),
-            "Configuration doesn't exist"
-        );
-        Configuration storage _configuration = _configurations[index];
-
-        votingDuration = _configuration.votingDuration;
-        sheriffsRewardShare = _configuration.sheriffsRewardShare;
-        fixedSheriffReward = _configuration.fixedSheriffReward;
-        minimalVotesForRequest = _configuration.minimalVotesForRequest;
-        minimalDepositForSheriff = _configuration.minimalDepositForSheriff;
-        requestReward = _configuration.requestReward;
-    }
-
-    function _currentConfigurationIndex() internal view returns (uint256) {
-        return _configurations.length - 1;
-    }
-
     function _updateConfiguration(
         uint256 _votingDuration,
         uint256 _sheriffsRewardShare,
@@ -457,6 +346,64 @@ contract WalletHunters is
             _minimalDepositForSheriff,
             _requestReward
         );
+    }
+
+    function configuration()
+        external
+        view
+        override
+        returns (
+            uint256 votingDuration,
+            uint256 sheriffsRewardShare,
+            uint256 fixedSheriffReward,
+            uint256 minimalVotesForRequest,
+            uint256 minimalDepositForSheriff,
+            uint256 requestReward
+        )
+    {
+        Configuration storage _configuration =
+            _configurations[_currentConfigurationIndex()];
+
+        votingDuration = _configuration.votingDuration;
+        sheriffsRewardShare = _configuration.sheriffsRewardShare;
+        fixedSheriffReward = _configuration.fixedSheriffReward;
+        minimalVotesForRequest = _configuration.minimalVotesForRequest;
+        minimalDepositForSheriff = _configuration.minimalDepositForSheriff;
+        requestReward = _configuration.requestReward;
+    }
+
+    function isNonceSet(uint256 nonce) external view override returns(bool) {
+        return _walletSignerNonces.isSet(nonce);
+    }
+
+    function configurationAt(uint256 index)
+        external
+        view
+        returns (
+            uint256 votingDuration,
+            uint256 sheriffsRewardShare,
+            uint256 fixedSheriffReward,
+            uint256 minimalVotesForRequest,
+            uint256 minimalDepositForSheriff,
+            uint256 requestReward
+        )
+    {
+        require(
+            index <= _currentConfigurationIndex(),
+            "Configuration doesn't exist"
+        );
+        Configuration storage _configuration = _configurations[index];
+
+        votingDuration = _configuration.votingDuration;
+        sheriffsRewardShare = _configuration.sheriffsRewardShare;
+        fixedSheriffReward = _configuration.fixedSheriffReward;
+        minimalVotesForRequest = _configuration.minimalVotesForRequest;
+        minimalDepositForSheriff = _configuration.minimalDepositForSheriff;
+        requestReward = _configuration.requestReward;
+    }
+
+    function _currentConfigurationIndex() internal view returns (uint256) {
+        return _configurations.length - 1;
     }
 
     function walletProposalsLength() external view override returns (uint256) {
@@ -859,4 +806,34 @@ contract WalletHunters is
     {
         return super._msgData();
     }
+
+    /* EIP712 methods */
+    function _domainSeparatorV4() internal view returns (bytes32) {
+        return _buildDomainSeparator(EIP712_TYPE_HASH, _EIP712NameHash(), _EIP712VersionHash());
+    }
+
+    function _buildDomainSeparator(bytes32 typeHash, bytes32 name, bytes32 version) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                typeHash,
+                name,
+                version,
+                block.chainid,
+                address(this)
+            )
+        );
+    }
+
+    function _hashTypedDataV4(bytes32 structHash) internal view virtual returns (bytes32) {
+        return ECDSAUpgradeable.toTypedDataHash(_domainSeparatorV4(), structHash);
+    }
+
+    function _EIP712NameHash() internal virtual view returns (bytes32) {
+        return 0x3a050c67573400c0b2c5554f14c582c5e36916209d03a15c84eef0d8fef9860a;
+    }
+
+    function _EIP712VersionHash() internal virtual view returns (bytes32) {
+        return 0x06c015bd22b4c69690933c1058878ebdfef31f9aaae40bbe86d8a09fe1b2972c;
+    }
+    /* EIP712 methods end */
 }

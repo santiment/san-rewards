@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface IWalletHunters {
+interface IWalletHuntersV2 {
     enum State {ACTIVE, APPROVED, DECLINED, DISCARDED}
 
     struct WalletProposal {
@@ -77,11 +77,18 @@ interface IWalletHunters {
      * @dev        Submit a new wallet request. Increment request id and return it. Counter starts
      * from 0. Request automatically moved in active state, see enum #State. Caller must be hunter.
      * Emit #NewWalletRequest.
-     * @param      hunter  The hunter address, which will get reward.
-     * for sheriffs reward in approve case.
+     * @param      hunter     The hunter address, which will get reward.
+     * @param      reward     Proposal reward.
+     * @param      nonce      Correct nonce for wallet signer.
+     * @param      signature  The signature created by wallet signer.
      * @return     request id for submitted request.
      */
-    function submitRequest(address hunter) external returns (uint256);
+    function submitRequest(
+        address hunter,
+        uint256 reward,
+        uint256 nonce,
+        bytes memory signature
+    ) external returns (uint256);
 
     /**
      * @dev        Discard wallet request and move request at discarded state, see enum #State.
@@ -221,6 +228,13 @@ interface IWalletHunters {
      * @return     Amount of all proposals
      */
     function walletProposalsLength() external view returns (uint256);
+
+    /**
+     * @dev        Get nonces for wallet signer to avoid replay attack.
+     * @param      nonce     The nonce
+     * @return     true if nonce is already used otherwise false
+     */
+    function isNonceSet(uint256 nonce) external view returns(bool);
 
     /**
      * @dev        Wallet hunters configuration.

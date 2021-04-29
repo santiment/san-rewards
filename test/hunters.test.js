@@ -6,7 +6,7 @@ const Wallet = require('ethereumjs-wallet').default
 const {bn, token, ZERO, relay, signSubmit} = require("./utils")
 
 const RealTokenMock = artifacts.require("RealTokenMock")
-const WalletHunters = artifacts.require("WalletHunters")
+const WalletHunters = artifacts.require("WalletHuntersV2")
 const TrustedForwarder = artifacts.require("TrustedForwarder")
 
 contract('WalletHunters', function (accounts) {
