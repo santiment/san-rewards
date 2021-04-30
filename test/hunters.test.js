@@ -51,7 +51,6 @@ contract('WalletHunters', function (accounts) {
         expect(configuration.fixedSheriffReward).to.be.bignumber.equal(fixedSheriffReward)
         expect(configuration.minimalVotesForRequest).to.be.bignumber.equal(minimalVotesForRequest)
         expect(configuration.minimalDepositForSheriff).to.be.bignumber.equal(minimalDepositForSheriff)
-        expect(configuration.requestReward).to.be.bignumber.equal(requestReward)
     })
 
     it("Check forbidden methods", async () => {
@@ -161,14 +160,15 @@ contract('WalletHunters', function (accounts) {
         const hunterBalanceTracker = await balance.tracker(hunter)
 
         const chainId = (await this.forwarder.getChainId()).toString()
+        const uri = '123456789'
 
-        const args = await signSubmit(walletSignerWallet, this.hunters.address, hunter, reward, chainId)
+        const args = await signSubmit(walletSignerWallet, this.hunters.address, hunter, reward, uri, chainId)
 
         const calldata = this.hunters.contract.methods["submitRequest"](...args).encodeABI()
         let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
 
         await expectEvent.inTransaction(receipt.tx, this.forwarder, "ForwardRequestExecuted", {success: true})
-        await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {reward, requestId})
+        await expectEvent.inTransaction(receipt.tx, this.hunters, "NewWalletRequest", {reward, requestId, uri})
 
         const proposal = await this.hunters.walletProposal(requestId)
 
@@ -255,11 +255,11 @@ contract('WalletHunters', function (accounts) {
             expect(await actualReward(sheriff3)).to.be.bignumber.equal(sheriff3Rewards[requestIndex])
 
             const withdrawReward = async (sheriff) => {
-                const receipt = await this.hunters.claimSheriffRewards(sheriff, [requestId], {from: sheriff})
-                expectEvent(receipt, "SheriffRewardPaid", {sheriff})
+                const receipt = await this.hunters.claimRewards(sheriff, [requestId], {from: sheriff})
+                expectEvent(receipt, "UserRewardPaid", {user: sheriff})
 
-                await expectRevert(this.hunters.claimSheriffRewards(sheriff, [requestId], {from: sheriff}), "Already rewarded")
-                await expectRevert(this.hunters.claimSheriffRewards(sheriff, [requestId], {from: deployer}), "Sender must be sheriff")
+                await expectRevert(this.hunters.claimRewards(sheriff, [requestId], {from: sheriff}), "Already rewarded")
+                await expectRevert(this.hunters.claimRewards(sheriff, [requestId], {from: deployer}), "Sender must be user")
             }
 
             const balanceBefore = await this.realToken.balanceOf(sheriff1)
@@ -325,9 +325,9 @@ contract('WalletHunters', function (accounts) {
         expect(actualReward).to.be.bignumber.equal(totalReward.mul(maxPercent.sub(sheriffsRewardShare)).div(maxPercent))
         expect(await this.hunters.userRewards(hunter)).to.be.bignumber.equal(actualReward)
 
-        const calldata = this.hunters.contract.methods["claimHunterReward"](hunter, requestIds).encodeABI()
+        const calldata = this.hunters.contract.methods["claimRewards"](hunter, requestIds).encodeABI()
         let receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
-        await expectEvent.inTransaction(receipt.tx, this.hunters, "HunterRewardPaid", {totalReward: actualReward})
+        await expectEvent.inTransaction(receipt.tx, this.hunters, "UserRewardPaid", {totalReward: actualReward})
         receipt = await relay(this.forwarder, relayer, hunterWallet, this.hunters.address, calldata)
         await expectEvent(receipt, "ForwardRequestExecuted", { success: false })
 
@@ -417,6 +417,6 @@ contract('WalletHunters', function (accounts) {
 })
 
 function decodeRevertReason(revertBytes) {
-    return we3b.eth.abi.decodeParameter('string', '0x' + revertBytes.slice(10))
+    return web3.eth.abi.decodeParameter('string', '0x' + revertBytes.slice(10))
 }
 

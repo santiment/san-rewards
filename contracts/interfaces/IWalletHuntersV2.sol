@@ -28,7 +28,10 @@ interface IWalletHuntersV2 {
     event NewWalletRequest(
         uint256 indexed requestId,
         address indexed hunter,
-        uint256 reward
+        uint256 reward,
+        uint256 uri,
+        uint256 creationTime,
+        uint256 configurationIndex
     );
 
     event Staked(address indexed sheriff, uint256 amount);
@@ -42,18 +45,6 @@ interface IWalletHuntersV2 {
         bool voteFor
     );
 
-    event HunterRewardPaid(
-        address indexed hunter,
-        uint256[] requestIds,
-        uint256 totalReward
-    );
-
-    event SheriffRewardPaid(
-        address indexed sheriff,
-        uint256[] requestIds,
-        uint256 totalReward
-    );
-
     event UserRewardPaid(
         address indexed user,
         uint256[] requestIds,
@@ -63,12 +54,12 @@ interface IWalletHuntersV2 {
     event RequestDiscarded(uint256 indexed requestId);
 
     event ConfigurationChanged(
+        uint256 indexed configurationIndex,
         uint256 votingDuration,
         uint256 sheriffsRewardShare,
         uint256 fixedSheriffReward,
         uint256 minimalVotesForRequest,
-        uint256 minimalDepositForSheriff,
-        uint256 requestReward
+        uint256 minimalDepositForSheriff
     );
 
     event ReplenishedRewardPool(address from, uint256 amount);
@@ -86,6 +77,7 @@ interface IWalletHuntersV2 {
     function submitRequest(
         address hunter,
         uint256 reward,
+        uint256 uri,
         uint256 nonce,
         bytes memory signature
     ) external returns (uint256);
@@ -185,26 +177,6 @@ interface IWalletHuntersV2 {
     function claimRewards(address user, uint256[] calldata requestIds) external;
 
     /**
-     * @dev        Claim hunter reward. Mint reward tokens. Should be used all available request
-     * ids in finished state for hunter, even if #hunterReward equal 0 for specific request id.
-     * Emit #HunterRewardPaid. Remove requestIds from #activeRequests set.
-     * @param      hunter      The hunter address
-     * @param      requestIds  The request ids
-     */
-    function claimHunterReward(address hunter, uint256[] calldata requestIds)
-        external;
-
-    /**
-     * @dev        Claim sheriff reward. Mint reward tokens. Should be used all available request
-     * ids in finished state for sheriff, even if #hunterReward equal 0 for specific request id.
-     * Emit #SheriffRewardPaid. Remove requestIds from #activeRequests set.
-     * @param      sheriff      The sheriff address.
-     * @param      requestIds  The request ids.
-     */
-    function claimSheriffRewards(address sheriff, uint256[] calldata requestIds)
-        external;
-
-    /**
      * @dev        Get wallet request data.
      * @param      startRequestId  The start request id. Can be 0
      * @param      pageSize        The page size. Can be #walletProposalsLength
@@ -247,8 +219,22 @@ interface IWalletHuntersV2 {
             uint256 sheriffsRewardShare,
             uint256 fixedSheriffReward,
             uint256 minimalVotesForRequest,
-            uint256 minimalDepositForSheriff,
-            uint256 requestReward
+            uint256 minimalDepositForSheriff
+        );
+
+    /**
+     * @dev        Wallet hunters configuration at specific index
+     * @param      index specific id
+     */
+    function configurationAt(uint256 index)
+        external
+        view
+        returns (
+            uint256 votingDuration,
+            uint256 sheriffsRewardShare,
+            uint256 fixedSheriffReward,
+            uint256 minimalVotesForRequest,
+            uint256 minimalDepositForSheriff
         );
 
     /**
@@ -260,15 +246,13 @@ interface IWalletHuntersV2 {
      * for next request.
      * @param      minimalVotesForRequest    The minimal votes for request to be approved.
      * @param      minimalDepositForSheriff  The minimal deposit to become sheriff.
-     * @param      requestReward             The reward for next request;
      */
     function updateConfiguration(
         uint256 votingDuration,
         uint256 sheriffsRewardShare,
         uint256 fixedSheriffReward,
         uint256 minimalVotesForRequest,
-        uint256 minimalDepositForSheriff,
-        uint256 requestReward
+        uint256 minimalDepositForSheriff
     ) external;
 
     /**

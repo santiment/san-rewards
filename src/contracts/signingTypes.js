@@ -25,6 +25,7 @@ const ForwardRequest = [
 const Submit = [
     {name: 'hunter', type: 'address'},
     {name: 'reward', type: 'uint256'},
+    {name: 'uri', type: 'uint256'},
     {name: 'nonce', type: 'uint256'},
 ]
 
@@ -35,11 +36,11 @@ const buildPermit = (name, version, chainId, verifyingContract, owner, spender, 
     message: {owner, spender, value, nonce, deadline},
 })
 
-const buildSubmit = (name, version, chainId, verifyingContract, hunter, reward, nonce) => ({
+const buildSubmit = (name, version, chainId, verifyingContract, hunter, reward, uri, nonce) => ({
     primaryType: 'Submit',
     types: {EIP712Domain, Submit},
     domain: {name, version, chainId, verifyingContract},
-    message: {hunter, reward, nonce},
+    message: {hunter, reward, uri, nonce},
 })
 
 const buildForwardRequest = (name, version, chainId, verifyingContract, from, to, value, gas, nonce, data) => ({

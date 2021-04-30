@@ -10,7 +10,7 @@ class WalletHunters {
         this.network = provider.getNetwork()
     }
 
-    async createSubmit(hunter, reward, nonce) {
+    async createSubmit(hunter, reward, uri, nonce) {
         const {chainId} = await this.network
 
         const data = _createSubmit(
@@ -18,6 +18,7 @@ class WalletHunters {
             this.contract.address,
             hunter,
             reward,
+            uri,
             nonce
         )
 
@@ -32,7 +33,7 @@ class WalletHunters {
     }
 }
 
-function _createSubmit(chainId, verifier, hunter, reward, nonce) {
+function _createSubmit(chainId, verifier, hunter, reward, uri, nonce) {
 
     const data = buildSubmit(
         "Wallet Hunters, Sheriff Token",
@@ -41,6 +42,7 @@ function _createSubmit(chainId, verifier, hunter, reward, nonce) {
         verifier,
         hunter,
         reward,
+        uri,
         nonce
     )
 

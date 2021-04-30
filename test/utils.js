@@ -22,7 +22,7 @@ const ForwardRequest = [
     {name: 'data', type: 'bytes'}
 ]
 
-async function signSubmit(signerWallet, verifier, hunter, reward, chainId) {
+async function signSubmit(signerWallet, verifier, hunter, reward, uri, chainId) {
 
     const nonce = signerWallet.nonce.toString()
 
@@ -33,6 +33,7 @@ async function signSubmit(signerWallet, verifier, hunter, reward, chainId) {
         verifier,
         hunter,
         reward,
+        uri,
         nonce
     )
 
@@ -40,7 +41,7 @@ async function signSubmit(signerWallet, verifier, hunter, reward, chainId) {
 
     signerWallet.nonce = signerWallet.nonce + 300
 
-    return [hunter, reward, nonce, signature]
+    return [hunter, reward, uri, nonce, signature]
 }
 
 async function relay(forwarder, relayer, fromWallet, to, calldata, nonce) {
