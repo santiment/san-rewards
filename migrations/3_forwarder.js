@@ -8,7 +8,7 @@ module.exports = async (deployer, network, accounts) => {
 
     const forwarder = await deployer.deploy(
         TrustedForwarder, 
-        process.env.DEFENDER_ADDRESS,
+        owner,
         {from: owner}
     )
 
