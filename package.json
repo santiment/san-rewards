@@ -1,6 +1,6 @@
 {
     "name": "san-rewards",
-    "version": "1.6.0",
+    "version": "2.0.0",
     "description": "Santiment rewards smart contracts",
     "files": [
         "/src",
