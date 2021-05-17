@@ -77,7 +77,7 @@ interface IWalletHuntersV2 {
 
     /**
      * @dev        Discard wallet request and move request at discarded state, see enum #State.
-     * Every who participated gets 0 reward. Caller must have access role. Emit #RequestDiscarded.
+     * Every who participated gets 0 reward. Caller must be sheriff of wanted list. Emit #RequestDiscarded.
      * @param      requestId The reqiest id, request must be in active state.
      */
     function discardRequest(uint256 requestId) external;

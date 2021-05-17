@@ -3,10 +3,13 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/IERC1155MetadataURIUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
@@ -18,6 +21,7 @@ import "../utils/UintBitmap.sol";
 
 contract WalletHuntersV2 is
     IWalletHuntersV2,
+    IERC1155MetadataURIUpgradeable,
     AccountingTokenUpgradeable,
     RelayRecipientUpgradeable,
     AccessControlUpgradeable
@@ -30,7 +34,7 @@ contract WalletHuntersV2 is
     using UintBitmap for UintBitmap.Bitmap;
 
     struct Request {
-        address hunter;
+        address hunter; // persistent
         uint256 reward;
         uint256 creationTime;
         uint256 configurationIndex;
@@ -59,7 +63,7 @@ contract WalletHuntersV2 is
     }
 
     struct WantedList {
-        address sheriff; 
+        address sheriff; // persistent
         uint256 rewardPool;
     }
 
@@ -81,8 +85,13 @@ contract WalletHuntersV2 is
     Configuration[] private _configurations;
 
     mapping(uint256 => WantedList) private _wantedLists;
-
     mapping(uint256 => uint256) private _requestIdToWantedListId;
+
+    // erc1155 fields
+    mapping (uint256 => mapping(address => uint256)) private _balances;
+    mapping (address => mapping(address => bool)) private _operatorApprovals;
+    string private _uri;
+    // erc1155 fields end
 
     modifier onlyRole(bytes32 role) {
         require(hasRole(role, _msgSender()), "Must have appropriate role");
@@ -90,22 +99,32 @@ contract WalletHuntersV2 is
     }
 
     modifier onlyRequestIdExists(uint256 requestId) {
+        require(_requests[requestId].hunter != address(0), "Request doesn't exist");
         _;
     }
 
     modifier onlyRequestIdNotExists(uint256 requestId) {
+        require(_requests[requestId].hunter == address(0), "Request already exists");
         _;
     }
 
     modifier onlyWantedListIdExists(uint256 wantedListId) {
+        require(_wantedLists[wantedListId].sheriff != address(0), "Wanted list doesn't exist");
         _;
     }
 
     modifier onlyWantedListIdNotExists(uint256 wantedListId) {
+        require(_wantedLists[wantedListId].sheriff == address(0), "Wanted list arelady exists");
         _;
     }
 
-    function submitRequest(        
+    function supportsInterface(bytes4 interfaceId) public view override(AccessControlUpgradeable, IERC165Upgradeable) returns (bool) {
+        return interfaceId == type(IERC1155Upgradeable).interfaceId
+            || interfaceId == type(IERC1155MetadataURIUpgradeable).interfaceId
+            || super.supportsInterface(interfaceId);
+    }
+
+    function submitRequest(
         uint256 requestId,
         uint256 wantedListId,
         address hunter
@@ -114,6 +133,8 @@ contract WalletHuntersV2 is
         _submitRequest(requestId, hunter);
         
         _requestIdToWantedListId[requestId] = wantedListId;
+
+        _mint(address(this), requestId, 1, "");
     }
 
     function _submitRequest(uint256 id, address hunter) internal {
@@ -153,6 +174,8 @@ contract WalletHuntersV2 is
 
         _wantedList.sheriff = sheriff;
         _wantedList.rewardPool = reward;
+
+        _mint(sheriff, wantedListId, 1, "");
 
         stakingToken.safeTransferFrom(sheriff, address(this), reward);
 
@@ -262,6 +285,7 @@ contract WalletHuntersV2 is
             uint256 reward;
             if (_requests[requestId].hunter == user) {
                 reward = hunterReward(user, requestId);
+                _mint(user, requestId, 1, "");
             } else {
                 reward = sheriffReward(user, requestId);
             }
@@ -578,7 +602,7 @@ contract WalletHuntersV2 is
                 locked = votes;
             }
         }
-    }
+    }  
 
     function _walletState(uint256 requestId) internal view returns (State) {
         if (_requests[requestId].discarded) {
@@ -648,6 +672,278 @@ contract WalletHuntersV2 is
     {
         return super._msgData();
     }
+
+    /* ERC1155 implementation */
+
+    /**
+     * @dev Returns the URI for token type `id`.
+     *
+     * If the `\{id\}` substring is present in the URI, it must be replaced by
+     * clients with the actual token type ID.
+     */
+    function uri(uint256) public view virtual override returns (string memory) {
+        return _uri;
+    }
+
+    function balanceOf(address account, uint256 id) public view override returns (uint256) {
+        require(account != address(0), "ERC1155: balance query for the zero address");
+        return _balances[id][account];
+    }
+
+    function balanceOfBatch(
+        address[] memory accounts,
+        uint256[] memory ids
+    )
+        public
+        view
+        override
+        returns (uint256[] memory)
+    {
+        require(accounts.length == ids.length, "ERC1155: accounts and ids length mismatch");
+
+        uint256[] memory batchBalances = new uint256[](accounts.length);
+
+        for (uint256 i = 0; i < accounts.length; ++i) {
+            batchBalances[i] = balanceOf(accounts[i], ids[i]);
+        }
+
+        return batchBalances;
+    }
+
+    function setApprovalForAll(address operator, bool approved) public override {
+        require(_msgSender() != operator, "ERC1155: setting approval status for self");
+
+        _operatorApprovals[_msgSender()][operator] = approved;
+        emit ApprovalForAll(_msgSender(), operator, approved);
+    }
+
+    function isApprovedForAll(address account, address operator) public view override returns (bool) {
+        return _operatorApprovals[account][operator];
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    )
+        public
+        override
+    {
+        require(
+            from == _msgSender() || isApprovedForAll(from, _msgSender()),
+            "ERC1155: caller is not owner nor approved"
+        );
+        _safeTransferFrom(from, to, id, amount, data);
+    }
+
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    )
+        public
+        override
+    {
+        require(
+            from == _msgSender() || isApprovedForAll(from, _msgSender()),
+            "ERC1155: transfer caller is not owner nor approved"
+        );
+        _safeBatchTransferFrom(from, to, ids, amounts, data);
+    }
+
+    function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    )
+        internal
+    {
+        require(to != address(0), "ERC1155: transfer to the zero address");
+
+        address operator = _msgSender();
+
+        _beforeTokenTransfer(operator, from, to, _asSingletonArray(id), _asSingletonArray(amount), data);
+
+        uint256 fromBalance = _balances[id][from];
+        require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
+        _balances[id][from] = fromBalance - amount;
+        _balances[id][to] += amount;
+
+        emit TransferSingle(operator, from, to, id, amount);
+
+        _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
+    }
+
+    function _safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    )
+        internal
+    {
+        require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
+        require(to != address(0), "ERC1155: transfer to the zero address");
+
+        address operator = _msgSender();
+
+        _beforeTokenTransfer(operator, from, to, ids, amounts, data);
+
+        for (uint256 i = 0; i < ids.length; ++i) {
+            uint256 id = ids[i];
+            uint256 amount = amounts[i];
+
+            uint256 fromBalance = _balances[id][from];
+            require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
+            _balances[id][from] = fromBalance - amount;
+            _balances[id][to] += amount;
+        }
+
+        emit TransferBatch(operator, from, to, ids, amounts);
+
+        _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);
+    }
+
+    function _setURI(string memory newuri) internal {
+        _uri = newuri;
+    }
+
+    function _mint(address account, uint256 id, uint256 amount, bytes memory data) internal {
+        require(account != address(0), "ERC1155: mint to the zero address");
+
+        address operator = _msgSender();
+
+        _beforeTokenTransfer(operator, address(0), account, _asSingletonArray(id), _asSingletonArray(amount), data);
+
+        _balances[id][account] += amount;
+        emit TransferSingle(operator, address(0), account, id, amount);
+
+        _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, data);
+    }
+
+    function _mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal {
+        require(to != address(0), "ERC1155: mint to the zero address");
+        require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
+
+        address operator = _msgSender();
+
+        _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
+
+        for (uint i = 0; i < ids.length; i++) {
+            _balances[ids[i]][to] += amounts[i];
+        }
+
+        emit TransferBatch(operator, address(0), to, ids, amounts);
+
+        _doSafeBatchTransferAcceptanceCheck(operator, address(0), to, ids, amounts, data);
+    }
+
+    function _burn(address account, uint256 id, uint256 amount) internal {
+        require(account != address(0), "ERC1155: burn from the zero address");
+
+        address operator = _msgSender();
+
+        _beforeTokenTransfer(operator, account, address(0), _asSingletonArray(id), _asSingletonArray(amount), "");
+
+        uint256 accountBalance = _balances[id][account];
+        require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
+        _balances[id][account] = accountBalance - amount;
+
+        emit TransferSingle(operator, account, address(0), id, amount);
+    }
+
+    function _burnBatch(address account, uint256[] memory ids, uint256[] memory amounts) internal {
+        require(account != address(0), "ERC1155: burn from the zero address");
+        require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
+
+        address operator = _msgSender();
+
+        _beforeTokenTransfer(operator, account, address(0), ids, amounts, "");
+
+        for (uint i = 0; i < ids.length; i++) {
+            uint256 id = ids[i];
+            uint256 amount = amounts[i];
+
+            uint256 accountBalance = _balances[id][account];
+            require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
+            _balances[id][account] = accountBalance - amount;
+        }
+
+        emit TransferBatch(operator, account, address(0), ids, amounts);
+    }
+
+    function _doSafeTransferAcceptanceCheck(
+        address operator,
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    )
+        private
+    {
+        if (to.isContract()) {
+            try IERC1155ReceiverUpgradeable(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
+                if (response != IERC1155ReceiverUpgradeable(to).onERC1155Received.selector) {
+                    revert("ERC1155: ERC1155Receiver rejected tokens");
+                }
+            } catch Error(string memory reason) {
+                revert(reason);
+            } catch {
+                revert("ERC1155: transfer to non ERC1155Receiver implementer");
+            }
+        }
+    }
+
+    function _doSafeBatchTransferAcceptanceCheck(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    )
+        private
+    {
+        if (to.isContract()) {
+            try IERC1155ReceiverUpgradeable(to).onERC1155BatchReceived(operator, from, ids, amounts, data) returns (bytes4 response) {
+                if (response != IERC1155ReceiverUpgradeable(to).onERC1155BatchReceived.selector) {
+                    revert("ERC1155: ERC1155Receiver rejected tokens");
+                }
+            } catch Error(string memory reason) {
+                revert(reason);
+            } catch {
+                revert("ERC1155: transfer to non ERC1155Receiver implementer");
+            }
+        }
+    }
+
+    function _asSingletonArray(uint256 element) private pure returns (uint256[] memory) {
+        uint256[] memory array = new uint256[](1);
+        array[0] = element;
+
+        return array;
+    }
+
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    )
+        internal
+    { }
+
+    /* ERC1155 implementation END */
 }
 
 // TODO
