@@ -8,7 +8,6 @@ interface IWalletHuntersV2 {
         uint256 indexed requestId,
         address indexed hunter,
         uint256 reward,
-        uint256 uri,
         uint256 creationTime,
         uint256 configurationIndex
     );
@@ -16,8 +15,7 @@ interface IWalletHuntersV2 {
     event NewWantedList(
         uint256 indexed wantedListId,
         address indexed sheriff,
-        uint256 reward,
-        uint256 uri
+        uint256 rewardPool
     );
 
     event Staked(address indexed sheriff, uint256 amount);
@@ -52,30 +50,30 @@ interface IWalletHuntersV2 {
 
     /**
      * @dev        Submit a new wallet request. Increment request id and return it. Counter starts
-     * from 0. Request automatically moved in active state, see enum #State. Caller must be hunter.
-     * Emit #NewWalletRequest.
-     * @param      hunter     The hunter address, which will get reward.
-     * @param      uri        The uri of request
-     * @param      hunter     The hunter
-     * @return     request id for submitted request.
+     *             from 0. Request automatically moved in active state, see enum #State. Caller must
+     *             be hunter. Emit #NewWalletRequest.
+     * @param      requestId     The request identifier
+     * @param      wantedListId  The wanted list identifier
+     * @param      hunter        The hunter address, which will get reward.
      */
-    function submitRequest(
-        address hunter,
-        uint256 uri,
-        uint256 wantedListId
-    ) external returns (uint256);
+    function submitRequest(        
+        uint256 requestId,
+        uint256 wantedListId,
+        address hunter
+    ) external;
 
     /**
      * @dev        Submit a new wanted list. Increment wanted list id and return it. Wanted list id
-     * is used for submiting new request.
-     * @param      sheriff  The sheriff address
-     * @param      uri      The uri of wanted list
+     *             is used for submiting new request.
+     * @param      wantedListId  The wanted list identifier
+     * @param      sheriff       The sheriff address
+     * @param      reward        The initial reward pool
      */
     function submitWantedList(
+        uint256 wantedListId,
         address sheriff,
-        uint256 uri,
         uint256 reward
-    ) external returns (uint256);
+    ) external;
 
     /**
      * @dev        Discard wallet request and move request at discarded state, see enum #State.

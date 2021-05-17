@@ -31,15 +31,15 @@ contract WalletHuntersV2 is
 
     struct Request {
         address hunter;
-        uint256 reward; // persistent
+        uint256 reward;
         uint256 creationTime;
         uint256 configurationIndex;
-        bool discarded; // persistent
+        bool discarded; 
     }
 
     struct RequestVoting {
-        uint256 votesFor; // persistent
-        uint256 votesAgainst; // persistent
+        uint256 votesFor; 
+        uint256 votesAgainst; 
         EnumerableSetUpgradeable.AddressSet voters;
         mapping(address => SheriffVote) votes;
     }
@@ -59,7 +59,7 @@ contract WalletHuntersV2 is
     }
 
     struct WantedList {
-        address sheriff;
+        address sheriff; 
         uint256 rewardPool;
     }
 
@@ -80,7 +80,6 @@ contract WalletHuntersV2 is
     mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
     Configuration[] private _configurations;
 
-    CountersUpgradeable.Counter private _wantedListCounter;
     mapping(uint256 => WantedList) private _wantedLists;
 
     mapping(uint256 => uint256) private _requestIdToWantedListId;
@@ -90,31 +89,41 @@ contract WalletHuntersV2 is
         _;
     }
 
-    function submitRequest(        
-        address hunter,
-        uint256 uri,
-        uint256 wantedListId
-    ) external override returns (uint256) {
-        require(wantedListId < _wantedListCounter.current(), "Wanted list doesn't exist");
-
-        uint256 requestId = _submitRequest(hunter, 0, uri);
-        
-        _requestIdToWantedListId[requestId] = wantedListId;
-
-        return requestId;
+    modifier onlyRequestIdExists(uint256 requestId) {
+        _;
     }
 
-    function _submitRequest(address hunter, uint256 reward, uint256 uri) internal returns (uint256) {
+    modifier onlyRequestIdNotExists(uint256 requestId) {
+        _;
+    }
 
-        uint256 id = _requestCounter.current();
-        _requestCounter.increment();
+    modifier onlyWantedListIdExists(uint256 wantedListId) {
+        _;
+    }
+
+    modifier onlyWantedListIdNotExists(uint256 wantedListId) {
+        _;
+    }
+
+    function submitRequest(        
+        uint256 requestId,
+        uint256 wantedListId,
+        address hunter
+    ) external override onlyWantedListIdExists(wantedListId) onlyRequestIdNotExists(requestId) {
+
+        _submitRequest(requestId, hunter);
+        
+        _requestIdToWantedListId[requestId] = wantedListId;
+    }
+
+    function _submitRequest(uint256 id, address hunter) internal {
 
         Request storage _request = _requests[id];
 
         uint256 configurationIndex = _currentConfigurationIndex();
 
         _request.hunter = hunter;
-        _request.reward = reward;
+        _request.reward = _configurations[configurationIndex].requestReward;
         _request.configurationIndex = configurationIndex;
         // solhint-disable-next-line not-rely-on-time
         _request.creationTime = block.timestamp;
@@ -125,40 +134,32 @@ contract WalletHuntersV2 is
         emit NewWalletRequest(
             id,
             hunter,
-            reward,
-            uri,
+            _request.reward,
             block.timestamp,
             configurationIndex
         );
-
-        return id;
     }
 
     function submitWantedList(
+        uint256 wantedListId,
         address sheriff,
-        uint256 uri,
         uint256 reward
-    ) external override returns (uint256) {
+    ) external override onlyWantedListIdNotExists(wantedListId) {
+
         require(isSheriff(_msgSender()), "Sender is not sheriff");
         require(sheriff == _msgSender(), "Sender must be sheriff");
 
-        uint256 id = _wantedListCounter.current();
-        _wantedListCounter.increment();
-
-        WantedList storage _wantedList = _wantedLists[id];
+        WantedList storage _wantedList = _wantedLists[wantedListId];
 
         _wantedList.sheriff = sheriff;
         _wantedList.rewardPool = reward;
 
         stakingToken.safeTransferFrom(sheriff, address(this), reward);
 
-        emit NewWantedList(id, sheriff, reward, uri);
-
-        return id;
+        emit NewWantedList(wantedListId, sheriff, reward);
     }
 
-    function replenishRewardPool(uint256 wantedListId, uint256 amount) external override {
-        require(wantedListId < _wantedListCounter.current(), "Wanted list doesn't exist");
+    function replenishRewardPool(uint256 wantedListId, uint256 amount) external override onlyWantedListIdExists(wantedListId) {
         require(_wantedLists[wantedListId].sheriff == _msgSender(), "Sender must be sheriff");
 
         _wantedLists[wantedListId].rewardPool += amount;
@@ -219,8 +220,10 @@ contract WalletHuntersV2 is
     function discardRequest(uint256 requestId)
         external
         override
-        onlyRole(MAYOR_ROLE)
     {
+        uint256 wantedListId = _requestIdToWantedListId[requestId];
+        require(_wantedLists[wantedListId].sheriff == _msgSender(), "Sender must be sheriff of wanted list");
+
         require(_votingState(requestId), "Voting is finished");
 
         _requests[requestId].discarded = true;
@@ -551,8 +554,7 @@ contract WalletHuntersV2 is
                 .minimalDepositForSheriff;
     }
 
-    function rewardPool(uint256 wantedListId) external view override returns (uint256) {
-        require(wantedListId < _wantedListCounter.current(), "Wanted list doesn't exist");
+    function rewardPool(uint256 wantedListId) external view override onlyWantedListIdExists(wantedListId) returns (uint256) {
         return _wantedLists[wantedListId].rewardPool;
     }
 
@@ -616,8 +618,7 @@ contract WalletHuntersV2 is
             SUPER_MAJORITY;
     }
 
-    function _votingState(uint256 requestId) internal view returns (bool) {
-        require(requestId < _requestCounter.current(), "Request doesn't exist");
+    function _votingState(uint256 requestId) internal view onlyRequestIdExists(requestId) returns (bool) {
 
         // solhint-disable-next-line not-rely-on-time
         uint256 votingDuration =
