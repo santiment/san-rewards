@@ -3,9 +3,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-/**
- * @dev Standard ERC20 token with supports snapshots.
- */
 interface IERC20Snapshot is IERC20Upgradeable {
     function snapshot() external returns (uint256);
 

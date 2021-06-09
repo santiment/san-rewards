@@ -22,11 +22,6 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
 
     event UnregisteredContracts(address[] contracts);
 
-    modifier onlyRole(bytes32 role) {
-        require(hasRole(role, _msgSender()), "Must have appropriate role");
-        _;
-    }
-
     constructor(address relayer)
         MinimalForwarder("TrustedForwarder", "1.0.0")
     {

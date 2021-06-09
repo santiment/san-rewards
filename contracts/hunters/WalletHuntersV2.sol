@@ -71,7 +71,6 @@ contract WalletHuntersV2 is
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
 
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
-    bytes32 public constant WALLET_SIGNER_ROLE = keccak256("WALLET_SIGNER_ROLE");
     string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
     string private constant ERC20_SYMBOL = "WHST";
 
@@ -92,11 +91,6 @@ contract WalletHuntersV2 is
     mapping (address => mapping(address => bool)) private _operatorApprovals;
     string private _uri;
     // erc1155 fields end
-
-    modifier onlyRole(bytes32 role) {
-        require(hasRole(role, _msgSender()), "Must have appropriate role");
-        _;
-    }
 
     modifier onlyRequestIdExists(uint256 requestId) {
         require(_requests[requestId].hunter != address(0), "Request doesn't exist");

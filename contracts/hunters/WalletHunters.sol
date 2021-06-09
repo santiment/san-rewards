@@ -72,11 +72,6 @@ contract WalletHunters is
         private _activeRequests;
     Configuration[] private _configurations;
 
-    modifier onlyRole(bytes32 role) {
-        require(hasRole(role, _msgSender()), "Must have appropriate role");
-        _;
-    }
-
     function initialize(
         address admin_,
         address trustedForwarder_,
