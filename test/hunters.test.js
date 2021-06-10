@@ -3,7 +3,7 @@ const { expect, use } = require("chai")
 const { solidity } = require("ethereum-waffle")
 const Wallet = require('ethereumjs-wallet').default
 
-const {bn, token, ZERO, relay, signSubmit} = require("./utils")
+const {bn, token, ZERO, relay} = require("./utils")
 
 use(solidity)
 

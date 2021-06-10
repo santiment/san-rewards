@@ -939,6 +939,3 @@ contract WalletHuntersV2 is
 
     /* ERC1155 implementation END */
 }
-
-// TODO
-// Update V2, add wanted type list
