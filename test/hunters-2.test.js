@@ -5,6 +5,7 @@ const { solidity } = require('ethereum-waffle')
 const bn = (n) => ethers.BigNumber.from(n)
 const token = (n) => ethers.utils.parseUnits(n)
 const ZERO = bn('0')
+const ZERO_ADDRESS = bn('0')
 
 use(solidity)
 
@@ -427,6 +428,27 @@ describe('WalletHuntersV2', function () {
 
     describe('Upgrade WalletHuntersV2', function () {
 
+        it('Upgrade', async function () {
+            await hunters.upgradeV2()
+        })
+
+        it('Check version', async function () {
+            expect(await hunters.contract.VERSION()).to.be.equal(bn(2))
+        })
+
+        it('Fix initial wanted pool', async function () {
+            hunters.connect(accounts[deployer])
+
+            const initialRewardsPool = await hunters.contract.rewardsPool()
+
+            await expect(hunters.contract.fixInitialWantedList(accounts[deployer].address))
+                .to.emit(hunters.contract, "NewWantedList")
+                .withArgs(bn(0), accounts[deployer].address, initialRewardsPool)
+                .to.emit(hunters.contract, "TransferSingle")
+                .withArgs(accounts[deployer].address, ZERO_ADDRESS, accounts[deployer].address, bn(0), bn(1))
+
+            expect(await hunters.contract.rewardPool(bn(0))).to.be.equal(initialRewardsPool)
+        })
     })
 
     context('Version 2', function () {

@@ -69,14 +69,14 @@ contract WalletHuntersV2 is
 
     uint256 public constant MAX_PERCENT = 10000; // 100%
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
+    uint256 public constant VERSION = 2;
 
-    bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
     string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
     string private constant ERC20_SYMBOL = "WHST";
 
     IERC20Upgradeable public stakingToken;
 
-    uint256 public rewardsPool;
+    uint256 public rewardsPool; // deprecated
     CountersUpgradeable.Counter private _requestCounter;
     mapping(uint256 => Request) private _requests;
     mapping(uint256 => RequestVoting) private _requestVotings;
@@ -174,6 +174,22 @@ contract WalletHuntersV2 is
         stakingToken.safeTransferFrom(sheriff, address(this), reward);
 
         emit NewWantedList(wantedListId, sheriff, reward);
+    }
+
+    function fixInitialWantedList(address sheriff) external onlyWantedListIdNotExists(0) {
+        _checkRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        require(sheriff == _msgSender(), "Sender must be sheriff");
+
+        uint256 wantedListId = 0;
+
+        WantedList storage _wantedList = _wantedLists[wantedListId];
+
+        _wantedList.sheriff = sheriff;
+        _wantedList.rewardPool = rewardsPool;
+
+        _mint(sheriff, wantedListId, 1, "");
+
+        emit NewWantedList(wantedListId, sheriff, rewardsPool);
     }
 
     function replenishRewardPool(uint256 wantedListId, uint256 amount) external override onlyWantedListIdExists(wantedListId) {
