@@ -13,7 +13,8 @@ require('hardhat-contract-sizer')
 const infuraKey = process.env.INFURA_KEY
 const mnemonic = process.env.MNEMONIC
 const etherscanKey = process.env.ETHERSCAN_KEY
-const reportGas = process.env.REPORT_GAS
+const coinmarketcapKey = process.env.COINMARKETCAP_KEY
+const report = process.env.REPORT
 
 module.exports = {
     networks: {
@@ -43,10 +44,13 @@ module.exports = {
     },
 
     gasReporter: {
-        enabled: reportGas ? true : false
+        enabled: report ? true : false,
+        currency: 'USD',
+        gasPrice: 20,
+        coinmarketcap: coinmarketcapKey
     },
 
     contractSizer: {
-        runOnCompile: true,
+        runOnCompile: report ? true : false,
     }
 }

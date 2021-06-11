@@ -71,13 +71,14 @@ contract WalletHuntersV2 is
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
     uint256 public constant VERSION = 2;
 
+    bytes16 private constant alphabet = "0123456789abcdef";
     string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
     string private constant ERC20_SYMBOL = "WHST";
 
     IERC20Upgradeable public stakingToken;
 
     uint256 public rewardsPool; // deprecated
-    CountersUpgradeable.Counter private _requestCounter;
+    CountersUpgradeable.Counter private _requestCounter; // deprecated
     mapping(uint256 => Request) private _requests;
     mapping(uint256 => RequestVoting) private _requestVotings;
     mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
@@ -178,7 +179,8 @@ contract WalletHuntersV2 is
 
     function fixInitialWantedList(address sheriff) external onlyWantedListIdNotExists(0) {
         _checkRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        require(sheriff == _msgSender(), "Sender must be sheriff");
+        require(isSheriff(sheriff), "Sheriff isn't sheriff");
+        require(sheriff != address(0), "Sheriff can't be zero address");
 
         uint256 wantedListId = 0;
 
@@ -194,6 +196,7 @@ contract WalletHuntersV2 is
 
     function replenishRewardPool(uint256 wantedListId, uint256 amount) external override onlyWantedListIdExists(wantedListId) {
         require(_wantedLists[wantedListId].sheriff == _msgSender(), "Sender must be sheriff");
+        require(_balances[wantedListId][_msgSender()] > 0, "Sheriff don't own wanted list");
 
         _wantedLists[wantedListId].rewardPool += amount;
 
@@ -295,7 +298,13 @@ contract WalletHuntersV2 is
             uint256 reward;
             if (_requests[requestId].hunter == user) {
                 reward = hunterReward(user, requestId);
-                _mint(user, requestId, 1, "");
+
+                if (reward > 0) {
+                    _safeTransferFrom(address(this), user, requestId, 1, "");
+                } else {
+                    _burn(address(this), requestId, 1);
+                }
+
             } else {
                 reward = sheriffReward(user, requestId);
             }
@@ -592,6 +601,10 @@ contract WalletHuntersV2 is
         return _wantedLists[wantedListId].rewardPool;
     }
 
+    function ownerOfWantedList(uint256 wantedListId) external view override onlyWantedListIdExists(wantedListId) returns (address) {
+        return _wantedLists[wantedListId].sheriff;
+    }
+
     function lockedBalance(address user)
         public
         view
@@ -691,8 +704,29 @@ contract WalletHuntersV2 is
      * If the `\{id\}` substring is present in the URI, it must be replaced by
      * clients with the actual token type ID.
      */
-    function uri(uint256) public view virtual override returns (string memory) {
-        return _uri;
+
+    function setURI(string memory newuri) onlyRole(DEFAULT_ADMIN_ROLE) external {
+        _uri = newuri;
+    }
+
+    function uri(uint256 id) public view virtual override returns (string memory) {
+        return string(abi.encodePacked(
+            _uri,
+            toHexString(id, 32)
+        ));
+    }
+
+    /**
+     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.
+     */
+    function toHexString(uint256 value, uint256 length) internal pure returns (string memory) {
+        bytes memory buffer = new bytes(2 * length);
+        for (uint256 i = 2 * length; i > 0; --i) {
+            buffer[i - 1] = alphabet[value & 0xf];
+            value >>= 4;
+        }
+        require(value == 0, "Strings: hex length insufficient");
+        return string(buffer);
     }
 
     function balanceOf(address account, uint256 id) public view override returns (uint256) {
@@ -819,10 +853,6 @@ contract WalletHuntersV2 is
         emit TransferBatch(operator, from, to, ids, amounts);
 
         _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);
-    }
-
-    function _setURI(string memory newuri) internal {
-        _uri = newuri;
     }
 
     function _mint(address account, uint256 id, uint256 amount, bytes memory data) internal {

@@ -108,8 +108,7 @@ describe('WalletHuntersV2', function () {
          accounts = await ethers.getSigners()
     })
 
-    const [deployer, mayor, hunter, sheriff1, sheriff2, sheriff3] = [0, 1, 2, 3, 5, 6, 7, 8, 9]
-    const sheriffs = [sheriff1, sheriff2, sheriff3]
+    const [deployer, mayor, hunter, sheriff1, sheriff2, sheriff3, sheriff4, sheriff5] = [0, 1, 2, 3, 5, 6, 7, 8, 9]
 
     const realToken = new RealToken()
     const forwarder = new Forwarder()
@@ -148,6 +147,7 @@ describe('WalletHuntersV2', function () {
         const discardedRequestId = 2
         const requestIds = [approvedRequestId, declinedRequestId, discardedRequestId]
 
+        const sheriffs = [sheriff1, sheriff2, sheriff3]
         const votes = [[true, true, true], [false, false, false], [true, false, true]]
         const hunterRewards = [token('240'), ZERO, ZERO]
         const sheriffRewards = [
@@ -436,25 +436,119 @@ describe('WalletHuntersV2', function () {
             expect(await hunters.contract.VERSION()).to.be.equal(bn(2))
         })
 
-        it('Fix initial wanted pool', async function () {
-            hunters.connect(accounts[deployer])
+        it('Set uri', async function () {
+            await hunters.contract.setURI("https://example.com/token/")
 
-            const initialRewardsPool = await hunters.contract.rewardsPool()
-
-            await expect(hunters.contract.fixInitialWantedList(accounts[deployer].address))
-                .to.emit(hunters.contract, "NewWantedList")
-                .withArgs(bn(0), accounts[deployer].address, initialRewardsPool)
-                .to.emit(hunters.contract, "TransferSingle")
-                .withArgs(accounts[deployer].address, ZERO_ADDRESS, accounts[deployer].address, bn(0), bn(1))
-
-            expect(await hunters.contract.rewardPool(bn(0))).to.be.equal(initialRewardsPool)
+            expect(await hunters.contract.uri(bn(1234567890)))
+                .to.be.equal("https://example.com/token/00000000000000000000000000000000000000000000000000000000499602d2")
         })
     })
 
     context('Version 2', function () {
 
+        const wantedListId0 = 0; // initial wanted list from version 1
+        const wantedListId1 = 1; // actually hash
+
+        const rewardPool1 = token('1000')
+
+        describe('Mint tokens', function () {
+
+            it('Add reward pool tokens for sheriffs #2 #3', async function () {
+                realToken.connect(accounts[deployer])
+
+                await expect(realToken.contract.transfer(accounts[sheriff4].address, hunters.minimalDepositForSheriff), 'Transfer fail')
+                    .to.emit(realToken.contract, 'Transfer')
+
+                await expect(realToken.contract.transfer(accounts[sheriff5].address, hunters.minimalDepositForSheriff.add(rewardPool1)), 'Transfer fail')
+                    .to.emit(realToken.contract, 'Transfer')
+            })
+        })
+
         describe('Sheriff workflow', function () {
 
+            [sheriff4, sheriff5].forEach(sheriff => {
+                it(`New sheriff becomes sheriff, stake`, async function () {
+                    hunters.connect(accounts[sheriff])
+                    realToken.connect(accounts[sheriff])
+
+                    expect(await hunters.contract.isSheriff(accounts[sheriff].address)).to.be.false
+
+                    await expect(realToken.contract.approve(hunters.contract.address, hunters.minimalDepositForSheriff), 'Approve fail')
+                        .to.emit(realToken.contract, 'Approval')
+
+                    await expect(hunters.contract.stake(accounts[sheriff].address, hunters.minimalDepositForSheriff), 'Stake fail')
+                        .to.emit(realToken.contract, 'Transfer')
+                        .to.emit(hunters.contract, 'Transfer')
+                        .to.emit(hunters.contract, 'Staked')
+
+                    expect(await hunters.contract.isSheriff(accounts[sheriff].address)).to.be.true
+                })
+            })
+
+            it('Fix initial wanted pool, sheriff #4 becomes owner of list', async function () {
+                hunters.connect(accounts[deployer])
+
+                const initialRewardsPool = await hunters.contract.rewardsPool()
+
+                await expect(hunters.contract.fixInitialWantedList(accounts[sheriff4].address))
+                    .to.emit(hunters.contract, "NewWantedList")
+                    .withArgs(bn(0), accounts[sheriff4].address, initialRewardsPool)
+                    .to.emit(hunters.contract, "TransferSingle")
+                    .withArgs(accounts[deployer].address, ZERO_ADDRESS, accounts[sheriff4].address, bn(0), bn(1))
+
+                expect(await hunters.contract.rewardPool(bn(0))).to.be.equal(initialRewardsPool)
+            })
+
+            it('Sheriff #4 owner of initial wanted list', async function () {
+                expect(await hunters.contract.ownerOfWantedList(wantedListId0))
+                    .to.be.equal(accounts[sheriff4].address)
+            })
+
+            it('Owner of wanted list #1 not exist', async function () {
+                await expect(hunters.contract.ownerOfWantedList(wantedListId1))
+                    .to.be.revertedWith(`Wanted list doesn't exist`)
+            })
+
+            it('Sheriff cant submit wanted list for other sheriff', async function () {
+                hunters.connect(accounts[sheriff5])
+
+                await expect(hunters.contract.submitWantedList(wantedListId1, accounts[sheriff4].address, rewardPool1))
+                    .to.be.revertedWith(`Sender must be sheriff`)
+            })
+
+            it('Sheriff cant submit wanted list without approve token', async function () {
+                hunters.connect(accounts[sheriff5])
+
+                await expect(hunters.contract.submitWantedList(wantedListId1, accounts[sheriff5].address, rewardPool1))
+                    .to.be.revertedWith('ERC20: transfer amount exceeds allowance')
+            })
+
+            it('Sheriff #5 submit wanted list #1', async function () {
+                realToken.connect(accounts[sheriff5])
+                hunters.connect(accounts[sheriff5])
+
+                await expect(realToken.contract.approve(hunters.contract.address, rewardPool1), 'Approval fail')
+                    .to.emit(realToken.contract, 'Approval')
+
+                await expect(hunters.contract.submitWantedList(wantedListId1, accounts[sheriff5].address, rewardPool1))
+                    .to.emit(hunters.contract, 'NewWantedList')
+                    .withArgs(wantedListId1, accounts[sheriff5].address, rewardPool1)
+                    .to.emit(hunters.contract, "TransferSingle")
+                    .withArgs(accounts[sheriff5].address, ZERO_ADDRESS, accounts[sheriff5].address, wantedListId1, bn(1))
+
+                expect(await hunters.contract.ownerOfWantedList(wantedListId1))
+                    .to.be.equal(accounts[sheriff5].address)
+
+                expect(await hunters.contract.rewardPool(wantedListId1))
+                    .to.be.equal(rewardPool1)
+            })
+
+            it('Sheriff cant submit wanted list twice', async function () {
+                hunters.connect(accounts[sheriff5])
+
+                await expect(hunters.contract.submitWantedList(wantedListId1, accounts[sheriff5].address, rewardPool1))
+                    .to.be.revertedWith('Wanted list arelady exists')
+            })
         })
 
         describe('Hunter workflow', function () {

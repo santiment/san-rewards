@@ -267,4 +267,6 @@ interface IWalletHuntersV2 {
      * @param      wantedListId  The wanted list id
      */
     function rewardPool(uint256 wantedListId) external view returns (uint256);
+
+    function ownerOfWantedList(uint256 wantedListId) external view returns (address);
 }
