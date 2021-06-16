@@ -6,6 +6,7 @@ interface IWalletHuntersV2 {
 
     event NewWalletRequest(
         uint256 indexed requestId,
+        uint256 indexed wantedListId,
         address indexed hunter,
         uint256 reward,
         uint256 creationTime,

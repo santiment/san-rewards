@@ -99,6 +99,12 @@ class Time {
         await ethers.provider.send("evm_increaseTime", [time])
         await ethers.provider.send("evm_mine")
     }
+
+    async getTime() {
+        const blockNumber = await ethers.provider.getBlockNumber()
+        const { timestamp } = await ethers.provider.getBlock(blockNumber)
+        return ethers.BigNumber.from(timestamp)
+    }
 }
 
 describe('WalletHuntersV2', function () {
@@ -148,13 +154,7 @@ describe('WalletHuntersV2', function () {
         const requestIds = [approvedRequestId, declinedRequestId, discardedRequestId]
 
         const sheriffs = [sheriff1, sheriff2, sheriff3]
-        const votes = [[true, true, true], [false, false, false], [true, false, true]]
         const hunterRewards = [token('240'), ZERO, ZERO]
-        const sheriffRewards = [
-            [token('10'), ZERO, ZERO],
-            [ZERO, hunters.fixedSheriffReward, ZERO],
-            [bn('54545454545454545454'), hunters.fixedSheriffReward, ZERO]
-        ]
 
         describe('Mint tokens', function () {
 
@@ -240,6 +240,8 @@ describe('WalletHuntersV2', function () {
         })
 
         describe('Voting workflow', function () {
+            const votes = [[true, true, true], [false, false, false], [true, false, true]]
+
             for (let i = 0; i < sheriffs.length; i++) {
                 for (let requestId = 0; requestId < votes[i].length; requestId++) {
 
@@ -300,6 +302,12 @@ describe('WalletHuntersV2', function () {
         })
 
         describe('Reward workflow', function () {
+
+            const sheriffRewards = [
+                [token('10'), ZERO, ZERO],
+                [ZERO, hunters.fixedSheriffReward, ZERO],
+                [bn('54545454545454545454'), hunters.fixedSheriffReward, ZERO]
+            ]
 
             it('Request is approved', async function () {
                 expect(await proposalState(approvedRequestId)).to.be.equal(1)
@@ -446,8 +454,22 @@ describe('WalletHuntersV2', function () {
 
     context('Version 2', function () {
 
-        const wantedListId0 = 0; // initial wanted list from version 1
-        const wantedListId1 = 1; // actually hash
+        const wantedListId0 = bn(0) // initial wanted list from version 1
+        const wantedListId1 = bn(1) // actually hash
+
+        const approvedRequestId0 = bn(10)
+        const approvedRequestId1 = bn(11)
+        const declinedRequestId = bn(12)
+        const discardedRequestId = bn(13)
+
+        const requestIds = [
+            [approvedRequestId0, wantedListId0],
+            [approvedRequestId1, wantedListId1],
+            [declinedRequestId, wantedListId1],
+            [discardedRequestId, wantedListId1],
+        ]
+
+        const sheriffs = [sheriff1, sheriff2, sheriff3]
 
         const rewardPool1 = token('1000')
 
@@ -541,6 +563,9 @@ describe('WalletHuntersV2', function () {
 
                 expect(await hunters.contract.rewardPool(wantedListId1))
                     .to.be.equal(rewardPool1)
+
+                expect(await hunters.contract['balanceOf(address,uint256)'](accounts[sheriff5].address, wantedListId1))
+                    .to.be.equal(bn(1))
             })
 
             it('Sheriff cant submit wanted list twice', async function () {
@@ -553,14 +578,321 @@ describe('WalletHuntersV2', function () {
 
         describe('Hunter workflow', function () {
 
+            requestIds.forEach(([requestId, wantedListId]) => {
+                it(`#${requestId} #${wantedListId} Submit new wallet`, async function () {
+                    hunters.connect(accounts[hunter])
+
+                    await expect(hunters.contract.submitRequest(requestId, wantedListId, accounts[hunter].address))
+                        .to.emit(hunters.contract, 'NewWalletRequest')
+                        .withArgs(
+                            requestId,
+                            wantedListId,
+                            accounts[hunter].address,
+                            hunters.requestReward,
+                            anyValue,
+                            ZERO,
+                        )
+
+                    expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, requestId))
+                        .to.be.equal(bn(1))
+                })
+            })
         })
 
         describe('Voting workflow', function () {
 
+            const votes = [[true, true, true, true], [false, false, false, false], [true, true, false, true]]
+
+            for (let i = 0; i < sheriffs.length; i++) {
+                for (let requestId = 0; requestId < votes[i].length; requestId++) {
+
+                    it(`#${i} #${requestId} Vote`, async function () {
+                        hunters.connect(accounts[sheriffs[i]])
+
+                        const vote = votes[i][requestId]
+                        const amountVotes = await hunters.contract['balanceOf(address)'](accounts[sheriffs[i]].address)
+
+                        await expect(hunters.contract.vote(accounts[sheriffs[i]].address, requestIds[requestId][0], vote))
+                            .to.emit(hunters.contract, 'Voted')
+                            .withArgs(
+                                bn(requestIds[requestId][0]),
+                                accounts[sheriffs[i]].address,
+                                amountVotes,
+                                vote,
+                            )
+                    })
+                }
+            }
         })
+
+        describe('Discard workflow', async function () {
+
+            it('Discard request by sheriff', async function () {
+                hunters.connect(accounts[sheriff5])
+
+                await expect(hunters.contract.discardRequest(discardedRequestId))
+                    .to.emit(hunters.contract, 'RequestDiscarded')
+                    .withArgs(discardedRequestId)
+
+                expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, discardedRequestId))
+                    .to.be.equal(ZERO)
+                expect(await hunters.contract['balanceOf(address,uint256)'](accounts[hunter].address, discardedRequestId))
+                    .to.be.equal(ZERO)
+            })
+        })
+
+
+        describe('Wait voting', function () {
+
+            for (let i = 0; i < sheriffs.length; i++) {
+                it(`#${i} Check locked balance`, async function () {
+                    const balance = await hunters.contract['balanceOf(address)'](accounts[sheriffs[i]].address)
+                    const locked = await hunters.contract.lockedBalance(accounts[sheriffs[i]].address)
+                    expect(locked).to.be.equal(balance)
+                })
+            }
+
+            it('Wait voting finish', async function () {
+                await time.increaseTime(+ hunters.votingDuration.add(1).toString())
+            })
+
+            for (let i = 0; i < sheriffs.length; i++) {
+                it(`#${i} Check unlocked balance`, async function () {
+                    const locked = await hunters.contract.lockedBalance(accounts[sheriffs[i]].address)
+                    expect(locked).to.be.equal(ZERO)
+                })
+            }
+        })
+
 
         describe('Reward workflow', function () {
 
+            const sheriffRewards = [
+                [token('10'), token('10'), ZERO, ZERO],
+                [ZERO, ZERO, hunters.fixedSheriffReward, ZERO],
+                [bn('54545454545454545454'), bn('54545454545454545454'), hunters.fixedSheriffReward, ZERO]
+            ]
+
+            const hunterRewards = [token('240'), token('240'), ZERO, ZERO]
+
+            context('Approved request wanted list #0', function () {
+
+                it('Check reward for hunter', async function () {
+                    expect(await hunters.contract.hunterReward(accounts[hunter].address, approvedRequestId0))
+                        .to.be.equal(hunterRewards[0])
+                })
+
+                it('Check reward for sheriff #0', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff1].address, approvedRequestId0))
+                        .to.be.equal(sheriffRewards[0][0])
+                })
+
+                it('Check reward for sheriff #1', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff2].address, approvedRequestId0))
+                        .to.be.equal(sheriffRewards[1][0])
+                })
+
+                it('Check reward for sheriff #2', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff3].address, approvedRequestId0))
+                        .to.be.equal((sheriffRewards[2][0]))
+                })
+            })
+
+            context('Approved request wanted list #1', function () {
+
+                it('Check reward for hunter', async function () {
+                    expect(await hunters.contract.hunterReward(accounts[hunter].address, approvedRequestId1))
+                        .to.be.equal(hunterRewards[1])
+                })
+
+                it('Check reward for sheriff #0', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff1].address, approvedRequestId1))
+                        .to.be.equal(sheriffRewards[0][1])
+                })
+
+                it('Check reward for sheriff #1', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff2].address, approvedRequestId1))
+                        .to.be.equal(sheriffRewards[1][1])
+                })
+
+                it('Check reward for sheriff #2', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff3].address, approvedRequestId1))
+                        .to.be.equal((sheriffRewards[2][1]))
+                })
+            })
+
+            context('Declined request wanted list #1', function () {
+
+                it('Check reward for hunter', async function () {
+                    expect(await hunters.contract.hunterReward(accounts[hunter].address, declinedRequestId))
+                        .to.be.equal(hunterRewards[2])
+                })
+
+                it('Check reward for sheriff #0', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff1].address, declinedRequestId))
+                        .to.be.equal(sheriffRewards[0][2])
+                })
+
+                it('Check reward for sheriff #1', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff2].address, declinedRequestId))
+                        .to.be.equal(sheriffRewards[1][2])
+                })
+
+                it('Check reward for sheriff #2', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff3].address, declinedRequestId))
+                        .to.be.equal((sheriffRewards[2][2]))
+                })
+            })
+
+            context('discarded request wanted list #1', function () {
+
+                it('Check reward for hunter', async function () {
+                    expect(await hunters.contract.hunterReward(accounts[hunter].address, discardedRequestId))
+                        .to.be.equal(hunterRewards[3])
+                })
+
+                it('Check reward for sheriff #0', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff1].address, discardedRequestId))
+                        .to.be.equal(sheriffRewards[0][3])
+                })
+
+                it('Check reward for sheriff #1', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff2].address, discardedRequestId))
+                        .to.be.equal(sheriffRewards[1][3])
+                })
+
+                it('Check reward for sheriff #2', async function () {
+                    expect(await hunters.contract.sheriffReward(accounts[sheriff3].address, discardedRequestId))
+                        .to.be.equal((sheriffRewards[2][3]))
+                })
+            })
+
+            context('Claim reward', function () {
+               it('Claim reward for hunter', async function () {
+                    hunters.connect(accounts[hunter])
+
+                    const totalReward = hunterRewards.reduce((total, reward) => total.add(reward), bn(0))
+
+                    expect(await hunters.contract.userRewards(accounts[hunter].address))
+                        .to.be.equal(totalReward)
+
+                    const activeRequestIds = await hunters.contract.activeRequests(
+                        accounts[hunter].address,
+                        bn(0),
+                        await hunters.contract.activeRequestsLength(accounts[hunter].address)
+                    )
+
+                    expect(await hunters.contract.claimRewards(accounts[hunter].address, activeRequestIds))
+                        .to.emit(hunters.contract, "UserRewardPaid")
+                        .withArgs(
+                            accounts[hunter].address,
+                            activeRequestIds,
+                            totalReward
+                        )
+                })
+
+               it('Check erc1155 tokens', async () => {
+                    expect(await hunters.contract['balanceOf(address,uint256)'](accounts[hunter].address, approvedRequestId0))
+                        .to.be.equal(bn(1))
+                    expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, approvedRequestId0))
+                        .to.be.equal(ZERO)
+
+                    expect(await hunters.contract['balanceOf(address,uint256)'](accounts[hunter].address, approvedRequestId1))
+                        .to.be.equal(bn(1))
+                    expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, approvedRequestId1))
+                        .to.be.equal(ZERO)
+
+                    expect(await hunters.contract['balanceOf(address,uint256)'](accounts[hunter].address, declinedRequestId))
+                        .to.be.equal(ZERO)
+                    expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, declinedRequestId))
+                        .to.be.equal(ZERO)
+
+                    expect(await hunters.contract['balanceOf(address,uint256)'](accounts[hunter].address, discardedRequestId))
+                        .to.be.equal(ZERO)
+                    expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, discardedRequestId))
+                        .to.be.equal(ZERO)
+               })
+
+                it('Claim reward for sheriff #0', async function () {
+                    hunters.connect(accounts[sheriff1])
+
+                    const totalReward = sheriffRewards[0].reduce((total, reward) => total.add(reward), bn(0))
+
+                    expect(await hunters.contract.userRewards(accounts[sheriff1].address))
+                        .to.be.equal(totalReward)
+
+                    const activeRequestIds = await hunters.contract.activeRequests(
+                        accounts[sheriff1].address,
+                        bn(0),
+                        await hunters.contract.activeRequestsLength(accounts[sheriff1].address)
+                    )
+
+                    expect(await hunters.contract.claimRewards(accounts[sheriff1].address, activeRequestIds))
+                        .to.emit(hunters.contract, "UserRewardPaid")
+                        .withArgs(
+                            accounts[sheriff1].address,
+                            activeRequestIds,
+                            totalReward
+                        )
+                })
+
+                it('Claim reward for sheriff #1', async function () {
+                    hunters.connect(accounts[sheriff2])
+
+                    const totalReward = sheriffRewards[1].reduce((total, reward) => total.add(reward), bn(0))
+
+                    expect(await hunters.contract.userRewards(accounts[sheriff2].address))
+                        .to.be.equal(totalReward)
+
+                    const activeRequestIds = await hunters.contract.activeRequests(
+                        accounts[sheriff2].address,
+                        bn(0),
+                        await hunters.contract.activeRequestsLength(accounts[sheriff2].address)
+                    )
+
+                    expect(await hunters.contract.claimRewards(accounts[sheriff2].address, activeRequestIds))
+                        .to.emit(hunters.contract, "UserRewardPaid")
+                        .withArgs(
+                            accounts[sheriff2].address,
+                            activeRequestIds,
+                            totalReward
+                        )
+                })
+
+                it('Claim reward for sheriff #2', async function () {
+                    hunters.connect(accounts[sheriff3])
+
+                    const totalReward = sheriffRewards[2].reduce((total, reward) => total.add(reward), bn(0))
+
+                    expect(await hunters.contract.userRewards(accounts[sheriff3].address))
+                        .to.be.equal(totalReward)
+
+                    const activeRequestIds = await hunters.contract.activeRequests(
+                        accounts[sheriff3].address,
+                        bn(0),
+                        await hunters.contract.activeRequestsLength(accounts[sheriff3].address)
+                    )
+
+                    expect(await hunters.contract.claimRewards(accounts[sheriff3].address, activeRequestIds))
+                        .to.emit(hunters.contract, "UserRewardPaid")
+                        .withArgs(
+                            accounts[sheriff3].address,
+                            activeRequestIds,
+                            totalReward
+                        )
+                })
+
+                it('Check balance of reward pools', async () => {
+                    expect(await hunters.contract.rewardPool(bn(0)))
+                        .to.be.equal(bn('870909090909090909092'))
+
+                    expect(await hunters.contract.rewardPool(wantedListId1))
+                        .to.be.equal(bn('675454545454545454546'))
+                })
+            })
         })
     })
 })
+
+function anyValue() {
+}

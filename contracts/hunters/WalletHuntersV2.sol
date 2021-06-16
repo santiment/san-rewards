@@ -24,7 +24,8 @@ contract WalletHuntersV2 is
     IERC1155MetadataURIUpgradeable,
     AccountingTokenUpgradeable,
     RelayRecipientUpgradeable,
-    AccessControlUpgradeable
+    AccessControlUpgradeable,
+    IERC1155ReceiverUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -125,14 +126,14 @@ contract WalletHuntersV2 is
         address hunter
     ) external override onlyWantedListIdExists(wantedListId) onlyRequestIdNotExists(requestId) {
 
-        _submitRequest(requestId, hunter);
+        _submitRequest(requestId, wantedListId, hunter);
         
         _requestIdToWantedListId[requestId] = wantedListId;
 
         _mint(address(this), requestId, 1, "");
     }
 
-    function _submitRequest(uint256 id, address hunter) internal {
+    function _submitRequest(uint256 id, uint256 wantedListId, address hunter) internal {
 
         Request storage _request = _requests[id];
 
@@ -149,6 +150,7 @@ contract WalletHuntersV2 is
 
         emit NewWalletRequest(
             id,
+            wantedListId,
             hunter,
             _request.reward,
             block.timestamp,
@@ -209,7 +211,7 @@ contract WalletHuntersV2 is
         require(sheriff == _msgSender(), "Sender must be sheriff");
         require(amount > 0, "Cannot deposit 0");
         _mint(sheriff, amount);
-        stakingToken.safeTransferFrom(sheriff, address(this), amount);
+       stakingToken.safeTransferFrom(sheriff, address(this), amount);
         emit Staked(sheriff, amount);
     }
 
@@ -264,6 +266,8 @@ contract WalletHuntersV2 is
 
         _requests[requestId].discarded = true;
 
+        _burn(address(this), requestId, 1);
+
         emit RequestDiscarded(requestId);
     }
 
@@ -299,10 +303,12 @@ contract WalletHuntersV2 is
             if (_requests[requestId].hunter == user) {
                 reward = hunterReward(user, requestId);
 
-                if (reward > 0) {
-                    _safeTransferFrom(address(this), user, requestId, 1, "");
-                } else {
-                    _burn(address(this), requestId, 1);
+                if (balanceOf(address(this), requestId) > 0) {
+                    if (reward > 0) {
+                        _safeTransferFrom(address(this), user, requestId, 1, "");
+                    } else {
+                        _burn(address(this), requestId, 1);
+                    }
                 }
 
             } else {
@@ -694,6 +700,16 @@ contract WalletHuntersV2 is
         returns (bytes calldata)
     {
         return super._msgData();
+    }
+
+    function onERC1155Received(address, address from, uint256, uint256, bytes memory) public virtual override returns (bytes4) {
+        require(from == address(0), "ERC1155 supports only mint");
+        return this.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(address, address from, uint256[] memory, uint256[] memory, bytes memory) public virtual override returns (bytes4) {
+        require(from == address(0), "ERC1155 supports only mint");
+        return this.onERC1155BatchReceived.selector;
     }
 
     /* ERC1155 implementation */
