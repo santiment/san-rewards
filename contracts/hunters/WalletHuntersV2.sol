@@ -94,23 +94,18 @@ contract WalletHuntersV2 is
     string private _uri;
     // erc1155 fields end
 
-    modifier onlyRequestIdExists(uint256 requestId) {
-        require(_requests[requestId].hunter != address(0), "Request doesn't exist");
+    modifier onlyRequestIdExists(uint256 id) {
+        require(_requests[id].hunter != address(0), "Id doesn't exist");
         _;
     }
 
-    modifier onlyRequestIdNotExists(uint256 requestId) {
-        require(_requests[requestId].hunter == address(0), "Request already exists");
+    modifier onlyWantedListIdExists(uint256 id) {
+        require(_wantedLists[id].sheriff != address(0), "Id doesn't exist");
         _;
     }
 
-    modifier onlyWantedListIdExists(uint256 wantedListId) {
-        require(_wantedLists[wantedListId].sheriff != address(0), "Wanted list doesn't exist");
-        _;
-    }
-
-    modifier onlyWantedListIdNotExists(uint256 wantedListId) {
-        require(_wantedLists[wantedListId].sheriff == address(0), "Wanted list arelady exists");
+    modifier onlyIdNotExists(uint256 id) {
+        require(_wantedLists[id].sheriff == address(0) && _requests[id].hunter == address(0), "Id already exists");
         _;
     }
 
@@ -124,7 +119,7 @@ contract WalletHuntersV2 is
         uint256 requestId,
         uint256 wantedListId,
         address hunter
-    ) external override onlyWantedListIdExists(wantedListId) onlyRequestIdNotExists(requestId) {
+    ) external override onlyWantedListIdExists(wantedListId) onlyIdNotExists(requestId) {
 
         _submitRequest(requestId, wantedListId, hunter);
         
@@ -162,7 +157,7 @@ contract WalletHuntersV2 is
         uint256 wantedListId,
         address sheriff,
         uint256 reward
-    ) external override onlyWantedListIdNotExists(wantedListId) {
+    ) external override onlyIdNotExists(wantedListId) {
 
         require(isSheriff(_msgSender()), "Sender is not sheriff");
         require(sheriff == _msgSender(), "Sender must be sheriff");
@@ -179,8 +174,9 @@ contract WalletHuntersV2 is
         emit NewWantedList(wantedListId, sheriff, reward);
     }
 
-    function fixInitialWantedList(address sheriff) external onlyWantedListIdNotExists(0) {
+    function fixInitialWantedList(address sheriff) external {
         _checkRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        require(_wantedLists[0].sheriff == address(0), "Wanted list arelady exists");
         require(isSheriff(sheriff), "Sheriff isn't sheriff");
         require(sheriff != address(0), "Sheriff can't be zero address");
 

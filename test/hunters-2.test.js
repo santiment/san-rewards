@@ -455,7 +455,7 @@ describe('WalletHuntersV2', function () {
     context('Version 2', function () {
 
         const wantedListId0 = bn(0) // initial wanted list from version 1
-        const wantedListId1 = bn(1) // actually hash
+        const wantedListId1 = bn(100) // actually hash
 
         const approvedRequestId0 = bn(10)
         const approvedRequestId1 = bn(11)
@@ -528,7 +528,7 @@ describe('WalletHuntersV2', function () {
 
             it('Owner of wanted list #1 not exist', async function () {
                 await expect(hunters.contract.ownerOfWantedList(wantedListId1))
-                    .to.be.revertedWith(`Wanted list doesn't exist`)
+                    .to.be.revertedWith(`Id doesn't exist`)
             })
 
             it('Sheriff cant submit wanted list for other sheriff', async function () {
@@ -572,7 +572,7 @@ describe('WalletHuntersV2', function () {
                 hunters.connect(accounts[sheriff5])
 
                 await expect(hunters.contract.submitWantedList(wantedListId1, accounts[sheriff5].address, rewardPool1))
-                    .to.be.revertedWith('Wanted list arelady exists')
+                    .to.be.revertedWith('Id already exists')
             })
         })
 
@@ -592,6 +592,8 @@ describe('WalletHuntersV2', function () {
                             anyValue,
                             ZERO,
                         )
+                        .to.emit(hunters.contract, 'TransferSingle')
+                        .withArgs(accounts[hunter].address, ZERO_ADDRESS, hunters.contract.address, requestId, bn(1))
 
                     expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, requestId))
                         .to.be.equal(bn(1))
@@ -633,6 +635,8 @@ describe('WalletHuntersV2', function () {
                 await expect(hunters.contract.discardRequest(discardedRequestId))
                     .to.emit(hunters.contract, 'RequestDiscarded')
                     .withArgs(discardedRequestId)
+                    .to.emit(hunters.contract, 'TransferSingle')
+                    .withArgs(accounts[sheriff5].address, hunters.contract.address, ZERO_ADDRESS, discardedRequestId, bn(1))
 
                 expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, discardedRequestId))
                     .to.be.equal(ZERO)
@@ -789,6 +793,10 @@ describe('WalletHuntersV2', function () {
                             activeRequestIds,
                             totalReward
                         )
+                        .to.emit(hunters.contract, 'TransferSingle')
+                        .withArgs(accounts[hunter].address, hunters.contract.address, accounts[hunter].address, activeRequestIds[0], bn(1))
+                        .to.emit(hunters.contract, 'TransferSingle')
+                        .withArgs(accounts[hunter].address, hunters.contract.address, accounts[hunter].address, activeRequestIds[1], bn(1))
                 })
 
                it('Check erc1155 tokens', async () => {
