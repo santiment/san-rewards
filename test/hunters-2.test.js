@@ -588,15 +588,8 @@ describe('WalletHuntersV2', function () {
                             requestId,
                             wantedListId,
                             accounts[hunter].address,
-                            hunters.requestReward,
                             anyValue,
-                            ZERO,
                         )
-                        .to.emit(hunters.contract, 'TransferSingle')
-                        .withArgs(accounts[hunter].address, ZERO_ADDRESS, hunters.contract.address, requestId, bn(1))
-
-                    expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, requestId))
-                        .to.be.equal(bn(1))
                 })
             })
         })
@@ -635,13 +628,6 @@ describe('WalletHuntersV2', function () {
                 await expect(hunters.contract.discardRequest(discardedRequestId))
                     .to.emit(hunters.contract, 'RequestDiscarded')
                     .withArgs(discardedRequestId)
-                    .to.emit(hunters.contract, 'TransferSingle')
-                    .withArgs(accounts[sheriff5].address, hunters.contract.address, ZERO_ADDRESS, discardedRequestId, bn(1))
-
-                expect(await hunters.contract['balanceOf(address,uint256)'](hunters.contract.address, discardedRequestId))
-                    .to.be.equal(ZERO)
-                expect(await hunters.contract['balanceOf(address,uint256)'](accounts[hunter].address, discardedRequestId))
-                    .to.be.equal(ZERO)
             })
         })
 
@@ -780,23 +766,13 @@ describe('WalletHuntersV2', function () {
                     expect(await hunters.contract.userRewards(accounts[hunter].address))
                         .to.be.equal(totalReward)
 
-                    const activeRequestIds = await hunters.contract.activeRequests(
-                        accounts[hunter].address,
-                        bn(0),
-                        await hunters.contract.activeRequestsLength(accounts[hunter].address)
-                    )
-
-                    expect(await hunters.contract.claimRewards(accounts[hunter].address, activeRequestIds))
+                    expect(await hunters.contract.claimRewards(accounts[hunter].address))
                         .to.emit(hunters.contract, "UserRewardPaid")
                         .withArgs(
                             accounts[hunter].address,
-                            activeRequestIds,
                             totalReward
                         )
-                        .to.emit(hunters.contract, 'TransferSingle')
-                        .withArgs(accounts[hunter].address, hunters.contract.address, accounts[hunter].address, activeRequestIds[0], bn(1))
-                        .to.emit(hunters.contract, 'TransferSingle')
-                        .withArgs(accounts[hunter].address, hunters.contract.address, accounts[hunter].address, activeRequestIds[1], bn(1))
+                        .to.emit(hunters.contract, 'TransferBatch')
                 })
 
                it('Check erc1155 tokens', async () => {
@@ -829,17 +805,10 @@ describe('WalletHuntersV2', function () {
                     expect(await hunters.contract.userRewards(accounts[sheriff1].address))
                         .to.be.equal(totalReward)
 
-                    const activeRequestIds = await hunters.contract.activeRequests(
-                        accounts[sheriff1].address,
-                        bn(0),
-                        await hunters.contract.activeRequestsLength(accounts[sheriff1].address)
-                    )
-
-                    expect(await hunters.contract.claimRewards(accounts[sheriff1].address, activeRequestIds))
+                    expect(await hunters.contract.claimRewards(accounts[sheriff1].address))
                         .to.emit(hunters.contract, "UserRewardPaid")
                         .withArgs(
                             accounts[sheriff1].address,
-                            activeRequestIds,
                             totalReward
                         )
                 })
@@ -852,17 +821,10 @@ describe('WalletHuntersV2', function () {
                     expect(await hunters.contract.userRewards(accounts[sheriff2].address))
                         .to.be.equal(totalReward)
 
-                    const activeRequestIds = await hunters.contract.activeRequests(
-                        accounts[sheriff2].address,
-                        bn(0),
-                        await hunters.contract.activeRequestsLength(accounts[sheriff2].address)
-                    )
-
-                    expect(await hunters.contract.claimRewards(accounts[sheriff2].address, activeRequestIds))
+                    expect(await hunters.contract.claimRewards(accounts[sheriff2].address))
                         .to.emit(hunters.contract, "UserRewardPaid")
                         .withArgs(
                             accounts[sheriff2].address,
-                            activeRequestIds,
                             totalReward
                         )
                 })
@@ -875,17 +837,10 @@ describe('WalletHuntersV2', function () {
                     expect(await hunters.contract.userRewards(accounts[sheriff3].address))
                         .to.be.equal(totalReward)
 
-                    const activeRequestIds = await hunters.contract.activeRequests(
-                        accounts[sheriff3].address,
-                        bn(0),
-                        await hunters.contract.activeRequestsLength(accounts[sheriff3].address)
-                    )
-
-                    expect(await hunters.contract.claimRewards(accounts[sheriff3].address, activeRequestIds))
+                    expect(await hunters.contract.claimRewards(accounts[sheriff3].address))
                         .to.emit(hunters.contract, "UserRewardPaid")
                         .withArgs(
                             accounts[sheriff3].address,
-                            activeRequestIds,
                             totalReward
                         )
                 })

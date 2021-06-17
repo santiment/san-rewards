@@ -2,15 +2,13 @@
 pragma solidity ^0.8.0;
 
 interface IWalletHuntersV2 {
-    enum State {ACTIVE, APPROVED, DECLINED, DISCARDED}
+    enum State { ACTIVE, APPROVED, DECLINED, DISCARDED }
 
     event NewWalletRequest(
         uint256 indexed requestId,
         uint256 indexed wantedListId,
         address indexed hunter,
-        uint256 reward,
-        uint256 creationTime,
-        uint256 configurationIndex
+        uint256 creationTime
     );
 
     event NewWantedList(
@@ -32,7 +30,6 @@ interface IWalletHuntersV2 {
 
     event UserRewardPaid(
         address indexed user,
-        uint256[] requestIds,
         uint256 totalReward
     );
 
@@ -166,9 +163,8 @@ interface IWalletHuntersV2 {
      * available request ids in not active state for user, even if #hunterReward equal 0 for
      * specific request id. Emit #UserRewardPaid. Remove requestIds from #activeRequests set.
      * @param      user        The user address
-     * @param      requestIds  The request ids
      */
-    function claimRewards(address user, uint256[] calldata requestIds) external;
+    function claimRewards(address user) external;
 
     /**
      * @dev        Wallet hunters configuration.
