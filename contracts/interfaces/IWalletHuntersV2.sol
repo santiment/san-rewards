@@ -4,6 +4,30 @@ pragma solidity ^0.8.0;
 interface IWalletHuntersV2 {
     enum State { ACTIVE, APPROVED, DECLINED, DISCARDED }
 
+    struct WalletProposal {
+        uint256 requestId;
+        uint256 wantedListId;
+        address hunter;
+        bool claimedReward;
+        uint256 reward;
+        uint256 rewardPool;
+        uint256 creationTime;
+        uint256 finishTime;
+        State state;
+        uint256 votesFor;
+        uint256 votesAgainst;
+        uint256 sheriffsRewardShare;
+        uint256 fixedSheriffReward;
+    }
+
+    struct SheriffWantedList {
+        uint256 wantedListId;
+        address sheriff;
+        uint256 rewardPool;
+        uint256 sheriffsRewardShare;
+        uint256 fixedSheriffReward;
+    }
+
     event NewWalletRequest(
         uint256 indexed requestId,
         uint256 indexed wantedListId,
@@ -113,10 +137,10 @@ interface IWalletHuntersV2 {
 
     /**
      * @dev        Combine two invokes #claimRewards and #withdraw.
-     * @param      sheriff     The sheriff address
-     * @param      requestIds  The request ids
+     * @param      sheriff       The sheriff address
+     * @param      amountClaims  The amount of claims
      */
-    function exit(address sheriff, uint256[] calldata requestIds) external;
+    function exit(address sheriff, uint256 amountClaims) external;
 
     /**
      * @dev        Return wallet requests that user participates at this time as sheriff or hunter.
@@ -152,6 +176,24 @@ interface IWalletHuntersV2 {
     function activeRequestsLength(address user) external view returns (uint256);
 
     /**
+     * @dev        Get wallet request data.
+     * @param      requestIds  The wallet proposal ids
+     */
+    function walletProposals(uint256[] memory requestIds)
+        external
+        view
+        returns (WalletProposal[] memory);
+
+    /**
+     * @dev        Get wanted list data.
+     * @param      wantedListIds   The wanted list ids
+     */
+    function wantedLists(uint256[] memory wantedListIds)
+        external
+        view
+        returns (SheriffWantedList[] memory);
+
+    /**
      * @dev        Replinish reward pool for wanted list using staking tokens.
      * @param      wantedListId    The wanted list id
      * @param      amount          The amount of tokens
@@ -162,9 +204,10 @@ interface IWalletHuntersV2 {
      * @dev        Claim hunter and sheriff rewards. Mint reward tokens. Should be used all
      * available request ids in not active state for user, even if #hunterReward equal 0 for
      * specific request id. Emit #UserRewardPaid. Remove requestIds from #activeRequests set.
-     * @param      user        The user address
+     * @param      user           The user address
+     * @param      amountClaims   The amount of claims
      */
-    function claimRewards(address user) external;
+    function claimRewards(address user, uint256 amountClaims) external;
 
     /**
      * @dev        Wallet hunters configuration.
@@ -264,6 +307,4 @@ interface IWalletHuntersV2 {
      * @param      wantedListId  The wanted list id
      */
     function rewardPool(uint256 wantedListId) external view returns (uint256);
-
-    function ownerOfWantedList(uint256 wantedListId) external view returns (address);
 }

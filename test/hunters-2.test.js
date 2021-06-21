@@ -522,13 +522,13 @@ describe('WalletHuntersV2', function () {
             })
 
             it('Sheriff #4 owner of initial wanted list', async function () {
-                expect(await hunters.contract.ownerOfWantedList(wantedListId0))
+                expect((await hunters.contract.wantedLists([wantedListId0]))[0]?.sheriff)
                     .to.be.equal(accounts[sheriff4].address)
             })
 
             it('Owner of wanted list #1 not exist', async function () {
-                await expect(hunters.contract.ownerOfWantedList(wantedListId1))
-                    .to.be.revertedWith(`Id doesn't exist`)
+                await expect(hunters.contract.wantedLists([wantedListId1]))
+                    .to.be.revertedWith(`Wanted list doesn't exist`)
             })
 
             it('Sheriff cant submit wanted list for other sheriff', async function () {
@@ -558,8 +558,8 @@ describe('WalletHuntersV2', function () {
                     .to.emit(hunters.contract, "TransferSingle")
                     .withArgs(accounts[sheriff5].address, ZERO_ADDRESS, accounts[sheriff5].address, wantedListId1, bn(1))
 
-                expect(await hunters.contract.ownerOfWantedList(wantedListId1))
-                    .to.be.equal(accounts[sheriff5].address)
+                expect((await hunters.contract.wantedLists([wantedListId1]))[0]?.sheriff)
+                        .to.be.equal(accounts[sheriff5].address)
 
                 expect(await hunters.contract.rewardPool(wantedListId1))
                     .to.be.equal(rewardPool1)
@@ -766,7 +766,9 @@ describe('WalletHuntersV2', function () {
                     expect(await hunters.contract.userRewards(accounts[hunter].address))
                         .to.be.equal(totalReward)
 
-                    expect(await hunters.contract.claimRewards(accounts[hunter].address))
+                    const requestLength = await hunters.contract.activeRequestsLength(accounts[hunter].address)
+
+                    expect(await hunters.contract.claimRewards(accounts[hunter].address, requestLength))
                         .to.emit(hunters.contract, "UserRewardPaid")
                         .withArgs(
                             accounts[hunter].address,
@@ -805,7 +807,9 @@ describe('WalletHuntersV2', function () {
                     expect(await hunters.contract.userRewards(accounts[sheriff1].address))
                         .to.be.equal(totalReward)
 
-                    expect(await hunters.contract.claimRewards(accounts[sheriff1].address))
+                    const requestLength = await hunters.contract.activeRequestsLength(accounts[hunter].address)
+
+                    expect(await hunters.contract.claimRewards(accounts[sheriff1].address, requestLength))
                         .to.emit(hunters.contract, "UserRewardPaid")
                         .withArgs(
                             accounts[sheriff1].address,
@@ -821,7 +825,9 @@ describe('WalletHuntersV2', function () {
                     expect(await hunters.contract.userRewards(accounts[sheriff2].address))
                         .to.be.equal(totalReward)
 
-                    expect(await hunters.contract.claimRewards(accounts[sheriff2].address))
+                    const requestLength = await hunters.contract.activeRequestsLength(accounts[hunter].address)
+
+                    expect(await hunters.contract.claimRewards(accounts[sheriff2].address, requestLength))
                         .to.emit(hunters.contract, "UserRewardPaid")
                         .withArgs(
                             accounts[sheriff2].address,
@@ -837,7 +843,9 @@ describe('WalletHuntersV2', function () {
                     expect(await hunters.contract.userRewards(accounts[sheriff3].address))
                         .to.be.equal(totalReward)
 
-                    expect(await hunters.contract.claimRewards(accounts[sheriff3].address))
+                    const requestLength = await hunters.contract.activeRequestsLength(accounts[hunter].address)
+
+                    expect(await hunters.contract.claimRewards(accounts[sheriff3].address, requestLength))
                         .to.emit(hunters.contract, "UserRewardPaid")
                         .withArgs(
                             accounts[sheriff3].address,

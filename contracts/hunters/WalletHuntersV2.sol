@@ -35,7 +35,7 @@ contract WalletHuntersV2 is
     using UintBitmap for UintBitmap.Bitmap;
 
     struct Request {
-        address hunter; // persistent
+        address hunter;
         uint256 reward; // deprecated
         uint256 creationTime;
         uint256 configurationIndex; // actually wantedListId
@@ -64,7 +64,7 @@ contract WalletHuntersV2 is
     }
 
     struct WantedList {
-        address sheriff; // persistent
+        address sheriff;
         uint256 rewardPool;
         uint256 configurationIndex;
     }
@@ -258,15 +258,15 @@ contract WalletHuntersV2 is
         emit Withdrawn(sheriff, amount);
     }
 
-    function exit(address sheriff, uint256[] calldata requestIds)
+    function exit(address sheriff, uint256 amountClaims)
         external
         override
     {
-        claimRewards(sheriff);
+        claimRewards(sheriff, amountClaims);
         withdraw(sheriff, balanceOf(sheriff));
     }
 
-    function claimRewards(address user)
+    function claimRewards(address user, uint256 amountClaims)
         public
         override
     {
@@ -274,11 +274,16 @@ contract WalletHuntersV2 is
         uint256 totalReward = 0;
 
         uint256[] memory mintBatchIndexes;
-
         uint256 mintBatchIndexesCounter = 0;
+        uint256 claimsCounter = 0;
 
         for (uint256 i = _activeRequests[user].length(); i > 0; i--) {
             uint256 requestId = _activeRequests[user].at(i - 1);
+
+            if (_votingState(requestId)) {
+                // voting is not finished
+                continue;
+            }
 
             require(_activeRequests[user].remove(requestId), "Already rewarded");
 
@@ -296,12 +301,19 @@ contract WalletHuntersV2 is
 
             } else {
                 reward = sheriffReward(user, requestId);
+
+                delete _sheriffVotes[keccak256(abi.encodePacked(requestId, user))];
             }
 
             uint256 wantedListId = _requests[requestId].configurationIndex;
 
             _wantedLists[wantedListId].rewardPool -= reward;
             totalReward += reward;
+
+            claimsCounter++;
+            if (claimsCounter == amountClaims) {
+                break;
+            }
         }
 
         if (totalReward > 0) {
@@ -430,6 +442,82 @@ contract WalletHuntersV2 is
 
     function _transferReward(address destination, uint256 amount) internal {
         stakingToken.safeTransfer(destination, amount);
+    }
+
+    function walletProposals(uint256[] memory requestIds)
+        external
+        view
+        override
+        returns (WalletProposal[] memory)
+    {
+
+        WalletProposal[] memory result = new WalletProposal[](requestIds.length);
+
+        for (uint256 i = 0; i < requestIds.length; i++) {
+            _walletProposal(requestIds[i], result[i]);
+        }
+
+        return result;
+    }
+
+    function _walletProposal(uint256 requestId, WalletProposal memory proposal)
+        internal
+        view
+    {
+        proposal.requestId = requestId;
+        proposal.hunter = _requests[requestId].hunter;
+        proposal.claimedReward = !_activeRequests[_requests[requestId].hunter]
+            .contains(requestId);
+        proposal.creationTime = _requests[requestId].creationTime;
+        proposal.votesFor = _requestVotings[requestId].votesFor;
+        proposal.votesAgainst = _requestVotings[requestId].votesAgainst;
+        proposal.state = _walletState(requestId);
+
+        uint256 wantedListId = _requests[requestId].configurationIndex;
+        proposal.wantedListId = wantedListId;
+        proposal.rewardPool = _wantedLists[wantedListId].rewardPool;
+
+        uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
+        proposal.finishTime = _requests[requestId].creationTime +
+            _configurations[configurationIndex].votingDuration;
+
+        proposal.sheriffsRewardShare = _configurations[configurationIndex]
+            .sheriffsRewardShare;
+        proposal.fixedSheriffReward = _configurations[configurationIndex]
+            .fixedSheriffReward;
+        proposal.reward = _configurations[configurationIndex].requestReward;
+    }
+
+    function wantedLists(uint256[] memory wantedListIds)
+        external
+        view
+        override
+        returns (SheriffWantedList[] memory)
+    {
+
+        SheriffWantedList[] memory result = new SheriffWantedList[](wantedListIds.length);
+
+        for (uint256 i = 0; i < wantedListIds.length; i++) {
+            _sheriffWantedList(wantedListIds[i], result[i]);
+        }
+
+        return result;
+    }
+
+    function _sheriffWantedList(uint256 wantedListId, SheriffWantedList memory wantedList)
+        internal
+        view
+    {
+        require(_wantedLists[wantedListId].sheriff != address(0), "Wanted list doesn't exist");
+
+        wantedList.wantedListId = wantedListId;
+        wantedList.sheriff = _wantedLists[wantedListId].sheriff;
+        wantedList.rewardPool = _wantedLists[wantedListId].rewardPool;
+
+        uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
+
+        wantedList.sheriffsRewardShare = _configurations[configurationIndex].sheriffsRewardShare;
+        wantedList.fixedSheriffReward = _configurations[configurationIndex].fixedSheriffReward;
     }
 
     function userRewards(address user)
@@ -595,10 +683,6 @@ contract WalletHuntersV2 is
 
     function rewardPool(uint256 wantedListId) external view override onlyWantedListIdExists(wantedListId) returns (uint256) {
         return _wantedLists[wantedListId].rewardPool;
-    }
-
-    function ownerOfWantedList(uint256 wantedListId) external view override onlyWantedListIdExists(wantedListId) returns (address) {
-        return _wantedLists[wantedListId].sheriff;
     }
 
     function lockedBalance(address user)
