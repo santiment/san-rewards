@@ -1,10 +1,10 @@
-const {BN, ether, constants: {MAX_UINT256, ZERO_ADDRESS}} = require('@openzeppelin/test-helpers')
+/* global ethers */
 const ethSigUtil = require('eth-sig-util')
 const {buildSubmit} = require("../src/contracts/signingTypes")
 
-const bn = (n) => new BN(n)
-const token = (n) => ether(n)
-const ZERO = new BN(0)
+const bn = (n) => ethers.BigNumber.from(n)
+const token = (n) => ethers.utils.parseUnits(n)
+const ZERO = bn('0')
 
 const EIP712Domain = [
     {name: 'name', type: 'string'},
@@ -44,20 +44,20 @@ async function signSubmit(signerWallet, verifier, hunter, reward, uri, chainId) 
     return [hunter, reward, uri, nonce, signature]
 }
 
-async function relay(forwarder, relayer, fromWallet, to, calldata, nonce) {
-    const args = await makeRelayArguments(forwarder, relayer, fromWallet.wallet, to, calldata, fromWallet.nonce)
+async function relay(forwarder, fromWallet, to, calldata) {
+    const args = await makeRelayArguments(forwarder, fromWallet.wallet, to, calldata, fromWallet.nonce)
 
-    const result = await forwarder.execute(...args, {from: relayer})
+    const result = await forwarder.execute(...args)
 
     fromWallet.nonce = fromWallet.nonce + 300
     return result
 }
 
-async function makeRelayArguments(forwarder, relayer, fromWallet, to, calldata, nonce) {
+async function makeRelayArguments(forwarder, fromWallet, to, calldata, nonce) {
 
     const from = fromWallet.getAddressString()
 
-    const chainId = await forwarder.getChainId()
+    const chainId = (await forwarder.getChainId()).toString()
 
     const request = {
         from,
@@ -87,13 +87,13 @@ async function makeRelayArguments(forwarder, relayer, fromWallet, to, calldata, 
     return args
 }
 
+
 module.exports = {
     bn,
     token,
-    ZERO,
     ForwardRequest,
     EIP712Domain,
     relay,
-    ZERO_ADDRESS,
-    signSubmit
+    signSubmit,
+    ZERO
 }

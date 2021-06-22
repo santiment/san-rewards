@@ -3,7 +3,7 @@
     "rules": {
         "compiler-version": [
             "error",
-            "^0.7.0"
+            "^0.8.0"
         ],
         "func-visibility": [
             "warn",
@@ -11,7 +11,8 @@
                 "ignoreConstructors": true
             }
         ],
-        "not-rely-on-time": "off"
+        "not-rely-on-time": "off",
+        "reason-string": ["warn", { "maxLength": 64 }]
     },
     "plugins": [
         "prettier"
