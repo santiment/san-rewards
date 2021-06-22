@@ -2,7 +2,12 @@
 pragma solidity ^0.8.0;
 
 interface IWalletHuntersV2 {
-    enum State { ACTIVE, APPROVED, DECLINED, DISCARDED }
+    enum State {
+        ACTIVE,
+        APPROVED,
+        DECLINED,
+        DISCARDED
+    }
 
     struct WalletProposal {
         uint256 requestId;
@@ -52,10 +57,7 @@ interface IWalletHuntersV2 {
         bool voteFor
     );
 
-    event UserRewardPaid(
-        address indexed user,
-        uint256 totalReward
-    );
+    event UserRewardPaid(address indexed user, uint256 totalReward);
 
     event RequestDiscarded(uint256 indexed requestId);
 
@@ -78,7 +80,7 @@ interface IWalletHuntersV2 {
      * @param      wantedListId  The wanted list identifier
      * @param      hunter        The hunter address, which will get reward.
      */
-    function submitRequest(        
+    function submitRequest(
         uint256 requestId,
         uint256 wantedListId,
         address hunter

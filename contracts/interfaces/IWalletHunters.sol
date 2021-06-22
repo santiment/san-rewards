@@ -2,7 +2,12 @@
 pragma solidity ^0.8.0;
 
 interface IWalletHunters {
-    enum State {ACTIVE, APPROVED, DECLINED, DISCARDED}
+    enum State {
+        ACTIVE,
+        APPROVED,
+        DECLINED,
+        DISCARDED
+    }
 
     struct WalletProposal {
         uint256 requestId;

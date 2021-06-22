@@ -39,17 +39,18 @@ contract WalletHuntersV2 is
         uint256 reward; // deprecated
         uint256 creationTime;
         uint256 configurationIndex; // actually wantedListId
-        bool discarded; 
+        bool discarded;
     }
 
     struct RequestVoting {
-        uint256 votesFor; 
-        uint256 votesAgainst; 
+        uint256 votesFor;
+        uint256 votesAgainst;
         EnumerableSetUpgradeable.AddressSet voters; // deprecated
         mapping(address => SheriffVote) votes; // deprecated
     }
 
-    struct SheriffVote { // deprecated
+    struct SheriffVote {
+        // deprecated
         uint256 amount;
         bool voteFor;
     }
@@ -84,15 +85,16 @@ contract WalletHuntersV2 is
     CountersUpgradeable.Counter private _requestCounter; // deprecated
     mapping(uint256 => Request) private _requests;
     mapping(uint256 => RequestVoting) private _requestVotings;
-    mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
+    mapping(address => EnumerableSetUpgradeable.UintSet)
+        private _activeRequests;
     Configuration[] private _configurations;
 
     mapping(uint256 => WantedList) private _wantedLists;
     mapping(bytes32 => int256) private _sheriffVotes;
 
     // erc1155 fields
-    mapping (uint256 => mapping(address => uint256)) private _balances;
-    mapping (address => mapping(address => bool)) private _operatorApprovals;
+    mapping(uint256 => mapping(address => uint256)) private _balances;
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
     string private _uri;
     // erc1155 fields end
 
@@ -107,27 +109,44 @@ contract WalletHuntersV2 is
     }
 
     modifier onlyIdNotExists(uint256 id) {
-        require(_wantedLists[id].sheriff == address(0) && _requests[id].hunter == address(0), "Id already exists");
+        require(
+            _wantedLists[id].sheriff == address(0) &&
+                _requests[id].hunter == address(0),
+            "Id already exists"
+        );
         _;
     }
 
-    function supportsInterface(bytes4 interfaceId) public view override(AccessControlUpgradeable, IERC165Upgradeable) returns (bool) {
-        return interfaceId == type(IERC1155Upgradeable).interfaceId
-            || interfaceId == type(IERC1155MetadataURIUpgradeable).interfaceId
-            || super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(AccessControlUpgradeable, IERC165Upgradeable)
+        returns (bool)
+    {
+        return
+            interfaceId == type(IERC1155Upgradeable).interfaceId ||
+            interfaceId == type(IERC1155MetadataURIUpgradeable).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     function submitRequest(
         uint256 requestId,
         uint256 wantedListId,
         address hunter
-    ) external override onlyWantedListIdExists(wantedListId) onlyIdNotExists(requestId) {
-
+    )
+        external
+        override
+        onlyWantedListIdExists(wantedListId)
+        onlyIdNotExists(requestId)
+    {
         _submitRequest(requestId, wantedListId, hunter);
     }
 
-    function _submitRequest(uint256 id, uint256 wantedListId, address hunter) internal {
-
+    function _submitRequest(
+        uint256 id,
+        uint256 wantedListId,
+        address hunter
+    ) internal {
         Request storage _request = _requests[id];
 
         // solhint-disable-next-line not-rely-on-time
@@ -138,12 +157,7 @@ contract WalletHuntersV2 is
         // ignore return
         _activeRequests[hunter].add(id);
 
-        emit NewWalletRequest(
-            id,
-            wantedListId,
-            hunter,
-            block.timestamp
-        );
+        emit NewWalletRequest(id, wantedListId, hunter, block.timestamp);
     }
 
     function submitWantedList(
@@ -151,7 +165,6 @@ contract WalletHuntersV2 is
         address sheriff,
         uint256 reward
     ) external override onlyIdNotExists(wantedListId) {
-
         require(sheriff == _msgSender(), "Sender must be sheriff");
         require(_isSheriff(sheriff), "Sender is not sheriff");
 
@@ -170,7 +183,10 @@ contract WalletHuntersV2 is
 
     function fixInitialWantedList(address sheriff) external {
         _checkRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        require(_wantedLists[0].sheriff == address(0), "Wanted list arelady exists");
+        require(
+            _wantedLists[0].sheriff == address(0),
+            "Wanted list arelady exists"
+        );
         require(_isSheriff(sheriff), "Sheriff isn't sheriff");
         require(sheriff != address(0), "Sheriff can't be zero address");
 
@@ -187,13 +203,27 @@ contract WalletHuntersV2 is
         emit NewWantedList(wantedListId, sheriff, rewardsPool);
     }
 
-    function replenishRewardPool(uint256 wantedListId, uint256 amount) external override onlyWantedListIdExists(wantedListId) {
-        require(_wantedLists[wantedListId].sheriff == _msgSender(), "Sender must be sheriff");
-        require(_balances[wantedListId][_msgSender()] > 0, "Sheriff don't own wanted list");
+    function replenishRewardPool(uint256 wantedListId, uint256 amount)
+        external
+        override
+        onlyWantedListIdExists(wantedListId)
+    {
+        require(
+            _wantedLists[wantedListId].sheriff == _msgSender(),
+            "Sender must be sheriff"
+        );
+        require(
+            _balances[wantedListId][_msgSender()] > 0,
+            "Sheriff don't own wanted list"
+        );
 
         _wantedLists[wantedListId].rewardPool += amount;
 
-        stakingToken.safeTransferFrom(_wantedLists[wantedListId].sheriff, address(this), amount);
+        stakingToken.safeTransferFrom(
+            _wantedLists[wantedListId].sheriff,
+            address(this),
+            amount
+        );
 
         emit ReplenishedRewardPool(wantedListId, amount);
     }
@@ -226,22 +256,26 @@ contract WalletHuntersV2 is
         require(amount <= uint256(type(int256).max), "Votes too many");
 
         if (voteFor) {
-            _sheriffVotes[keccak256(abi.encodePacked(requestId, sheriff))] = int256(amount);
+            _sheriffVotes[
+                keccak256(abi.encodePacked(requestId, sheriff))
+            ] = int256(amount);
             _requestVotings[requestId].votesFor += amount;
         } else {
-            _sheriffVotes[keccak256(abi.encodePacked(requestId, sheriff))] = -int256(amount);
+            _sheriffVotes[
+                keccak256(abi.encodePacked(requestId, sheriff))
+            ] = -int256(amount);
             _requestVotings[requestId].votesAgainst += amount;
         }
 
         emit Voted(requestId, sheriff, amount, voteFor);
     }
 
-    function discardRequest(uint256 requestId)
-        external
-        override
-    {
+    function discardRequest(uint256 requestId) external override {
         uint256 wantedListId = _requests[requestId].configurationIndex;
-        require(_wantedLists[wantedListId].sheriff == _msgSender(), "Sender must be sheriff of wanted list");
+        require(
+            _wantedLists[wantedListId].sheriff == _msgSender(),
+            "Sender must be sheriff of wanted list"
+        );
 
         require(_votingState(requestId), "Voting is finished");
 
@@ -259,18 +293,12 @@ contract WalletHuntersV2 is
         emit Withdrawn(sheriff, amount);
     }
 
-    function exit(address sheriff, uint256 amountClaims)
-        external
-        override
-    {
+    function exit(address sheriff, uint256 amountClaims) external override {
         claimRewards(sheriff, amountClaims);
         withdraw(sheriff, balanceOf(sheriff));
     }
 
-    function claimRewards(address user, uint256 amountClaims)
-        public
-        override
-    {
+    function claimRewards(address user, uint256 amountClaims) public override {
         require(user == _msgSender(), "Sender must be user");
         uint256 totalReward = 0;
 
@@ -286,24 +314,30 @@ contract WalletHuntersV2 is
                 continue;
             }
 
-            require(_activeRequests[user].remove(requestId), "Already rewarded");
+            require(
+                _activeRequests[user].remove(requestId),
+                "Already rewarded"
+            );
 
             uint256 reward;
             if (_requests[requestId].hunter == user) {
                 reward = hunterReward(user, requestId);
 
-                if (reward > 0 && requestId != INITIAL_WANTED_LIST_ID ) {
+                if (reward > 0 && requestId != INITIAL_WANTED_LIST_ID) {
                     if (mintBatchIndexesCounter == 0) {
-                        mintBatchIndexes = new uint256[](_activeRequests[user].length() + 1);
+                        mintBatchIndexes = new uint256[](
+                            _activeRequests[user].length() + 1
+                        );
                     }
                     mintBatchIndexes[mintBatchIndexesCounter] = requestId;
                     mintBatchIndexesCounter++;
                 }
-
             } else {
                 reward = sheriffReward(user, requestId);
 
-                delete _sheriffVotes[keccak256(abi.encodePacked(requestId, user))];
+                delete _sheriffVotes[
+                    keccak256(abi.encodePacked(requestId, user))
+                ];
             }
 
             uint256 wantedListId = _requests[requestId].configurationIndex;
@@ -321,9 +355,8 @@ contract WalletHuntersV2 is
             _transferReward(user, totalReward);
         }
 
-        if(mintBatchIndexesCounter == 1) {
+        if (mintBatchIndexesCounter == 1) {
             _mint(user, mintBatchIndexes[0], 1, "");
-
         } else if (mintBatchIndexesCounter > 1) {
             uint256[] memory ids = new uint256[](mintBatchIndexesCounter);
             uint256[] memory amounts = new uint256[](mintBatchIndexesCounter);
@@ -403,7 +436,9 @@ contract WalletHuntersV2 is
             uint256 minimalDepositForSheriff
         )
     {
-        Configuration storage _configuration = _configurations[_currentConfigurationIndex()];
+        Configuration storage _configuration = _configurations[
+            _currentConfigurationIndex()
+        ];
 
         votingDuration = _configuration.votingDuration;
         sheriffsRewardShare = _configuration.sheriffsRewardShare;
@@ -451,8 +486,9 @@ contract WalletHuntersV2 is
         override
         returns (WalletProposal[] memory)
     {
-
-        WalletProposal[] memory result = new WalletProposal[](requestIds.length);
+        WalletProposal[] memory result = new WalletProposal[](
+            requestIds.length
+        );
 
         for (uint256 i = 0; i < requestIds.length; i++) {
             _walletProposal(requestIds[i], result[i]);
@@ -468,7 +504,7 @@ contract WalletHuntersV2 is
         proposal.requestId = requestId;
         proposal.hunter = _requests[requestId].hunter;
         proposal.claimedReward = !_activeRequests[_requests[requestId].hunter]
-            .contains(requestId);
+        .contains(requestId);
         proposal.creationTime = _requests[requestId].creationTime;
         proposal.votesFor = _requestVotings[requestId].votesFor;
         proposal.votesAgainst = _requestVotings[requestId].votesAgainst;
@@ -478,14 +514,16 @@ contract WalletHuntersV2 is
         proposal.wantedListId = wantedListId;
         proposal.rewardPool = _wantedLists[wantedListId].rewardPool;
 
-        uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
-        proposal.finishTime = _requests[requestId].creationTime +
+        uint256 configurationIndex = _wantedLists[wantedListId]
+        .configurationIndex;
+        proposal.finishTime =
+            _requests[requestId].creationTime +
             _configurations[configurationIndex].votingDuration;
 
         proposal.sheriffsRewardShare = _configurations[configurationIndex]
-            .sheriffsRewardShare;
+        .sheriffsRewardShare;
         proposal.fixedSheriffReward = _configurations[configurationIndex]
-            .fixedSheriffReward;
+        .fixedSheriffReward;
         proposal.reward = _configurations[configurationIndex].requestReward;
     }
 
@@ -495,8 +533,9 @@ contract WalletHuntersV2 is
         override
         returns (SheriffWantedList[] memory)
     {
-
-        SheriffWantedList[] memory result = new SheriffWantedList[](wantedListIds.length);
+        SheriffWantedList[] memory result = new SheriffWantedList[](
+            wantedListIds.length
+        );
 
         for (uint256 i = 0; i < wantedListIds.length; i++) {
             _sheriffWantedList(wantedListIds[i], result[i]);
@@ -505,20 +544,26 @@ contract WalletHuntersV2 is
         return result;
     }
 
-    function _sheriffWantedList(uint256 wantedListId, SheriffWantedList memory wantedList)
-        internal
-        view
-    {
-        require(_wantedLists[wantedListId].sheriff != address(0), "Wanted list doesn't exist");
+    function _sheriffWantedList(
+        uint256 wantedListId,
+        SheriffWantedList memory wantedList
+    ) internal view {
+        require(
+            _wantedLists[wantedListId].sheriff != address(0),
+            "Wanted list doesn't exist"
+        );
 
         wantedList.wantedListId = wantedListId;
         wantedList.sheriff = _wantedLists[wantedListId].sheriff;
         wantedList.rewardPool = _wantedLists[wantedListId].rewardPool;
 
-        uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
+        uint256 configurationIndex = _wantedLists[wantedListId]
+        .configurationIndex;
 
-        wantedList.sheriffsRewardShare = _configurations[configurationIndex].sheriffsRewardShare;
-        wantedList.fixedSheriffReward = _configurations[configurationIndex].fixedSheriffReward;
+        wantedList.sheriffsRewardShare = _configurations[configurationIndex]
+        .sheriffsRewardShare;
+        wantedList.fixedSheriffReward = _configurations[configurationIndex]
+        .fixedSheriffReward;
     }
 
     function userRewards(address user)
@@ -568,9 +613,11 @@ contract WalletHuntersV2 is
 
         if (_walletApproved(requestId)) {
             uint256 wantedListId = _requests[requestId].configurationIndex;
-            uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
+            uint256 configurationIndex = _wantedLists[wantedListId]
+            .configurationIndex;
 
-            uint256 sheriffsRewardShare = _configurations[configurationIndex].sheriffsRewardShare;
+            uint256 sheriffsRewardShare = _configurations[configurationIndex]
+            .sheriffsRewardShare;
             uint256 reward = _configurations[configurationIndex].requestReward;
 
             return (reward * (MAX_PERCENT - sheriffsRewardShare)) / MAX_PERCENT;
@@ -602,24 +649,31 @@ contract WalletHuntersV2 is
             require(amountVotes <= uint256(type(int256).max), "Votes too many");
             votes = voteFor ? int256(amountVotes) : -int256(amountVotes);
         } else {
-            votes = _sheriffVotes[keccak256(abi.encodePacked(requestId, sheriff))];
+            votes = _sheriffVotes[
+                keccak256(abi.encodePacked(requestId, sheriff))
+            ];
         }
 
         if (walletApproved && votes > 0) {
             uint256 wantedListId = _requests[requestId].configurationIndex;
-            uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
+            uint256 configurationIndex = _wantedLists[wantedListId]
+            .configurationIndex;
 
             uint256 reward = _configurations[configurationIndex].requestReward;
             uint256 totalVotes = _requestVotings[requestId].votesFor;
-            uint256 sheriffsRewardShare = _configurations[configurationIndex].sheriffsRewardShare;
-            uint256 fixedSheriffReward = _configurations[configurationIndex].fixedSheriffReward;
+            uint256 sheriffsRewardShare = _configurations[configurationIndex]
+            .sheriffsRewardShare;
+            uint256 fixedSheriffReward = _configurations[configurationIndex]
+            .fixedSheriffReward;
 
-            uint256 actualReward = (((reward * uint256(votes)) / totalVotes) * sheriffsRewardShare) / MAX_PERCENT;
+            uint256 actualReward = (((reward * uint256(votes)) / totalVotes) *
+                sheriffsRewardShare) / MAX_PERCENT;
 
             return MathUpgradeable.max(actualReward, fixedSheriffReward);
         } else if (!walletApproved && votes < 0) {
             uint256 wantedListId = _requests[requestId].configurationIndex;
-            uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
+            uint256 configurationIndex = _wantedLists[wantedListId]
+            .configurationIndex;
 
             return _configurations[configurationIndex].fixedSheriffReward;
         } else {
@@ -679,10 +733,16 @@ contract WalletHuntersV2 is
         return
             balanceOf(sheriff) >=
             _configurations[_currentConfigurationIndex()]
-                .minimalDepositForSheriff;
+            .minimalDepositForSheriff;
     }
 
-    function rewardPool(uint256 wantedListId) external view override onlyWantedListIdExists(wantedListId) returns (uint256) {
+    function rewardPool(uint256 wantedListId)
+        external
+        view
+        override
+        onlyWantedListIdExists(wantedListId)
+        returns (uint256)
+    {
         return _wantedLists[wantedListId].rewardPool;
     }
 
@@ -706,10 +766,15 @@ contract WalletHuntersV2 is
             uint256 amountVotes = _requestVotings[requestId].votes[user].amount;
             if (amountVotes > 0) {
                 bool voteFor = _requestVotings[requestId].votes[user].voteFor;
-                require(amountVotes <= uint256(type(int256).max), "Votes too many");
+                require(
+                    amountVotes <= uint256(type(int256).max),
+                    "Votes too many"
+                );
                 votes = voteFor ? int256(amountVotes) : -int256(amountVotes);
             } else {
-                votes = _sheriffVotes[keccak256(abi.encodePacked(requestId, user))];
+                votes = _sheriffVotes[
+                    keccak256(abi.encodePacked(requestId, user))
+                ];
             }
 
             uint256 absVotes = uint256(abs(votes));
@@ -718,9 +783,9 @@ contract WalletHuntersV2 is
                 locked = absVotes;
             }
         }
-    }  
+    }
 
-    function abs(int x) private pure returns (int) {
+    function abs(int256 x) private pure returns (int256) {
         return x >= 0 ? x : -x;
     }
 
@@ -741,33 +806,39 @@ contract WalletHuntersV2 is
     }
 
     function _isEnoughVotes(uint256 requestId) internal view returns (bool) {
-        uint256 totalVotes =
-            _requestVotings[requestId].votesFor +
-                _requestVotings[requestId].votesAgainst;
+        uint256 totalVotes = _requestVotings[requestId].votesFor +
+            _requestVotings[requestId].votesAgainst;
 
         uint256 wantedListId = _requests[requestId].configurationIndex;
-        uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
+        uint256 configurationIndex = _wantedLists[wantedListId]
+        .configurationIndex;
 
-        uint256 minimalVotesForRequest = _configurations[configurationIndex].minimalVotesForRequest;
+        uint256 minimalVotesForRequest = _configurations[configurationIndex]
+        .minimalVotesForRequest;
 
         return totalVotes >= minimalVotesForRequest;
     }
 
     function _walletApproved(uint256 requestId) internal view returns (bool) {
-        uint256 totalVotes =
-            _requestVotings[requestId].votesFor +
-                _requestVotings[requestId].votesAgainst;
+        uint256 totalVotes = _requestVotings[requestId].votesFor +
+            _requestVotings[requestId].votesAgainst;
 
         return
             (_requestVotings[requestId].votesFor * MAX_PERCENT) / totalVotes >
             SUPER_MAJORITY;
     }
 
-    function _votingState(uint256 requestId) internal view onlyRequestIdExists(requestId) returns (bool) {
-
+    function _votingState(uint256 requestId)
+        internal
+        view
+        onlyRequestIdExists(requestId)
+        returns (bool)
+    {
         uint256 wantedListId = _requests[requestId].configurationIndex;
-        uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
-        uint256 votingDuration = _configurations[configurationIndex].votingDuration;
+        uint256 configurationIndex = _wantedLists[wantedListId]
+        .configurationIndex;
+        uint256 votingDuration = _configurations[configurationIndex]
+        .votingDuration;
 
         return
             block.timestamp <
@@ -793,12 +864,24 @@ contract WalletHuntersV2 is
         return super._msgData();
     }
 
-    function onERC1155Received(address, address from, uint256, uint256, bytes memory) public virtual override returns (bytes4) {
+    function onERC1155Received(
+        address,
+        address from,
+        uint256,
+        uint256,
+        bytes memory
+    ) public virtual override returns (bytes4) {
         require(from == address(0), "ERC1155 supports only mint");
         return this.onERC1155Received.selector;
     }
 
-    function onERC1155BatchReceived(address, address from, uint256[] memory, uint256[] memory, bytes memory) public virtual override returns (bytes4) {
+    function onERC1155BatchReceived(
+        address,
+        address from,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) public virtual override returns (bytes4) {
         require(from == address(0), "ERC1155 supports only mint");
         return this.onERC1155BatchReceived.selector;
     }
@@ -812,21 +895,31 @@ contract WalletHuntersV2 is
      * clients with the actual token type ID.
      */
 
-    function setURI(string memory newuri) onlyRole(DEFAULT_ADMIN_ROLE) external {
+    function setURI(string memory newuri)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _uri = newuri;
     }
 
-    function uri(uint256 id) public view virtual override returns (string memory) {
-        return string(abi.encodePacked(
-            _uri,
-            toHexString(id, 32)
-        ));
+    function uri(uint256 id)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        return string(abi.encodePacked(_uri, toHexString(id, 32)));
     }
 
     /**
      * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.
      */
-    function toHexString(uint256 value, uint256 length) internal pure returns (string memory) {
+    function toHexString(uint256 value, uint256 length)
+        internal
+        pure
+        returns (string memory)
+    {
         bytes memory buffer = new bytes(2 * length);
         for (uint256 i = 2 * length; i > 0; --i) {
             buffer[i - 1] = alphabet[value & 0xf];
@@ -836,21 +929,29 @@ contract WalletHuntersV2 is
         return string(buffer);
     }
 
-    function balanceOf(address account, uint256 id) public view override returns (uint256) {
-        require(account != address(0), "ERC1155: balance query for the zero address");
+    function balanceOf(address account, uint256 id)
+        public
+        view
+        override
+        returns (uint256)
+    {
+        require(
+            account != address(0),
+            "ERC1155: balance query for the zero address"
+        );
         return _balances[id][account];
     }
 
-    function balanceOfBatch(
-        address[] memory accounts,
-        uint256[] memory ids
-    )
+    function balanceOfBatch(address[] memory accounts, uint256[] memory ids)
         public
         view
         override
         returns (uint256[] memory)
     {
-        require(accounts.length == ids.length, "ERC1155: accounts and ids length mismatch");
+        require(
+            accounts.length == ids.length,
+            "ERC1155: accounts and ids length mismatch"
+        );
 
         uint256[] memory batchBalances = new uint256[](accounts.length);
 
@@ -861,14 +962,25 @@ contract WalletHuntersV2 is
         return batchBalances;
     }
 
-    function setApprovalForAll(address operator, bool approved) public override {
-        require(_msgSender() != operator, "ERC1155: setting approval status for self");
+    function setApprovalForAll(address operator, bool approved)
+        public
+        override
+    {
+        require(
+            _msgSender() != operator,
+            "ERC1155: setting approval status for self"
+        );
 
         _operatorApprovals[_msgSender()][operator] = approved;
         emit ApprovalForAll(_msgSender(), operator, approved);
     }
 
-    function isApprovedForAll(address account, address operator) public view override returns (bool) {
+    function isApprovedForAll(address account, address operator)
+        public
+        view
+        override
+        returns (bool)
+    {
         return _operatorApprovals[account][operator];
     }
 
@@ -878,10 +990,7 @@ contract WalletHuntersV2 is
         uint256 id,
         uint256 amount,
         bytes memory data
-    )
-        public
-        override
-    {
+    ) public override {
         require(
             from == _msgSender() || isApprovedForAll(from, _msgSender()),
             "ERC1155: caller is not owner nor approved"
@@ -895,10 +1004,7 @@ contract WalletHuntersV2 is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    )
-        public
-        override
-    {
+    ) public override {
         require(
             from == _msgSender() || isApprovedForAll(from, _msgSender()),
             "ERC1155: transfer caller is not owner nor approved"
@@ -912,17 +1018,25 @@ contract WalletHuntersV2 is
         uint256 id,
         uint256 amount,
         bytes memory data
-    )
-        internal
-    {
+    ) internal {
         require(to != address(0), "ERC1155: transfer to the zero address");
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, from, to, _asSingletonArray(id), _asSingletonArray(amount), data);
+        _beforeTokenTransfer(
+            operator,
+            from,
+            to,
+            _asSingletonArray(id),
+            _asSingletonArray(amount),
+            data
+        );
 
         uint256 fromBalance = _balances[id][from];
-        require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
+        require(
+            fromBalance >= amount,
+            "ERC1155: insufficient balance for transfer"
+        );
         _balances[id][from] = fromBalance - amount;
         _balances[id][to] += amount;
 
@@ -937,10 +1051,11 @@ contract WalletHuntersV2 is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    )
-        internal
-    {
-        require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
+    ) internal {
+        require(
+            ids.length == amounts.length,
+            "ERC1155: ids and amounts length mismatch"
+        );
         require(to != address(0), "ERC1155: transfer to the zero address");
 
         address operator = _msgSender();
@@ -952,74 +1067,142 @@ contract WalletHuntersV2 is
             uint256 amount = amounts[i];
 
             uint256 fromBalance = _balances[id][from];
-            require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
+            require(
+                fromBalance >= amount,
+                "ERC1155: insufficient balance for transfer"
+            );
             _balances[id][from] = fromBalance - amount;
             _balances[id][to] += amount;
         }
 
         emit TransferBatch(operator, from, to, ids, amounts);
 
-        _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);
+        _doSafeBatchTransferAcceptanceCheck(
+            operator,
+            from,
+            to,
+            ids,
+            amounts,
+            data
+        );
     }
 
-    function _mint(address account, uint256 id, uint256 amount, bytes memory data) internal {
+    function _mint(
+        address account,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal {
         require(account != address(0), "ERC1155: mint to the zero address");
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, address(0), account, _asSingletonArray(id), _asSingletonArray(amount), data);
+        _beforeTokenTransfer(
+            operator,
+            address(0),
+            account,
+            _asSingletonArray(id),
+            _asSingletonArray(amount),
+            data
+        );
 
         _balances[id][account] += amount;
         emit TransferSingle(operator, address(0), account, id, amount);
 
-        _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, data);
+        _doSafeTransferAcceptanceCheck(
+            operator,
+            address(0),
+            account,
+            id,
+            amount,
+            data
+        );
     }
 
-    function _mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal {
+    function _mintBatch(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal {
         require(to != address(0), "ERC1155: mint to the zero address");
-        require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
+        require(
+            ids.length == amounts.length,
+            "ERC1155: ids and amounts length mismatch"
+        );
 
         address operator = _msgSender();
 
         _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
 
-        for (uint i = 0; i < ids.length; i++) {
+        for (uint256 i = 0; i < ids.length; i++) {
             _balances[ids[i]][to] += amounts[i];
         }
 
         emit TransferBatch(operator, address(0), to, ids, amounts);
 
-        _doSafeBatchTransferAcceptanceCheck(operator, address(0), to, ids, amounts, data);
+        _doSafeBatchTransferAcceptanceCheck(
+            operator,
+            address(0),
+            to,
+            ids,
+            amounts,
+            data
+        );
     }
 
-    function _burn(address account, uint256 id, uint256 amount) internal {
+    function _burn(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) internal {
         require(account != address(0), "ERC1155: burn from the zero address");
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, account, address(0), _asSingletonArray(id), _asSingletonArray(amount), "");
+        _beforeTokenTransfer(
+            operator,
+            account,
+            address(0),
+            _asSingletonArray(id),
+            _asSingletonArray(amount),
+            ""
+        );
 
         uint256 accountBalance = _balances[id][account];
-        require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
+        require(
+            accountBalance >= amount,
+            "ERC1155: burn amount exceeds balance"
+        );
         _balances[id][account] = accountBalance - amount;
 
         emit TransferSingle(operator, account, address(0), id, amount);
     }
 
-    function _burnBatch(address account, uint256[] memory ids, uint256[] memory amounts) internal {
+    function _burnBatch(
+        address account,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) internal {
         require(account != address(0), "ERC1155: burn from the zero address");
-        require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
+        require(
+            ids.length == amounts.length,
+            "ERC1155: ids and amounts length mismatch"
+        );
 
         address operator = _msgSender();
 
         _beforeTokenTransfer(operator, account, address(0), ids, amounts, "");
 
-        for (uint i = 0; i < ids.length; i++) {
+        for (uint256 i = 0; i < ids.length; i++) {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
 
             uint256 accountBalance = _balances[id][account];
-            require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
+            require(
+                accountBalance >= amount,
+                "ERC1155: burn amount exceeds balance"
+            );
             _balances[id][account] = accountBalance - amount;
         }
 
@@ -1033,12 +1216,21 @@ contract WalletHuntersV2 is
         uint256 id,
         uint256 amount,
         bytes memory data
-    )
-        private
-    {
+    ) private {
         if (to.isContract()) {
-            try IERC1155ReceiverUpgradeable(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
-                if (response != IERC1155ReceiverUpgradeable(to).onERC1155Received.selector) {
+            try
+                IERC1155ReceiverUpgradeable(to).onERC1155Received(
+                    operator,
+                    from,
+                    id,
+                    amount,
+                    data
+                )
+            returns (bytes4 response) {
+                if (
+                    response !=
+                    IERC1155ReceiverUpgradeable(to).onERC1155Received.selector
+                ) {
                     revert("ERC1155: ERC1155Receiver rejected tokens");
                 }
             } catch Error(string memory reason) {
@@ -1056,12 +1248,23 @@ contract WalletHuntersV2 is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    )
-        private
-    {
+    ) private {
         if (to.isContract()) {
-            try IERC1155ReceiverUpgradeable(to).onERC1155BatchReceived(operator, from, ids, amounts, data) returns (bytes4 response) {
-                if (response != IERC1155ReceiverUpgradeable(to).onERC1155BatchReceived.selector) {
+            try
+                IERC1155ReceiverUpgradeable(to).onERC1155BatchReceived(
+                    operator,
+                    from,
+                    ids,
+                    amounts,
+                    data
+                )
+            returns (bytes4 response) {
+                if (
+                    response !=
+                    IERC1155ReceiverUpgradeable(to)
+                    .onERC1155BatchReceived
+                    .selector
+                ) {
                     revert("ERC1155: ERC1155Receiver rejected tokens");
                 }
             } catch Error(string memory reason) {
@@ -1072,7 +1275,11 @@ contract WalletHuntersV2 is
         }
     }
 
-    function _asSingletonArray(uint256 element) private pure returns (uint256[] memory) {
+    function _asSingletonArray(uint256 element)
+        private
+        pure
+        returns (uint256[] memory)
+    {
         uint256[] memory array = new uint256[](1);
         array[0] = element;
 
@@ -1086,9 +1293,7 @@ contract WalletHuntersV2 is
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    )
-        internal
-    { }
+    ) internal {}
 
     /* ERC1155 implementation END */
 }

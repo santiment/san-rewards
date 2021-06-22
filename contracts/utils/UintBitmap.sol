@@ -2,12 +2,15 @@
 pragma solidity ^0.8.0;
 
 library UintBitmap {
-
     struct Bitmap {
         mapping(uint256 => uint256) map;
     }
 
-    function isSet(Bitmap storage bitmap, uint256 index) internal view returns (bool) {
+    function isSet(Bitmap storage bitmap, uint256 index)
+        internal
+        view
+        returns (bool)
+    {
         uint256 wordIndex = index / 256;
         uint256 word = bitmap.map[wordIndex];
         uint256 bitIndex = index % 256;

@@ -16,16 +16,18 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
 
     mapping(address => bool) public registeredContracts;
 
-    event ForwardRequestExecuted(address indexed from, uint256 nonce, bool success, bytes returnData);
+    event ForwardRequestExecuted(
+        address indexed from,
+        uint256 nonce,
+        bool success,
+        bytes returnData
+    );
 
     event RegisteredContracts(address[] contracts);
 
     event UnregisteredContracts(address[] contracts);
 
-    constructor(address relayer)
-        MinimalForwarder("TrustedForwarder", "2.0.0")
-    {
-
+    constructor(address relayer) MinimalForwarder("TrustedForwarder", "2.0.0") {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(RELAYER_ROLE, _msgSender());
         _setupRole(RELAYER_ROLE, relayer);
@@ -48,7 +50,6 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
         onlyRole(RELAYER_ROLE)
         returns (bool success, bytes memory ret)
     {
-
         (success, ret) = super.execute(req, signature);
 
         emit ForwardRequestExecuted(req.from, req.nonce, success, ret);

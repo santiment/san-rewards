@@ -1,4 +1,4 @@
-    // SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -24,9 +24,10 @@ contract MinimalForwarder is EIP712 {
         bytes data;
     }
 
-    bytes32 private constant TYPEHASH = keccak256(
-        "ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)"
-    );
+    bytes32 private constant TYPEHASH =
+        keccak256(
+            "ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)"
+        );
 
     mapping(address => UintBitmap.Bitmap) private _nonces;
 
@@ -40,21 +41,19 @@ contract MinimalForwarder is EIP712 {
         virtual
         returns (bool)
     {
-        address signer =
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        TYPEHASH,
-                        req.from,
-                        req.to,
-                        req.value,
-                        req.gas,
-                        req.nonce,
-                        keccak256(req.data)
-                    )
+        address signer = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    TYPEHASH,
+                    req.from,
+                    req.to,
+                    req.value,
+                    req.gas,
+                    req.nonce,
+                    keccak256(req.data)
                 )
             )
-                .recover(signature);
+        ).recover(signature);
 
         return !_nonces[req.from].isSet(req.nonce) && signer == req.from;
     }
@@ -70,7 +69,9 @@ contract MinimalForwarder is EIP712 {
         );
         _nonces[req.from].set(req.nonce);
 
-        (bool success, bytes memory returndata) = req.to.call(abi.encodePacked(req.data, req.from));
+        (bool success, bytes memory returndata) = req.to.call(
+            abi.encodePacked(req.data, req.from)
+        );
 
         return (success, returndata);
     }
