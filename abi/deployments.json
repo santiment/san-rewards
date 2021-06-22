@@ -2,9 +2,9 @@
     "rinkeby": {
         "TrustedForwarder": [
             {
-                "address": "0x859C7171EbF9684ABF29f5Bc2AE3DaE62dA9364F",
-                "abi": "TrustedForwarder.json",
-                "time": "6/22/2021, 1:20:19 PM"
+                "address": "0x231A015975C1a1770435cd75883983Cc32be859a",
+                "description": "TrustedForwarder V2",
+                "time": "6/22/2021, 2:33:20 PM"
             }
         ],
         "WalletHunters": [
