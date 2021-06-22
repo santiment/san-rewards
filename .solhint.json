@@ -11,7 +11,8 @@
                 "ignoreConstructors": true
             }
         ],
-        "not-rely-on-time": "off"
+        "not-rely-on-time": "off",
+        "reason-string": ["warn", { "maxLength": 64 }]
     },
     "plugins": [
         "prettier"
