@@ -48,6 +48,7 @@
         "prettier-plugin-solidity": "^1.0.0-beta.5",
         "solhint": "^3.3.2",
         "solhint-plugin-prettier": "0.0.5",
+        "defender-relay-client": "^1.8.0",
         "solidity-coverage": "^0.7.15",
         "solidity-docgen": "^0.5.11"
     },

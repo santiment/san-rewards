@@ -72,6 +72,7 @@ contract WalletHuntersV2 is
     uint256 public constant MAX_PERCENT = 10000; // 100%
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
     uint256 public constant VERSION = 2;
+    uint256 public constant INITIAL_WANTED_LIST_ID = 0;
 
     bytes16 private constant alphabet = "0123456789abcdef";
     string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
@@ -173,7 +174,7 @@ contract WalletHuntersV2 is
         require(_isSheriff(sheriff), "Sheriff isn't sheriff");
         require(sheriff != address(0), "Sheriff can't be zero address");
 
-        uint256 wantedListId = 0;
+        uint256 wantedListId = INITIAL_WANTED_LIST_ID;
 
         WantedList storage _wantedList = _wantedLists[wantedListId];
 
@@ -291,7 +292,7 @@ contract WalletHuntersV2 is
             if (_requests[requestId].hunter == user) {
                 reward = hunterReward(user, requestId);
 
-                if (reward > 0) {
+                if (reward > 0 && requestId != INITIAL_WANTED_LIST_ID ) {
                     if (mintBatchIndexesCounter == 0) {
                         mintBatchIndexes = new uint256[](_activeRequests[user].length() + 1);
                     }
