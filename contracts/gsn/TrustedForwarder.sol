@@ -23,7 +23,7 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
     event UnregisteredContracts(address[] contracts);
 
     constructor(address relayer)
-        MinimalForwarder("TrustedForwarder", "1.0.0")
+        MinimalForwarder("TrustedForwarder", "2.0.0")
     {
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());

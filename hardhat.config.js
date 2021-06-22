@@ -42,7 +42,7 @@ module.exports = {
     abiExporter: {
       path: './abi',
       flat: true,
-      only: ['WalletHunters', 'WalletHuntersV2', 'TrustedForwarder', "ERC20Mock"],
+      only: ['WalletHunters', 'WalletHuntersV2', 'TrustedForwarder', "IERC20Metadata"],
     },
 
     etherscan: {

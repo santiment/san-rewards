@@ -3,22 +3,29 @@
         "TrustedForwarder": [
             {
                 "address": "0x859C7171EbF9684ABF29f5Bc2AE3DaE62dA9364F",
-                "description": "TrustedForwarder V2",
+                "abi": "TrustedForwarder.json",
                 "time": "6/22/2021, 1:20:19 PM"
             }
         ],
         "WalletHunters": [
             {
                 "address": "0x20ae30F8013247Cb4340ea42b01f6Be9911e25B6",
-                "description": "WalletHunters",
+                "abi": "WalletHunters.json",
                 "time": "6/22/2021, 1:20:49 PM"
             }
         ],
         "WalletHuntersV2": [
             {
                 "address": "0x20ae30F8013247Cb4340ea42b01f6Be9911e25B6",
-                "description": "WalletHunters V2",
+                "abi": "WalletHuntersV2.json",
                 "time": "6/22/2021, 1:21:01 PM"
+            }
+        ],
+        "San": [
+            {
+                "address": "0xD0E3D08EddC77399F818f8888f5D8A2A9661e22D",
+                "abi": "IERC20Metadata.json",
+                "time": "3/21/2021, 10:43:11 AM"
             }
         ]
     }
