@@ -49,8 +49,7 @@ contract WalletHuntersV2 is
         mapping(address => SheriffVote) votes; // deprecated
     }
 
-    struct SheriffVote {
-        // deprecated
+    struct SheriffVote { // deprecated
         uint256 amount;
         bool voteFor;
     }
@@ -73,6 +72,7 @@ contract WalletHuntersV2 is
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
     uint256 public constant VERSION = 2;
     uint256 public constant INITIAL_WANTED_LIST_ID = 0;
+    uint256 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     bytes16 private constant alphabet = "0123456789abcdef";
     string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
@@ -1078,6 +1078,37 @@ contract WalletHuntersV2 is
             amounts,
             data
         );
+    }
+
+    function mint(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external onlyRole(MINTER_ROLE) {
+        require(
+            _wantedLists[id].sheriff == address(0) &&
+                _requests[id].hunter == address(0),
+            "Id is not available"
+        );
+
+        _mint(account, id, amount, "");
+    }
+
+    function mintBatch(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) external onlyRole(MINTER_ROLE) {
+
+        for (uint256 i = 0; i < ids.length; i++) {
+            require(
+                _wantedLists[ids[i]].sheriff == address(0) &&
+                    _requests[ids[i]].hunter == address(0),
+                "Id is not available"
+            );
+        }
+
+        _mintBatch(to, ids, amounts, "");
     }
 
     function _mint(
