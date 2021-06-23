@@ -516,7 +516,7 @@ describe('WalletHuntersV2', function () {
                     .to.emit(hunters.contract, "NewWantedList")
                     .withArgs(bn(0), accounts[sheriff4].address, initialRewardsPool)
                     .to.emit(hunters.contract, "TransferSingle")
-                    .withArgs(accounts[deployer].address, ZERO_ADDRESS, accounts[sheriff4].address, bn(0), bn(1))
+                    .withArgs(accounts[deployer].address, ZERO_ADDRESS, accounts[sheriff4].address, bn(0), initialRewardsPool)
 
                 expect(await hunters.contract.rewardPool(bn(0))).to.be.equal(initialRewardsPool)
             })
@@ -556,7 +556,7 @@ describe('WalletHuntersV2', function () {
                     .to.emit(hunters.contract, 'NewWantedList')
                     .withArgs(wantedListId1, accounts[sheriff5].address, rewardPool1)
                     .to.emit(hunters.contract, "TransferSingle")
-                    .withArgs(accounts[sheriff5].address, ZERO_ADDRESS, accounts[sheriff5].address, wantedListId1, bn(1))
+                    .withArgs(accounts[sheriff5].address, ZERO_ADDRESS, accounts[sheriff5].address, wantedListId1, rewardPool1)
 
                 expect((await hunters.contract.wantedLists([wantedListId1]))[0]?.sheriff)
                         .to.be.equal(accounts[sheriff5].address)
@@ -565,7 +565,7 @@ describe('WalletHuntersV2', function () {
                     .to.be.equal(rewardPool1)
 
                 expect(await hunters.contract['balanceOf(address,uint256)'](accounts[sheriff5].address, wantedListId1))
-                    .to.be.equal(bn(1))
+                    .to.be.equal(rewardPool1)
             })
 
             it('Sheriff cant submit wanted list twice', async function () {

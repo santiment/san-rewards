@@ -73,9 +73,8 @@ interface IWalletHuntersV2 {
     event ReplenishedRewardPool(uint256 indexed wantedListId, uint256 amount);
 
     /**
-     * @dev        Submit a new wallet request. Increment request id and return it. Counter starts
-     *             from 0. Request automatically moved in active state, see enum #State. Caller must
-     *             be hunter. Emit #NewWalletRequest.
+     * @dev        Submit a new wallet request. Request automatically moved in active state,
+     *             see enum #State. Caller must be hunter. Emit #NewWalletRequest.
      * @param      requestId     The request identifier
      * @param      wantedListId  The wanted list identifier
      * @param      hunter        The hunter address, which will get reward.
@@ -87,8 +86,7 @@ interface IWalletHuntersV2 {
     ) external;
 
     /**
-     * @dev        Submit a new wanted list. Increment wanted list id and return it. Wanted list id
-     *             is used for submiting new request.
+     * @dev        Submit a new wanted list. Wanted list id is used for submiting new request.
      * @param      wantedListId  The wanted list identifier
      * @param      sheriff       The sheriff address
      * @param      reward        The initial reward pool

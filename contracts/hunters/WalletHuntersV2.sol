@@ -66,7 +66,6 @@ contract WalletHuntersV2 is
 
     struct WantedList {
         address sheriff;
-        uint256 rewardPool;
         uint256 configurationIndex;
     }
 
@@ -82,7 +81,7 @@ contract WalletHuntersV2 is
     IERC20Upgradeable public stakingToken;
 
     uint256 public rewardsPool; // deprecated
-    CountersUpgradeable.Counter private _requestCounter; // deprecated
+    CountersUpgradeable.Counter private _requestCounter; // deprecated TODO check last counter
     mapping(uint256 => Request) private _requests;
     mapping(uint256 => RequestVoting) private _requestVotings;
     mapping(address => EnumerableSetUpgradeable.UintSet)
@@ -171,10 +170,9 @@ contract WalletHuntersV2 is
         WantedList storage _wantedList = _wantedLists[wantedListId];
 
         _wantedList.sheriff = sheriff;
-        _wantedList.rewardPool = reward;
         _wantedList.configurationIndex = _currentConfigurationIndex();
 
-        _mint(sheriff, wantedListId, 1, "");
+        _mint(sheriff, wantedListId, reward, "");
 
         stakingToken.safeTransferFrom(sheriff, address(this), reward);
 
@@ -195,10 +193,9 @@ contract WalletHuntersV2 is
         WantedList storage _wantedList = _wantedLists[wantedListId];
 
         _wantedList.sheriff = sheriff;
-        _wantedList.rewardPool = rewardsPool;
         _wantedList.configurationIndex = _currentConfigurationIndex();
 
-        _mint(sheriff, wantedListId, 1, "");
+        _mint(sheriff, wantedListId, rewardsPool, "");
 
         emit NewWantedList(wantedListId, sheriff, rewardsPool);
     }
@@ -212,12 +209,8 @@ contract WalletHuntersV2 is
             _wantedLists[wantedListId].sheriff == _msgSender(),
             "Sender must be sheriff"
         );
-        require(
-            _balances[wantedListId][_msgSender()] > 0,
-            "Sheriff don't own wanted list"
-        );
 
-        _wantedLists[wantedListId].rewardPool += amount;
+        _mint(_wantedLists[wantedListId].sheriff, wantedListId, amount, "");
 
         stakingToken.safeTransferFrom(
             _wantedLists[wantedListId].sheriff,
@@ -342,7 +335,7 @@ contract WalletHuntersV2 is
 
             uint256 wantedListId = _requests[requestId].configurationIndex;
 
-            _wantedLists[wantedListId].rewardPool -= reward;
+            _burn(_wantedLists[wantedListId].sheriff, wantedListId, reward);
             totalReward += reward;
 
             claimsCounter++;
@@ -512,7 +505,7 @@ contract WalletHuntersV2 is
 
         uint256 wantedListId = _requests[requestId].configurationIndex;
         proposal.wantedListId = wantedListId;
-        proposal.rewardPool = _wantedLists[wantedListId].rewardPool;
+        proposal.rewardPool = balanceOf(_wantedLists[wantedListId].sheriff, wantedListId);
 
         uint256 configurationIndex = _wantedLists[wantedListId]
         .configurationIndex;
@@ -555,7 +548,7 @@ contract WalletHuntersV2 is
 
         wantedList.wantedListId = wantedListId;
         wantedList.sheriff = _wantedLists[wantedListId].sheriff;
-        wantedList.rewardPool = _wantedLists[wantedListId].rewardPool;
+        wantedList.rewardPool = balanceOf(_wantedLists[wantedListId].sheriff, wantedListId);
 
         uint256 configurationIndex = _wantedLists[wantedListId]
         .configurationIndex;
@@ -743,7 +736,7 @@ contract WalletHuntersV2 is
         onlyWantedListIdExists(wantedListId)
         returns (uint256)
     {
-        return _wantedLists[wantedListId].rewardPool;
+        return balanceOf(_wantedLists[wantedListId].sheriff, wantedListId);
     }
 
     function lockedBalance(address user)
@@ -1287,13 +1280,26 @@ contract WalletHuntersV2 is
     }
 
     function _beforeTokenTransfer(
-        address operator,
+        address,
         address from,
         address to,
         uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal {}
+        uint256[] memory,
+        bytes memory
+    ) internal {
+        if (from == address(0)) {
+            // mint
+            return;
+        }
+        if (to == address(0)) {
+            // burn
+            return;
+        }
+
+        for (uint256 i = 0; i < ids.length; i++) {
+            require(_wantedLists[ids[i]].sheriff == address(0), "Sheriff can't transfer wanted list");
+        }
+    }
 
     /* ERC1155 implementation END */
 }
