@@ -72,7 +72,7 @@ contract WalletHuntersV2 is
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
     uint256 public constant VERSION = 2;
     uint256 public constant INITIAL_WANTED_LIST_ID = 0;
-    uint256 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     bytes16 private constant alphabet = "0123456789abcdef";
     string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
@@ -1317,7 +1317,7 @@ contract WalletHuntersV2 is
         uint256[] memory ids,
         uint256[] memory,
         bytes memory
-    ) internal {
+    ) internal view {
         if (from == address(0)) {
             // mint
             return;
