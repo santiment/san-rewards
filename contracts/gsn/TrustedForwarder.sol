@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.7.6;
+pragma abicoder v2;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
@@ -18,7 +19,7 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
 
     event ForwardRequestExecuted(
         address indexed from,
-        uint256 nonce,
+        uint256 indexed nonce,
         bool success,
         bytes returnData
     );
@@ -27,9 +28,13 @@ contract TrustedForwarder is MinimalForwarder, AccessControl {
 
     event UnregisteredContracts(address[] contracts);
 
+    modifier onlyRole(bytes32 role) {
+        require(hasRole(role, _msgSender()), "Access denied");
+        _;
+    }
+
     constructor(address relayer) MinimalForwarder("TrustedForwarder", "2.0.0") {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _setupRole(RELAYER_ROLE, _msgSender());
         _setupRole(RELAYER_ROLE, relayer);
     }
 

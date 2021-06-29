@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.7.6;
 
 interface IMerkleDistributor {
     event Claimed(uint256 index, address account, uint256 amount);

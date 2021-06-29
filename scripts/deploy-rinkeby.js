@@ -9,7 +9,9 @@ async function main() {
     const tokenAddress = "0xd0e3d08eddc77399f818f8888f5d8a2a9661e22d"
     const relayerAddress = "0xb6ec2f67a9b7816462cd1a665d314838f92ac3ea"
     const [admin] = await ethers.getSigners()
+}
 
+async function deployForwarder(relayerAddress) {
     const TrustedForwarder = await ethers.getContractFactory("TrustedForwarder")
     const forwarder = await TrustedForwarder.deploy(relayerAddress)
     await forwarder.deployed()
@@ -20,6 +22,9 @@ async function main() {
         network: "rinkeby",
         description: "TrustedForwarder V2",
     })
+}
+
+async function deployHunters(admin, forwarder, tokenAddress) {
 
     const votingDuration = bn(60 * 60) // 1 hour
     const sheriffsRewardShare = bn(20 * 100) // 20%
@@ -49,15 +54,21 @@ async function main() {
         description: "WalletHunters",
     })
 
+    return hunters
+}
+
+async function upgradeHunters(hunters) {
     const WalletHuntersV2 = await ethers.getContractFactory('WalletHuntersV2')
     hunters = await upgrades.upgradeProxy(hunters.address, WalletHuntersV2)
 
     await saveContract({
-        name: 'WalletHuntersV2',
-        address: hunters.address,
-        network: "rinkeby",
-        description: "WalletHunters V2",
+       name: 'WalletHuntersV2',
+       address: hunters.address,
+       network: "rinkeby",
+       description: "WalletHunters V2",
     })
+
+    return hunters
 }
 
 main()

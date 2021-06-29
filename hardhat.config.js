@@ -6,7 +6,8 @@ require('@nomiclabs/hardhat-solhint')
 
 require('@openzeppelin/hardhat-upgrades')
 
-require('hardhat-abi-exporter')
+require('@eth-optimism/hardhat-ovm')
+
 require('hardhat-gas-reporter')
 require('hardhat-contract-sizer')
 
@@ -26,11 +27,18 @@ module.exports = {
             gasPrice: 'auto',
             gasMultiplier: 1,
             loggingEnabled: true
-        }
+        },
+
+        optimism: {
+            url: 'http://127.0.0.1:8545',
+            accounts: { mnemonic },
+            gasPrice: 0,
+            ovm: true
+        },
     },
 
     solidity: {
-        version: '0.8.3',
+        version: '0.7.6',
         settings: {
             optimizer: {
                 enabled: true,
@@ -39,10 +47,8 @@ module.exports = {
         },
     },
 
-    abiExporter: {
-      path: './abi',
-      flat: true,
-      only: ['WalletHunters', 'WalletHuntersV2', 'TrustedForwarder', "IERC20Metadata"],
+    ovm: {
+        solcVersion: '0.7.6'
     },
 
     etherscan: {
