@@ -194,20 +194,6 @@ interface IWalletHunters {
     function claimRewards(address user, uint256 amountClaims) external;
 
     /**
-     * @dev        Wallet hunters configuration at specific index
-     * @param      index specific id
-     */
-    function configurationAt(uint256 index)
-        external
-        view
-        returns (
-            uint256 votingDuration,
-            uint256 sheriffsRewardShare,
-            uint256 fixedSheriffReward,
-            uint256 minimalVotesForRequest
-        );
-
-    /**
      * @dev        Add wallet hunters configuration. Must have access role. Emit
      *             #ConfigurationChanged.
      * @param      _votingDuration       The voting duration for next request.
@@ -220,14 +206,6 @@ interface IWalletHunters {
         uint256 _sheriffsRewardShare,
         uint256 _fixedSheriffReward
     ) external;
-
-    /**
-     * @dev        Sum up amount of reward tokens that user can claim for request as hunter or
-     * sheriff. Will be used only requests that has not active state.
-     * @param      user  The user address
-     * @return     amount of reward tokens
-     */
-    function userRewards(address user) external view returns (uint256);
 
     /**
      * @dev        Get amount of reward tokens that hunter can claim for request. Request must have

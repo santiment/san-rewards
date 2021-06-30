@@ -26,7 +26,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable {
     IERC20Upgradeable public stakingToken;
     address public admin;
 
-    Configuration[] private _configurations;
+    Configuration[] public _configurations;
 
     mapping(uint256 => Proposal) public _proposals;
     mapping(uint256 => WantedList) public _wantedLists;
@@ -257,13 +257,13 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable {
         external
         override
         onlyProposalIdExists(proposalId)
+        whenVoting(proposalId)
     {
         uint256 wantedListId = _proposals[proposalId].wantedListId;
         require(
             _wantedLists[wantedListId].sheriff == _msgSender(),
             "Sender not sheriff"
         );
-        require(_votingState(proposalId), "Voting finished");
 
         _proposals[proposalId].discarded = true;
 
@@ -407,35 +407,6 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable {
         );
     }
 
-    function userRewards(address user)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        uint256 totalReward = 0;
-
-        for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
-            uint256 proposalId = _activeRequests[user].at(i);
-
-            if (_votingState(proposalId)) {
-                // voting is not finished
-                continue;
-            }
-
-            uint256 reward;
-            if (_proposals[proposalId].hunter == user) {
-                reward = hunterReward(proposalId);
-            } else {
-                reward = sheriffReward(user, proposalId);
-            }
-
-            totalReward = totalReward.add(reward);
-        }
-
-        return totalReward;
-    }
-
     function hunterReward(uint256 proposalId)
         public
         view
@@ -477,11 +448,12 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable {
         int256 votes = _sheriffVotes[proposalId][sheriff].amount;
 
         if (walletApproved && votes > 0) {
+            uint256 totalVotes = _requestVotings[proposalId].votesFor;
+
             uint256 wantedListId = _proposals[proposalId].wantedListId;
-            uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
             uint256 reward = _wantedLists[wantedListId].proposalReward;
 
-            uint256 totalVotes = _requestVotings[proposalId].votesFor;
+            uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
             uint256 sheriffsRewardShare = _configurations[configurationIndex].sheriffsRewardShare;
             uint256 fixedSheriffReward = _configurations[configurationIndex].fixedSheriffReward;
 
@@ -530,25 +502,6 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable {
         return _activeRequests[user].length();
     }
 
-    function configurationAt(uint256 index)
-        external
-        view
-        override
-        returns (
-            uint256 votingDuration,
-            uint256 sheriffsRewardShare,
-            uint256 fixedSheriffReward,
-            uint256 minimalVotesForRequest
-        )
-    {
-        require(index < _configurations.length, "Configuration not exist");
-
-        sheriffsRewardShare = _configurations[index].sheriffsRewardShare;
-        fixedSheriffReward = _configurations[index].fixedSheriffReward;
-        minimalVotesForRequest = _configurations[index].minimalVotesForRequest;
-        votingDuration = _configurations[index].votingDuration;
-    }
-
     function isSheriff(address sheriff) public view override returns (bool) {
         return _isSheriff(sheriff);
     }
@@ -575,19 +528,12 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable {
     {
         for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
             uint256 proposalId = _activeRequests[user].at(i);
-            if (!_votingState(proposalId)) {
+            if (!_votingState(proposalId) || _proposals[proposalId].hunter == user) {
                 // voting finished
                 continue;
             }
 
-            if (_proposals[proposalId].hunter == user) {
-                // hunter not lock
-                continue;
-            }
-
-            uint256 votes = uint256(
-                abs(_sheriffVotes[proposalId][user].amount)
-            );
+            uint256 votes = uint256(abs(_sheriffVotes[proposalId][user].amount));
 
             locked = votes > locked ? votes : locked;
         }
