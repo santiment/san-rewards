@@ -4,7 +4,7 @@ pragma solidity 0.7.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 
-import "../IMerkleDistributor.sol";
+import "./IMerkleDistributor.sol";
 import "../utils/UintBitmap.sol";
 
 contract MerkleDistributor is IMerkleDistributor {

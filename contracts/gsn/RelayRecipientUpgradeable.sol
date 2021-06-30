@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.6;
 
-import "../utils/Initializable.sol";
-import "../utils/ContextUpgradeable.sol";
+import "../openzeppelin/Initializable.sol";
+import "../openzeppelin/ContextUpgradeable.sol";
 
 abstract contract RelayRecipientUpgradeable is Initializable, ContextUpgradeable {
 
     address private _trustedForwarder;
 
     function __RelayRecipientUpgradeable_init() internal initializer {
+        __Context_init_unchained();
+
         __RelayRecipientUpgradeable_init_unchained();
     }
 
