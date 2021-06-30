@@ -149,13 +149,6 @@ interface IWalletHunters {
     function withdraw(address sheriff, uint256 amount) external;
 
     /**
-     * @dev        Combine two invokes #claimRewards and #withdraw.
-     * @param      sheriff       The sheriff address
-     * @param      amountClaims  The amount of claims
-     */
-    function exit(address sheriff, uint256 amountClaims) external;
-
-    /**
      * @dev        Return wallet requests that user participates at this time as sheriff or hunter.
      * Request can be in voting or finished state.
      * @param      user         The user address

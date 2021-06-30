@@ -2,7 +2,6 @@
 pragma solidity 0.7.6;
 
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/math/MathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
@@ -272,20 +271,14 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable {
 
     function withdraw(address sheriff, uint256 amount) public override {
         require(sheriff == _msgSender(), "Sender not sheriff");
-        uint256 available = balanceOf(sheriff, STAKING_TOKEN_ID).sub(
-            lockedBalance(sheriff)
-        );
+        uint256 available = balanceOf(sheriff, STAKING_TOKEN_ID)
+            .sub(lockedBalance(sheriff));
         require(amount <= available, "Withdraw exceeds balance");
 
         _burn(sheriff, STAKING_TOKEN_ID, amount);
         require(stakingToken.transfer(sheriff, amount), "Transfer fail");
 
         emit Withdrawn(sheriff, amount);
-    }
-
-    function exit(address sheriff, uint256 amountClaims) external override {
-        claimRewards(sheriff, amountClaims);
-        withdraw(sheriff, balanceOf(sheriff, STAKING_TOKEN_ID));
     }
 
     function claimRewards(address user, uint256 amountClaims) public override {
@@ -463,7 +456,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable {
                 .mul(sheriffsRewardShare)
                 .div(MAX_PERCENT);
 
-            return MathUpgradeable.max(actualReward, fixedSheriffReward);
+            return actualReward >= fixedSheriffReward ? actualReward : fixedSheriffReward;
         } else if (!walletApproved && votes < 0) {
             uint256 wantedListId = _proposals[proposalId].wantedListId;
             uint256 configurationIndex = _wantedLists[wantedListId].configurationIndex;
