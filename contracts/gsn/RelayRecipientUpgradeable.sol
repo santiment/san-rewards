@@ -4,8 +4,10 @@ pragma solidity 0.7.6;
 import "../openzeppelin/Initializable.sol";
 import "../openzeppelin/ContextUpgradeable.sol";
 
-abstract contract RelayRecipientUpgradeable is Initializable, ContextUpgradeable {
-
+abstract contract RelayRecipientUpgradeable is
+    Initializable,
+    ContextUpgradeable
+{
     address private _trustedForwarder;
 
     function __RelayRecipientUpgradeable_init() internal initializer {
@@ -21,7 +23,12 @@ abstract contract RelayRecipientUpgradeable is Initializable, ContextUpgradeable
 
     event TrustedForwarderChanged(address previous, address current);
 
-    function isTrustedForwarder(address forwarder) public view virtual returns (bool) {
+    function isTrustedForwarder(address forwarder)
+        public
+        view
+        virtual
+        returns (bool)
+    {
         return forwarder == _trustedForwarder;
     }
 
@@ -31,7 +38,13 @@ abstract contract RelayRecipientUpgradeable is Initializable, ContextUpgradeable
         emit TrustedForwarderChanged(previousForwarder, trustedForwarder_);
     }
 
-    function _msgSender() internal view virtual override returns (address payable sender) {
+    function _msgSender()
+        internal
+        view
+        virtual
+        override
+        returns (address payable sender)
+    {
         if (isTrustedForwarder(msg.sender)) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.
             assembly {

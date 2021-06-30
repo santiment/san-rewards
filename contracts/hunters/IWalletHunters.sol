@@ -67,7 +67,10 @@ interface IWalletHunters {
 
     event UserRewardPaid(address indexed user, uint256 totalReward);
 
-    event RequestDiscarded(uint256 indexed proposalId, uint256 indexed wantedListId);
+    event RequestDiscarded(
+        uint256 indexed proposalId,
+        uint256 indexed wantedListId
+    );
 
     event ConfigurationAdded(
         uint256 indexed configurationIndex,
@@ -232,10 +235,7 @@ interface IWalletHunters {
      * @param      proposalId  The request id
      * @return     amount  of reward tokens. Return 0 if request was discarded
      */
-    function hunterReward(uint256 proposalId)
-        external
-        view
-        returns (uint256);
+    function hunterReward(uint256 proposalId) external view returns (uint256);
 
     /**
      * @dev        Get amount of reward tokens that sheriff can claim for request. Request must have
@@ -267,5 +267,8 @@ interface IWalletHunters {
      * @dev        Get reward pool for wanted list
      * @param      wantedListId  The wanted list id
      */
-    function wantedListRewardPool(uint256 wantedListId) external view returns (uint256);
+    function wantedListRewardPool(uint256 wantedListId)
+        external
+        view
+        returns (uint256);
 }
