@@ -29,11 +29,22 @@ module.exports = {
             loggingEnabled: true
         },
 
-        optimism: {
-            url: 'http://127.0.0.1:8545',
+        kovan: {
+            url: `https://rinkeby.infura.io/v3/${infuraKey}`,
+            chainId: 4,
             accounts: { mnemonic },
-            gasPrice: 0,
-            ovm: true
+            gas: 'auto',
+            gasPrice: 'auto',
+            gasMultiplier: 1,
+            loggingEnabled: true
+        },
+
+        'optimistic-kovan': {
+            url: `https://optimism-kovan.infura.io/v3/${infuraKey}`,
+            accounts: { mnemonic },
+            ovm: true,
+            gasPrice: 15000000,
+            gas: 5_000_000
         },
     },
 

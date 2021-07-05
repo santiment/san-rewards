@@ -6,9 +6,24 @@ const token = (n) => ethers.utils.parseUnits(n)
 
 async function main() {
 
-    const tokenAddress = "0xd0e3d08eddc77399f818f8888f5d8a2a9661e22d"
-    const relayerAddress = "0xb6ec2f67a9b7816462cd1a665d314838f92ac3ea"
     const [admin] = await ethers.getSigners()
+    const proxyAdmin = '0x6356dc8C49599490A804E38d6f7E02F0818D4900'
+    const token = '0x3711466D711Cf0D2E3B721a4fA07419c2F7aA3af'
+
+    await deployHunters(admin, proxyAdmin, token)
+}
+
+async function deployProxyAdmin() {
+    const ProxyAdmin = await ethers.getContractFactory("ProxyAdmin")
+    const proxyAdmin = await ProxyAdmin.deploy()
+    await proxyAdmin.deployed()
+
+    await saveContract({
+        name: 'ProxyAdmin',
+        address: proxyAdmin.address,
+    })
+
+    return proxyAdmin
 }
 
 async function deployForwarder(relayerAddress) {
@@ -19,39 +34,47 @@ async function deployForwarder(relayerAddress) {
     await saveContract({
         name: 'TrustedForwarder',
         address: forwarder.address,
-        network: "rinkeby",
-        description: "TrustedForwarder V2",
     })
 }
 
-async function deployHunters(admin, forwarder, tokenAddress) {
+async function deployToken() {
+    const RealTokenMock = await ethers.getContractFactory('RealTokenMock')
+    const token = await RealTokenMock.deploy(1_000_000_000)
+    await token.deployed()
 
+    await saveContract({
+        name: 'RealTokenMock',
+        address: token.address,
+    })
+
+    return token
+}
+
+async function deployHunters(admin, proxyAdmin, tokenAddress) {
     const votingDuration = bn(60 * 60) // 1 hour
     const sheriffsRewardShare = bn(20 * 100) // 20%
     const fixedSheriffReward = token(`10`)
-    const minimalVotesForRequest = token(`150`)
-    const minimalDepositForSheriff = token(`50`)
-    const requestReward = token(`300`)
 
     const WalletHunters = await ethers.getContractFactory('WalletHunters')
-    let hunters = await upgrades.deployProxy(WalletHunters, [
+    const huntersImpl = await WalletHunters.deploy()
+    await huntersImpl.deployed()
+
+    const TransparentUpgradeableProxy = await ethers.getContractFactory('TransparentUpgradeableProxy')
+    const initialize = await huntersImpl.interface.encodeFunctionData('initialize', [
         admin.address,
-        forwarder.address,
         tokenAddress,
+        "https://example.com/token/{id}",
         votingDuration,
         sheriffsRewardShare,
         fixedSheriffReward,
-        minimalVotesForRequest,
-        minimalDepositForSheriff,
-        requestReward
     ])
+    const hunters = await TransparentUpgradeableProxy.deploy(huntersImpl.address, proxyAdmin, initialize)
     await hunters.deployed()
 
     await saveContract({
         name: 'WalletHunters',
         address: hunters.address,
-        network: "rinkeby",
-        description: "WalletHunters",
+        addressImpl: huntersImpl.address
     })
 
     return hunters
@@ -64,8 +87,6 @@ async function upgradeHunters(hunters) {
     await saveContract({
        name: 'WalletHuntersV2',
        address: hunters.address,
-       network: "rinkeby",
-       description: "WalletHunters V2",
     })
 
     return hunters
