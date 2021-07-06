@@ -118,9 +118,9 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         emit NewWantedList(
             wantedListId,
             sheriff,
-            configurationIndex,
             proposalReward,
-            rewardPool
+            rewardPool,
+            configurationIndex
         );
     }
 
@@ -547,8 +547,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         for (uint256 i = 0; i < ids.length; i = i.add(1)) {
             if (from != address(0) && to != address(0)) {
                 require(
-                    ids[i] != STAKING_TOKEN_ID &&
-                        wantedLists[ids[i]].sheriff == address(0),
+                    proposals[ids[i]].hunter != address(0),
                     "Transfer protection"
                 );
             }

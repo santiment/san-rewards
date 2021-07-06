@@ -49,9 +49,9 @@ interface IWalletHunters {
     event NewWantedList(
         uint256 indexed wantedListId,
         address indexed sheriff,
-        uint256 configurationIndex,
         uint256 proposalReward,
-        uint256 rewardPool
+        uint256 rewardPool,
+        uint256 configurationIndex
     );
 
     event Staked(address indexed sheriff, uint256 amount);
