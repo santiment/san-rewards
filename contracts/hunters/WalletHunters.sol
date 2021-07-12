@@ -367,6 +367,40 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         }
     }
 
+    function withdrawRemainingRewardPool(address sheriff, uint256 wantedListId) external override {
+        require(_msgSender() == sheriff, "Sender must be sheriff");
+        require(wantedLists[wantedListId].sheriff == sheriff, "Sheriff invalid");
+
+        uint256 amountDeclinedProposals = 0;
+
+        for (uint256 i = _wantedListSlots[wantedListId].length(); i > 0; i = i.sub(1)) {
+            uint256 _proposalId = _wantedListSlots[wantedListId].at(i.sub(1));
+
+            State state = _proposalState(_proposalId);
+            _saveProposalState(_proposalId, state);
+            if (state == State.DECLINED) {
+                amountDeclinedProposals = amountDeclinedProposals.add(1);
+            }
+        }
+
+        uint256 leftProposals = 0;
+
+        if (block.timestamp >= wantedLists[wantedListId].finishTime) {
+            leftProposals = wantedLists[wantedListId].amountProposals - _wantedListSlots[wantedListId].length();
+        }
+
+        uint256 withdrawAmount = wantedLists[wantedListId].proposalReward
+            .mul(MAX_PERCENT.sub(uint256(wantedLists[wantedListId].sheriffsRewardShare)))
+            .div(MAX_PERCENT)
+            .mul(amountDeclinedProposals)
+            .add(wantedLists[wantedListId].proposalReward.mul(leftProposals));
+
+        if (withdrawAmount > 0) {
+            _burn(sheriff, wantedListId, withdrawAmount);
+            require(stakingToken.transfer(sheriff, withdrawAmount), "Transfer fail");
+        }
+    }
+
     function activeRequests(
         address user,
         uint256 startIndex,
