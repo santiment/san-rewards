@@ -6,6 +6,7 @@ interface IWalletHunters {
         ACTIVE,
         APPROVED,
         DECLINED,
+        INSUFFICIENTED,
         DISCARDED
     }
 
@@ -13,20 +14,16 @@ interface IWalletHunters {
         address hunter;
         uint256 finishTime;
         uint256 wantedListId;
-        bool discarded;
+        State state;
     }
 
     struct WantedList {
         address sheriff;
         uint256 proposalReward;
-        uint256 configurationIndex;
-    }
-
-    struct Configuration {
-        uint256 votingDuration;
-        uint256 sheriffsRewardShare;
-        uint256 fixedSheriffReward;
-        uint256 minimalVotesForRequest;
+        uint256 finishTime;
+        uint16 amountProposals;
+        uint16 sheriffsRewardShare;
+        uint32 votingDuration;
     }
 
     struct RequestVoting {
@@ -38,7 +35,7 @@ interface IWalletHunters {
         int256 amount;
     }
 
-    event NewWalletRequest(
+    event NewProposal(
         uint256 indexed proposalId,
         uint256 indexed wantedListId,
         address indexed hunter,
@@ -50,8 +47,11 @@ interface IWalletHunters {
         uint256 indexed wantedListId,
         address indexed sheriff,
         uint256 proposalReward,
-        uint256 rewardPool,
-        uint256 configurationIndex
+        uint256 creationTime,
+        uint256 finishTime,
+        uint16 amountProposals,
+        uint16 sheriffsRewardShare,
+        uint32 votingDuration
     );
 
     event Staked(address indexed sheriff, uint256 amount);
@@ -72,42 +72,36 @@ interface IWalletHunters {
         uint256 indexed wantedListId
     );
 
-    event ConfigurationAdded(
-        uint256 indexed configurationIndex,
-        uint256 votingDuration,
-        uint256 sheriffsRewardShare,
-        uint256 fixedSheriffReward
-    );
-
-    event ReplenishedRewardPool(uint256 indexed wantedListId, uint256 amount);
-
     /**
-     * @dev        Submit a new wallet request. Request automatically moved in active state,
-     *             see enum #State. Caller must be hunter. Emit #NewWalletRequest.
-     * @param      proposalId     The request identifier
-     * @param      wantedListId  The wanted list identifier
+     * @dev        Submit a new wallet request. Request automatically moved in active state, see
+     *             enum #State. Caller must be hunter. Emit #NewWalletRequest.
      * @param      hunter        The hunter address, which will get reward.
+     * @param      proposalId    The request identifier
+     * @param      wantedListId  The wanted list identifier
      */
-    function submitRequest(
+    function submitProposal(
+        address hunter,
         uint256 proposalId,
-        uint256 wantedListId,
-        address hunter
+        uint256 wantedListId
     ) external;
 
     /**
      * @dev        Submit a new wanted list. Wanted list id is used for submiting new request.
-     * @param      wantedListId        The wanted list id
-     * @param      sheriff             The sheriff address
-     * @param      proposalReward      The proposal reward
-     * @param      rewardPool          The initial reward pool
-     * @param      configurationIndex  The configuration index
+     * @param      sheriff              The sheriff address
+     * @param      wantedListId         The wanted list id
+     * @param      deadlinePeriod       The deadline period, after which wanted list is ended
+     * @param      proposalReward       The proposal reward
+     * @param      amountProposals      The proposals limit
+     * @param      sheriffsRewardShare  The sheriffs reward share
      */
     function submitWantedList(
-        uint256 wantedListId,
         address sheriff,
+        uint256 wantedListId,
+        uint256 deadlinePeriod,
         uint256 proposalReward,
-        uint256 rewardPool,
-        uint256 configurationIndex
+        uint16 amountProposals,
+        uint16 sheriffsRewardShare,
+        uint32 votingDuration
     ) external;
 
     /**
@@ -171,13 +165,6 @@ interface IWalletHunters {
     function activeRequestsLength(address user) external view returns (uint256);
 
     /**
-     * @dev        Replinish reward pool for wanted list using staking tokens.
-     * @param      wantedListId    The wanted list id
-     * @param      amount          The amount of tokens
-     */
-    function replenishRewardPool(uint256 wantedListId, uint256 amount) external;
-
-    /**
      * @dev        Claim hunter and sheriff rewards. Mint reward tokens. Should be used all
      * available request ids in not active state for user, even if #hunterReward equal 0 for
      * specific request id. Emit #UserRewardPaid. Remove proposalIds from #activeRequests set.
@@ -185,20 +172,6 @@ interface IWalletHunters {
      * @param      amountClaims   The amount of claims
      */
     function claimRewards(address user, uint256 amountClaims) external;
-
-    /**
-     * @dev        Add wallet hunters configuration. Must have access role. Emit
-     *             #ConfigurationChanged.
-     * @param      _votingDuration       The voting duration for next request.
-     * @param      _sheriffsRewardShare  The sheriffs reward share for next request.
-     * @param      _fixedSheriffReward   The fixed sheriff reward in case of disapprove request for
-     *                                   next request.
-     */
-    function addConfiguration(
-        uint256 _votingDuration,
-        uint256 _sheriffsRewardShare,
-        uint256 _fixedSheriffReward
-    ) external;
 
     /**
      * @dev        Get amount of reward tokens that hunter can claim for request. Request must have
@@ -233,13 +206,4 @@ interface IWalletHunters {
      * @param      sheriff  The user address
      */
     function isSheriff(address sheriff) external view returns (bool);
-
-    /**
-     * @dev        Get reward pool for wanted list
-     * @param      wantedListId  The wanted list id
-     */
-    function wantedListRewardPool(uint256 wantedListId)
-        external
-        view
-        returns (uint256);
 }

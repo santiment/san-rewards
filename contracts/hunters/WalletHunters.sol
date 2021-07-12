@@ -20,11 +20,10 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
     uint256 public constant STAKING_TOKEN_ID = 0;
     uint256 public constant MINIMAL_STAKE = 50 ether;
+    uint256 public constant FIXED_SHERIFF_REWARD = 10 ether;
     uint256 public constant MINIMAL_VOTES = MINIMAL_STAKE * 2;
 
     IERC20Upgradeable public stakingToken;
-
-    Configuration[] public _configurations;
 
     mapping(uint256 => Proposal) public proposals;
     mapping(uint256 => WantedList) public wantedLists;
@@ -32,6 +31,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
 
     mapping(uint256 => mapping(address => SheriffVote)) private _sheriffVotes;
     mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
+    mapping(uint256 => EnumerableSetUpgradeable.UintSet) private _wantedListSlots;
 
     modifier onlyProposalIdExists(uint256 id) {
         require(proposals[id].hunter != address(0), "Id not exist");
@@ -54,12 +54,12 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     }
 
     modifier whenVoting(uint256 proposalId) {
-        require(_votingState(proposalId), "Voting finished");
+        require(_proposalState(proposalId) == State.ACTIVE, "Voting finished");
         _;
     }
 
     modifier whenVotingFinished(uint256 proposalId) {
-        require(!_votingState(proposalId), "Voting not finished");
+        require(_proposalState(proposalId) != State.ACTIVE, "Voting not finished");
         _;
     }
 
@@ -71,10 +71,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     function initialize(
         address admin_,
         address stakingToken_,
-        string calldata uri_,
-        uint256 votingDuration_,
-        uint256 sheriffsRewardShare_,
-        uint256 fixedSheriffReward_
+        string calldata uri_
     ) external initializer {
         __Context_init_unchained();
         __ERC165_init_unchained();
@@ -84,30 +81,26 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         _setupRole(MAYOR_ROLE, admin_);
 
         stakingToken = IERC20Upgradeable(stakingToken_);
-
-        _addConfiguration(
-            votingDuration_,
-            sheriffsRewardShare_,
-            fixedSheriffReward_
-        );
     }
 
     function submitWantedList(
-        uint256 wantedListId,
         address sheriff,
+        uint256 wantedListId,
+        uint256 deadlinePeriod,
         uint256 proposalReward,
-        uint256 rewardPool,
-        uint256 configurationIndex
+        uint16 amountProposals,
+        uint16 sheriffsRewardShare,
+        uint32 votingDuration
     ) external override onlyIdNotExists(wantedListId) onlySheriff(sheriff) {
         require(sheriff == _msgSender(), "Sender not sheriff");
-        require(
-            configurationIndex < _configurations.length,
-            "Configuration invalid"
-        );
+
+        uint256 finishTime = block.timestamp.add(deadlinePeriod);
+        uint256 rewardPool = proposalReward.mul(amountProposals);
 
         wantedLists[wantedListId].sheriff = sheriff;
         wantedLists[wantedListId].proposalReward = proposalReward;
-        wantedLists[wantedListId].configurationIndex = configurationIndex;
+        wantedLists[wantedListId].finishTime = finishTime;
+        wantedLists[wantedListId].amountProposals = amountProposals;
 
         _mint(sheriff, wantedListId, rewardPool, "");
         require(
@@ -119,60 +112,41 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
             wantedListId,
             sheriff,
             proposalReward,
-            rewardPool,
-            configurationIndex
+            block.timestamp,
+            finishTime,
+            amountProposals,
+            sheriffsRewardShare,
+            votingDuration
         );
     }
 
-    function submitRequest(
+    function submitProposal(
+        address hunter,
         uint256 proposalId,
-        uint256 wantedListId,
-        address hunter
+        uint256 wantedListId
     )
         external
         override
         onlyWantedListIdExists(wantedListId)
         onlyIdNotExists(proposalId)
     {
+        require(hunter == _msgSender(), "Sender must be hunter");
+        require(block.timestamp < wantedLists[wantedListId].finishTime, "Wanted list finished");
+        acquireWantedListSlot(wantedListId, proposalId);
         require(_activeRequests[hunter].add(proposalId), "Smth wrong");
 
-        uint256 configurationIndex = wantedLists[wantedListId].configurationIndex;
-        uint256 votingDuration = _configurations[configurationIndex].votingDuration;
-
-        proposals[proposalId].finishTime = block.timestamp.add(votingDuration);
+        proposals[proposalId].finishTime = block.timestamp.add(wantedLists[wantedListId].votingDuration);
         proposals[proposalId].hunter = hunter;
         proposals[proposalId].wantedListId = wantedListId;
+        // proposals[proposalId].state = STATE.ACTIVE; initial value
 
-        emit NewWalletRequest(
+        emit NewProposal(
             proposalId,
             wantedListId,
             hunter,
             block.timestamp,
             proposals[proposalId].finishTime
         );
-    }
-
-    function replenishRewardPool(uint256 wantedListId, uint256 amount)
-        external
-        override
-        onlySheriff(wantedLists[wantedListId].sheriff)
-    {
-        require(
-            wantedLists[wantedListId].sheriff == _msgSender(),
-            "Sender not sheriff"
-        );
-
-        _mint(wantedLists[wantedListId].sheriff, wantedListId, amount, "");
-        require(
-            stakingToken.transferFrom(
-                wantedLists[wantedListId].sheriff,
-                address(this),
-                amount
-            ),
-            "Transfer fail"
-        );
-
-        emit ReplenishedRewardPool(wantedListId, amount);
     }
 
     function stake(address sheriff, uint256 amount) external override {
@@ -227,7 +201,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
             "Sender not sheriff"
         );
 
-        proposals[proposalId].discarded = true;
+        proposals[proposalId].state = State.DISCARDED;
 
         emit RequestDiscarded(proposalId, wantedListId);
     }
@@ -257,7 +231,9 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         for (uint256 i = _activeRequests[user].length(); i > 0; i = i.sub(1)) {
             uint256 proposalId = _activeRequests[user].at(i.sub(1));
 
-            if (_votingState(proposalId)) {
+            State state = _proposalState(proposalId);
+            _saveProposalState(proposalId, state);
+            if (state == State.ACTIVE) {
                 // voting is not finished
                 continue;
             }
@@ -323,46 +299,23 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         emit UserRewardPaid(user, totalReward);
     }
 
-    function addConfiguration(
-        uint256 _votingDuration,
-        uint256 _sheriffsRewardShare,
-        uint256 _fixedSheriffReward
-    ) external override {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Acess denied");
+    function acquireWantedListSlot(uint256 wantedListId, uint256 proposalId) private {
 
-        _addConfiguration(
-            _votingDuration,
-            _sheriffsRewardShare,
-            _fixedSheriffReward
-        );
-    }
+        if (_wantedListSlots[wantedListId].length() == wantedLists[wantedListId].amountProposals) {
+            for (uint256 i = _wantedListSlots[wantedListId].length(); i > 0; i = i.sub(1)) {
+                uint256 _proposalId = _wantedListSlots[wantedListId].at(i.sub(1));
 
-    function _addConfiguration(
-        uint256 _votingDuration,
-        uint256 _sheriffsRewardShare,
-        uint256 _fixedSheriffReward
-    ) private {
-        require(
-            _votingDuration >= 10 minutes && _votingDuration <= 4 weeks,
-            "Voting duration invalid"
-        );
-        require(
-            _sheriffsRewardShare > 0 && _sheriffsRewardShare < MAX_PERCENT,
-            "Sheriff share too much"
-        );
+                State state = _proposalState(_proposalId);
+                _saveProposalState(_proposalId, state);
+                if (state == State.DECLINED || state == State.DISCARDED) {
+                    require(_wantedListSlots[wantedListId].remove(_proposalId), "Smth wrong");
+                    break;
+                }
+            }
+        }
 
-        Configuration storage _configuration = _configurations.push();
-
-        _configuration.votingDuration = _votingDuration;
-        _configuration.sheriffsRewardShare = _sheriffsRewardShare;
-        _configuration.fixedSheriffReward = _fixedSheriffReward;
-
-        emit ConfigurationAdded(
-            _configurations.length.sub(1),
-            _votingDuration,
-            _sheriffsRewardShare,
-            _fixedSheriffReward
-        );
+        require(_wantedListSlots[wantedListId].add(proposalId), "Smth wrong");
+        require(_wantedListSlots[wantedListId].length() <= wantedLists[wantedListId].amountProposals, "Limit reached");
     }
 
     function hunterReward(uint256 proposalId)
@@ -372,19 +325,14 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         whenVotingFinished(proposalId)
         returns (uint256)
     {
-        if (proposals[proposalId].discarded) {
+        State state = _proposalState(proposalId);
+        if (state == State.DISCARDED) {
             return 0;
         }
 
-        if (_walletApproved(proposalId)) {
-            uint256 wantedListId = proposals[proposalId].wantedListId;
-            uint256 configurationIndex = wantedLists[wantedListId].configurationIndex;
-            uint256 reward = wantedLists[wantedListId].proposalReward;
-
-            uint256 sheriffsRewardShare = _configurations[configurationIndex].sheriffsRewardShare;
-
-            return reward
-                .mul(MAX_PERCENT.sub(sheriffsRewardShare))
+        if (state == State.APPROVED) {
+            return wantedLists[proposals[proposalId].wantedListId].proposalReward
+                .mul(MAX_PERCENT.sub(uint256(wantedLists[proposals[proposalId].wantedListId].sheriffsRewardShare)))
                 .div(MAX_PERCENT);
         } else {
             return 0;
@@ -398,35 +346,22 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         whenVotingFinished(proposalId)
         returns (uint256)
     {
-        if (!_isEnoughVotes(proposalId) || proposals[proposalId].discarded) {
+        State state = _proposalState(proposalId);
+        if (state == State.DISCARDED || state == State.INSUFFICIENTED) {
             return 0;
         }
 
-        bool walletApproved = _walletApproved(proposalId);
         int256 votes = _sheriffVotes[proposalId][sheriff].amount;
 
-        if (walletApproved && votes > 0) {
-            uint256 totalVotes = requestVotings[proposalId].votesFor;
-
+        if (state == State.APPROVED && votes > 0 || state == State.DECLINED && votes < 0) {
+            uint256 totalVotes = votes > 0 ? requestVotings[proposalId].votesFor : requestVotings[proposalId].votesAgainst;
             uint256 wantedListId = proposals[proposalId].wantedListId;
-            uint256 reward = wantedLists[wantedListId].proposalReward;
 
-            uint256 configurationIndex = wantedLists[wantedListId].configurationIndex;
-            uint256 sheriffsRewardShare = _configurations[configurationIndex].sheriffsRewardShare;
-            uint256 fixedSheriffReward = _configurations[configurationIndex].fixedSheriffReward;
-
-            uint256 actualReward = reward
-                .mul(uint256(votes))
+            return wantedLists[wantedListId].proposalReward
+                .mul(uint256(abs(votes)))
                 .div(totalVotes)
-                .mul(sheriffsRewardShare)
+                .mul(uint256(wantedLists[wantedListId].sheriffsRewardShare))
                 .div(MAX_PERCENT);
-
-            return actualReward >= fixedSheriffReward ? actualReward : fixedSheriffReward;
-        } else if (!walletApproved && votes < 0) {
-            uint256 wantedListId = proposals[proposalId].wantedListId;
-            uint256 configurationIndex = wantedLists[wantedListId].configurationIndex;
-
-            return _configurations[configurationIndex].fixedSheriffReward;
         } else {
             return 0;
         }
@@ -468,16 +403,6 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         return balanceOf(sheriff, STAKING_TOKEN_ID) >= MINIMAL_STAKE;
     }
 
-    function wantedListRewardPool(uint256 wantedListId)
-        external
-        view
-        override
-        onlyWantedListIdExists(wantedListId)
-        returns (uint256)
-    {
-        return balanceOf(wantedLists[wantedListId].sheriff, wantedListId);
-    }
-
     function lockedBalance(address user)
         public
         view
@@ -486,7 +411,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     {
         for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
             uint256 proposalId = _activeRequests[user].at(i);
-            if (!_votingState(proposalId) || proposals[proposalId].hunter == user) {
+            if (_proposalState(proposalId) != State.ACTIVE || proposals[proposalId].hunter == user) {
                 // voting finished
                 continue;
             }
@@ -501,23 +426,36 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         return x >= 0 ? x : -x;
     }
 
-    function _votingState(uint256 proposalId) private view returns (bool) {
-        return _proposalState(proposalId) == State.ACTIVE;
-    }
-
-    function _proposalState(uint256 proposalId) private view returns (State) {
-        if (proposals[proposalId].discarded) {
-            return State.DISCARDED;
-        } else if (block.timestamp < proposals[proposalId].finishTime) {
-            return State.ACTIVE;
-        } else if (_walletApproved(proposalId)) {
-            return State.APPROVED;
-        } else {
-            return State.DECLINED;
+    function _saveProposalState(uint256 proposalId, State state) private {
+        if (proposals[proposalId].state != state) {
+            proposals[proposalId].state = state;
         }
     }
 
-    function _isEnoughVotes(uint256 proposalId) private view returns (bool) {
+    function _proposalState(uint256 proposalId) private view returns (State) {
+        if (proposals[proposalId].state != State.ACTIVE) {
+            return proposals[proposalId].state;
+        } else {
+            if (proposals[proposalId].state == State.DISCARDED) {
+                return State.DISCARDED;
+            } else if (_proposalVoting(proposalId)) {
+                return State.ACTIVE;
+            } else if (!_enoughVotes(proposalId)) {
+                return State.INSUFFICIENTED;
+            } else if (_walletApproved(proposalId)) {
+                return State.APPROVED;
+            } else {
+                return State.DECLINED;
+            }
+        }
+    }
+
+    function _proposalVoting(uint256 proposalId) private view returns (bool) {
+        return
+            block.timestamp < proposals[proposalId].finishTime;
+    }
+
+    function _enoughVotes(uint256 proposalId) private view returns (bool) {
         return
             requestVotings[proposalId].votesFor
                 .add(requestVotings[proposalId].votesAgainst) >= MINIMAL_VOTES;
@@ -528,7 +466,6 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
             .add(requestVotings[proposalId].votesAgainst);
 
         return
-            totalVotes >= MINIMAL_VOTES &&
             requestVotings[proposalId].votesFor
                 .mul(MAX_PERCENT)
                 .div(totalVotes) > SUPER_MAJORITY;
