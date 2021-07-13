@@ -8,9 +8,10 @@ async function main() {
 
     const [admin] = await ethers.getSigners()
     const proxyAdmin = '0x6356dc8C49599490A804E38d6f7E02F0818D4900'
-    const token = '0x3711466D711Cf0D2E3B721a4fA07419c2F7aA3af'
+    const l1Token = '0xb837728f114dc4be044151D4181c18d597cB365b'
+    const l2Token = '0x5a069773d764d1efbe4f3fF0E0F326a88E960240'
 
-    await deployHunters(admin, proxyAdmin, token)
+    await deployToken(l1Token)
 }
 
 async function deployProxyAdmin() {
@@ -37,13 +38,13 @@ async function deployForwarder(relayerAddress) {
     })
 }
 
-async function deployToken() {
-    const RealTokenMock = await ethers.getContractFactory('RealTokenMock')
-    const token = await RealTokenMock.deploy(1_000_000_000)
+async function deployToken(l1Token) {
+    const RealTokenL2 = await ethers.getContractFactory('RealTokenL2')
+    const token = await RealTokenL2.deploy(l1Token)
     await token.deployed()
 
     await saveContract({
-        name: 'RealTokenMock',
+        name: 'RealTokenL2',
         address: token.address,
     })
 
@@ -51,9 +52,6 @@ async function deployToken() {
 }
 
 async function deployHunters(admin, proxyAdmin, tokenAddress) {
-    const votingDuration = bn(60 * 60) // 1 hour
-    const sheriffsRewardShare = bn(20 * 100) // 20%
-    const fixedSheriffReward = token(`10`)
 
     const WalletHunters = await ethers.getContractFactory('WalletHunters')
     const huntersImpl = await WalletHunters.deploy()
@@ -64,9 +62,6 @@ async function deployHunters(admin, proxyAdmin, tokenAddress) {
         admin.address,
         tokenAddress,
         "https://example.com/token/{id}",
-        votingDuration,
-        sheriffsRewardShare,
-        fixedSheriffReward,
     ])
     const hunters = await TransparentUpgradeableProxy.deploy(huntersImpl.address, proxyAdmin, initialize)
     await hunters.deployed()

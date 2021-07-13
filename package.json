@@ -21,6 +21,7 @@
     ],
     "author": "Nail Khafizov <854297992c@gmail.com>",
     "devDependencies": {
+        "@eth-optimism/contracts": "^0.4.5",
         "@nomiclabs/hardhat-ethers": "^2.0.2",
         "@nomiclabs/hardhat-etherscan": "^2.1.2",
         "@nomiclabs/hardhat-solhint": "^2.0.0",
