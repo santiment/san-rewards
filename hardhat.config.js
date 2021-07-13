@@ -30,8 +30,8 @@ module.exports = {
         },
 
         kovan: {
-            url: `https://rinkeby.infura.io/v3/${infuraKey}`,
-            chainId: 4,
+            url: `https://kovan.infura.io/v3/${infuraKey}`,
+            chainId: 42,
             accounts: { mnemonic },
             gas: 'auto',
             gasPrice: 'auto',

@@ -8,7 +8,7 @@ async function main() {
 
     const [admin] = await ethers.getSigners()
     const proxyAdmin = '0x6356dc8C49599490A804E38d6f7E02F0818D4900'
-    const l1Token = '0xb837728f114dc4be044151D4181c18d597cB365b'
+    const l1Token = '0x529CCeB5E7C5271af5f0dcBfbD80bEb0EE3Ab7c8'
     const l2Token = '0x5a069773d764d1efbe4f3fF0E0F326a88E960240'
 
     await deployToken(l1Token)
