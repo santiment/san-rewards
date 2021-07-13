@@ -36,16 +36,16 @@ interface IWalletHunters {
     }
 
     event NewProposal(
+        address indexed hunter,
         uint256 indexed proposalId,
         uint256 indexed wantedListId,
-        address indexed hunter,
         uint256 creationTime,
         uint256 finishTime
     );
 
     event NewWantedList(
-        uint256 indexed wantedListId,
         address indexed sheriff,
+        uint256 indexed wantedListId,
         uint256 proposalReward,
         uint256 creationTime,
         uint256 finishTime,
@@ -59,8 +59,8 @@ interface IWalletHunters {
     event Withdrawn(address indexed sheriff, uint256 amount);
 
     event Voted(
-        uint256 indexed proposalId,
         address indexed sheriff,
+        uint256 indexed proposalId,
         uint256 amount,
         bool voteFor
     );
@@ -165,6 +165,12 @@ interface IWalletHunters {
     function activeRequestsLength(address user) external view returns (uint256);
 
     /**
+     * @dev        Sum up user reward from sherrifReward and hunterReward
+     * @param      user  The user address
+     */
+    function userRewards(address user) external view returns (uint256 totalReward);
+
+    /**
      * @dev        Claim hunter and sheriff rewards. Mint reward tokens. Should be used all
      * available request ids in not active state for user, even if #hunterReward equal 0 for
      * specific request id. Emit #UserRewardPaid. Remove proposalIds from #activeRequests set.
@@ -206,4 +212,12 @@ interface IWalletHunters {
      * @param      sheriff  The user address
      */
     function isSheriff(address sheriff) external view returns (bool);
+
+    /**
+     * @dev        Withdraw remaining reward pool from wanted list. Checking deadline period and
+     * declined proposals.
+     * @param      sheriff       The sheriff
+     * @param      wantedListId  The wanted list id
+     */
+    function withdrawRemainingRewardPool(address sheriff, uint256 wantedListId) external;
 }
