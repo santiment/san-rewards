@@ -11,7 +11,20 @@ async function main() {
     const l1Token = '0x529CCeB5E7C5271af5f0dcBfbD80bEb0EE3Ab7c8'
     const l2Token = '0xac47f49579c1Aabc231502007fA056635Fc7dDa8'
 
-    await deployHunters(admin, proxyAdmin, l2Token)
+    await deployAirdrop(l2Token, "0xddca499c86140df98f46c90a2e5ea54c61b460bb7b1955774c8a9c1157a91c4e")
+}
+
+async function deployAirdrop(token, merkleRoot) {
+    const MerkleDistributor = await ethers.getContractFactory("MerkleDistributor")
+    const merkleDistributor = await MerkleDistributor.deploy(token, merkleRoot)
+    await merkleDistributor.deployed()
+
+    await saveContract({
+        name: 'MerkleDistributor',
+        address: merkleDistributor.address,
+    })
+
+    return merkleDistributor
 }
 
 async function deployProxyAdmin() {

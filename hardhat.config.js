@@ -28,6 +28,15 @@ module.exports = {
             gasMultiplier: 1,
             loggingEnabled: true
         },
+        mainnet: {
+            url: `https://mainnet.infura.io/v3/${infuraKey}`,
+            chainId: 1,
+            accounts: { mnemonic },
+            gas: 'auto',
+            gasPrice: 'auto',
+            gasMultiplier: 1,
+            loggingEnabled: true
+        },
 
         kovan: {
             url: `https://kovan.infura.io/v3/${infuraKey}`,
