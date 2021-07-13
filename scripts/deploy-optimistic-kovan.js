@@ -9,9 +9,9 @@ async function main() {
     const [admin] = await ethers.getSigners()
     const proxyAdmin = '0x6356dc8C49599490A804E38d6f7E02F0818D4900'
     const l1Token = '0x529CCeB5E7C5271af5f0dcBfbD80bEb0EE3Ab7c8'
-    const l2Token = '0x5a069773d764d1efbe4f3fF0E0F326a88E960240'
+    const l2Token = '0xac47f49579c1Aabc231502007fA056635Fc7dDa8'
 
-    await deployToken(l1Token)
+    await deployHunters(admin, proxyAdmin, l2Token)
 }
 
 async function deployProxyAdmin() {
@@ -54,8 +54,9 @@ async function deployToken(l1Token) {
 async function deployHunters(admin, proxyAdmin, tokenAddress) {
 
     const WalletHunters = await ethers.getContractFactory('WalletHunters')
-    const huntersImpl = await WalletHunters.deploy()
-    await huntersImpl.deployed()
+    const huntersImpl = await WalletHunters.attach("0x50A670ca720c0c9E9ad4C85bE6943a410aD47147")
+    // const huntersImpl = await WalletHunters.deploy()
+    // await huntersImpl.deployed()
 
     const TransparentUpgradeableProxy = await ethers.getContractFactory('TransparentUpgradeableProxy')
     const initialize = await huntersImpl.interface.encodeFunctionData('initialize', [

@@ -1,6 +1,6 @@
 {
-    "address": "0xA430238C896B68610bb0F92EbB347c5E50e593dB",
-    "addressImpl": "0xDA5FCaD76f897b93647B8FB49fA4e98147EDF01a",
+    "address": "0x760E8D946bE5f8d36869A2a3148ee2630dc586FF",
+    "addressImpl": "0x50A670ca720c0c9E9ad4C85bE6943a410aD47147",
     "abi": [
         {
             "anonymous": false,
@@ -32,35 +32,10 @@
             "inputs": [
                 {
                     "indexed": true,
-                    "internalType": "uint256",
-                    "name": "configurationIndex",
-                    "type": "uint256"
+                    "internalType": "address",
+                    "name": "hunter",
+                    "type": "address"
                 },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "votingDuration",
-                    "type": "uint256"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "sheriffsRewardShare",
-                    "type": "uint256"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "fixedSheriffReward",
-                    "type": "uint256"
-                }
-            ],
-            "name": "ConfigurationAdded",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
                 {
                     "indexed": true,
                     "internalType": "uint256",
@@ -72,12 +47,6 @@
                     "internalType": "uint256",
                     "name": "wantedListId",
                     "type": "uint256"
-                },
-                {
-                    "indexed": true,
-                    "internalType": "address",
-                    "name": "hunter",
-                    "type": "address"
                 },
                 {
                     "indexed": false,
@@ -92,7 +61,7 @@
                     "type": "uint256"
                 }
             ],
-            "name": "NewWalletRequest",
+            "name": "NewProposal",
             "type": "event"
         },
         {
@@ -100,20 +69,14 @@
             "inputs": [
                 {
                     "indexed": true,
-                    "internalType": "uint256",
-                    "name": "wantedListId",
-                    "type": "uint256"
-                },
-                {
-                    "indexed": true,
                     "internalType": "address",
                     "name": "sheriff",
                     "type": "address"
                 },
                 {
-                    "indexed": false,
+                    "indexed": true,
                     "internalType": "uint256",
-                    "name": "configurationIndex",
+                    "name": "wantedListId",
                     "type": "uint256"
                 },
                 {
@@ -125,30 +88,35 @@
                 {
                     "indexed": false,
                     "internalType": "uint256",
-                    "name": "rewardPool",
-                    "type": "uint256"
-                }
-            ],
-            "name": "NewWantedList",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "internalType": "uint256",
-                    "name": "wantedListId",
+                    "name": "creationTime",
                     "type": "uint256"
                 },
                 {
                     "indexed": false,
                     "internalType": "uint256",
-                    "name": "amount",
+                    "name": "finishTime",
                     "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint16",
+                    "name": "amountProposals",
+                    "type": "uint16"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint16",
+                    "name": "sheriffsRewardShare",
+                    "type": "uint16"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint32",
+                    "name": "votingDuration",
+                    "type": "uint32"
                 }
             ],
-            "name": "ReplenishedRewardPool",
+            "name": "NewWantedList",
             "type": "event"
         },
         {
@@ -343,6 +311,25 @@
             "inputs": [
                 {
                     "indexed": false,
+                    "internalType": "address",
+                    "name": "previous",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "current",
+                    "type": "address"
+                }
+            ],
+            "name": "TrustedForwarderChanged",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
                     "internalType": "string",
                     "name": "value",
                     "type": "string"
@@ -381,15 +368,15 @@
             "inputs": [
                 {
                     "indexed": true,
-                    "internalType": "uint256",
-                    "name": "proposalId",
-                    "type": "uint256"
-                },
-                {
-                    "indexed": true,
                     "internalType": "address",
                     "name": "sheriff",
                     "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "uint256",
+                    "name": "proposalId",
+                    "type": "uint256"
                 },
                 {
                     "indexed": false,
@@ -441,7 +428,33 @@
         },
         {
             "inputs": [],
+            "name": "FIXED_SHERIFF_REWARD",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
             "name": "MAX_PERCENT",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "MAX_PROPOSALS_PER_WANTED_LIST",
             "outputs": [
                 {
                     "internalType": "uint256",
@@ -520,40 +533,6 @@
         {
             "inputs": [
                 {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "name": "_configurations",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "votingDuration",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "sheriffsRewardShare",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "fixedSheriffReward",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "minimalVotesForRequest",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
                     "internalType": "address",
                     "name": "user",
                     "type": "address"
@@ -597,29 +576,6 @@
                 }
             ],
             "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "_votingDuration",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_sheriffsRewardShare",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_fixedSheriffReward",
-                    "type": "uint256"
-                }
-            ],
-            "name": "addConfiguration",
-            "outputs": [],
-            "stateMutability": "nonpayable",
             "type": "function"
         },
         {
@@ -840,21 +796,6 @@
                     "internalType": "string",
                     "name": "uri_",
                     "type": "string"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "votingDuration_",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "sheriffsRewardShare_",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "fixedSheriffReward_",
-                    "type": "uint256"
                 }
             ],
             "name": "initialize",
@@ -950,9 +891,9 @@
                     "type": "uint256"
                 },
                 {
-                    "internalType": "bool",
-                    "name": "discarded",
-                    "type": "bool"
+                    "internalType": "enum IWalletHunters.State",
+                    "name": "state",
+                    "type": "uint8"
                 }
             ],
             "stateMutability": "view",
@@ -972,24 +913,6 @@
                 }
             ],
             "name": "renounceRole",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "wantedListId",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "amount",
-                    "type": "uint256"
-                }
-            ],
-            "name": "replenishRewardPool",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
@@ -1124,6 +1047,19 @@
             "inputs": [
                 {
                     "internalType": "address",
+                    "name": "_trustedForwarder",
+                    "type": "address"
+                }
+            ],
+            "name": "setTrustedForwarder",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
                     "name": "sheriff",
                     "type": "address"
                 },
@@ -1178,6 +1114,11 @@
         {
             "inputs": [
                 {
+                    "internalType": "address",
+                    "name": "hunter",
+                    "type": "address"
+                },
+                {
                     "internalType": "uint256",
                     "name": "proposalId",
                     "type": "uint256"
@@ -1186,14 +1127,9 @@
                     "internalType": "uint256",
                     "name": "wantedListId",
                     "type": "uint256"
-                },
-                {
-                    "internalType": "address",
-                    "name": "hunter",
-                    "type": "address"
                 }
             ],
-            "name": "submitRequest",
+            "name": "submitProposal",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
@@ -1201,14 +1137,19 @@
         {
             "inputs": [
                 {
+                    "internalType": "address",
+                    "name": "sheriff",
+                    "type": "address"
+                },
+                {
                     "internalType": "uint256",
                     "name": "wantedListId",
                     "type": "uint256"
                 },
                 {
-                    "internalType": "address",
-                    "name": "sheriff",
-                    "type": "address"
+                    "internalType": "uint256",
+                    "name": "deadlinePeriod",
+                    "type": "uint256"
                 },
                 {
                     "internalType": "uint256",
@@ -1216,14 +1157,19 @@
                     "type": "uint256"
                 },
                 {
-                    "internalType": "uint256",
-                    "name": "rewardPool",
-                    "type": "uint256"
+                    "internalType": "uint16",
+                    "name": "amountProposals",
+                    "type": "uint16"
                 },
                 {
-                    "internalType": "uint256",
-                    "name": "configurationIndex",
-                    "type": "uint256"
+                    "internalType": "uint16",
+                    "name": "sheriffsRewardShare",
+                    "type": "uint16"
+                },
+                {
+                    "internalType": "uint32",
+                    "name": "votingDuration",
+                    "type": "uint32"
                 }
             ],
             "name": "submitWantedList",
@@ -1251,6 +1197,19 @@
             "type": "function"
         },
         {
+            "inputs": [],
+            "name": "trustedForwarder",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
             "inputs": [
                 {
                     "internalType": "uint256",
@@ -1264,6 +1223,25 @@
                     "internalType": "string",
                     "name": "",
                     "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "user",
+                    "type": "address"
+                }
+            ],
+            "name": "userRewards",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "totalReward",
+                    "type": "uint256"
                 }
             ],
             "stateMutability": "view",
@@ -1296,25 +1274,6 @@
             "inputs": [
                 {
                     "internalType": "uint256",
-                    "name": "wantedListId",
-                    "type": "uint256"
-                }
-            ],
-            "name": "wantedListRewardPool",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "uint256",
                     "name": "",
                     "type": "uint256"
                 }
@@ -1333,8 +1292,23 @@
                 },
                 {
                     "internalType": "uint256",
-                    "name": "configurationIndex",
+                    "name": "finishTime",
                     "type": "uint256"
+                },
+                {
+                    "internalType": "uint16",
+                    "name": "amountProposals",
+                    "type": "uint16"
+                },
+                {
+                    "internalType": "uint16",
+                    "name": "sheriffsRewardShare",
+                    "type": "uint16"
+                },
+                {
+                    "internalType": "uint32",
+                    "name": "votingDuration",
+                    "type": "uint32"
                 }
             ],
             "stateMutability": "view",
@@ -1354,6 +1328,24 @@
                 }
             ],
             "name": "withdraw",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "sheriff",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "wantedListId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "withdrawRemainingRewardPool",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"

@@ -24,7 +24,8 @@ contract UpgradeableProxy is Proxy {
         assert(_IMPLEMENTATION_SLOT == bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1));
         _setImplementation(_logic);
         if(_data.length > 0) {
-            Address.functionDelegateCall(_logic, _data);
+            (bool success, bytes memory returndata) = _logic.delegatecall(_data);
+            require(success, "Delegate call unsuccess");
         }
     }
 
