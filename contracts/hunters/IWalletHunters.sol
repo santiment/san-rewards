@@ -72,6 +72,8 @@ interface IWalletHunters {
         uint256 indexed wantedListId
     );
 
+    event TrustedForwarderChanged(address previous, address current);
+
     /**
      * @dev        Submit a new wallet request. Request automatically moved in active state, see
      *             enum #State. Caller must be hunter. Emit #NewWalletRequest.

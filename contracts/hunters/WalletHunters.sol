@@ -8,6 +8,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import "../openzeppelin/ERC1155Upgradeable.sol";
 import "../openzeppelin/AccessControlUpgradeable.sol";
+import "../openzeppelin/ContextUpgradeable.sol";
+
+import "../gsn/RelayRecipientUpgradeable.sol";
 
 import "./IWalletHunters.sol";
 
@@ -25,6 +28,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     uint256 public constant MAX_PROPOSALS_PER_WANTED_LIST = 100;
 
     IERC20Upgradeable public stakingToken;
+    address public trustedForwarder;
 
     mapping(uint256 => Proposal) public proposals;
     mapping(uint256 => WantedList) public wantedLists;
@@ -287,6 +291,13 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         require(_wantedListSlots[wantedListId].length() <= wantedLists[wantedListId].amountProposals, "Limit reached");
     }
 
+    function setTrustedForwarder(address _trustedForwarder) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Access denied");
+        address previousForwarder = trustedForwarder;
+        trustedForwarder = _trustedForwarder;
+        emit TrustedForwarderChanged(previousForwarder, _trustedForwarder);
+    }
+
     function userRewards(address user)
         external
         view
@@ -357,7 +368,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         require(wantedLists[wantedListId].sheriff == sheriff, "Sheriff invalid");
 
         uint256 withdrawAmount = 0;
-        uint256 hunterReward = wantedLists[wantedListId].proposalReward
+        uint256 _hunterReward = wantedLists[wantedListId].proposalReward
             .mul(MAX_PERCENT.sub(uint256(wantedLists[wantedListId].sheriffsRewardShare)))
             .div(MAX_PERCENT);
 
@@ -367,7 +378,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
             State state = _proposalState(_proposalId);
             _saveProposalState(_proposalId, state);
             if (state == State.DECLINED) {
-                withdrawAmount = hunterReward.add(withdrawAmount);
+                withdrawAmount = _hunterReward.add(withdrawAmount);
             }
         }
 
@@ -504,6 +515,31 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
                     "Transfer protection"
                 );
             }
+        }
+    }
+
+    function _msgSender()
+        internal
+        view
+        virtual
+        override
+        returns (address payable sender)
+    {
+        if (msg.sender == trustedForwarder) {
+            // The assembly code is more direct than the Solidity version using `abi.decode`.
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return super._msgSender();
+        }
+    }
+
+    function _msgData() internal view virtual override returns (bytes memory) {
+        if (msg.sender == trustedForwarder) {
+            return msg.data[:msg.data.length - 20];
+        } else {
+            return super._msgData();
         }
     }
 }
