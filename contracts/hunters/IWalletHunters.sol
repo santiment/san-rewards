@@ -46,9 +46,9 @@ interface IWalletHunters {
     event NewWantedList(
         address indexed sheriff,
         uint256 indexed wantedListId,
-        uint256 proposalReward,
         uint256 creationTime,
         uint256 finishTime,
+        uint256 proposalReward,
         uint16 amountProposals,
         uint16 sheriffsRewardShare,
         uint32 votingDuration

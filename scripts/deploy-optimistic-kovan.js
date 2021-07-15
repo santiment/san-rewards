@@ -67,9 +67,9 @@ async function deployToken(l1Token) {
 async function deployHunters(admin, proxyAdmin, tokenAddress) {
 
     const WalletHunters = await ethers.getContractFactory('WalletHunters')
-    const huntersImpl = await WalletHunters.attach("0x50A670ca720c0c9E9ad4C85bE6943a410aD47147")
-    // const huntersImpl = await WalletHunters.deploy()
-    // await huntersImpl.deployed()
+    // const huntersImpl = await WalletHunters.attach("0x50A670ca720c0c9E9ad4C85bE6943a410aD47147")
+    const huntersImpl = await WalletHunters.deploy()
+    await huntersImpl.deployed()
 
     const TransparentUpgradeableProxy = await ethers.getContractFactory('TransparentUpgradeableProxy')
     const initialize = await huntersImpl.interface.encodeFunctionData('initialize', [
