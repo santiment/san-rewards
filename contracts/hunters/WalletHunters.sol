@@ -19,6 +19,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     using SafeMathUpgradeable for uint256;
 
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     uint256 public constant MAX_PERCENT = 10000; // 100%
     uint256 public constant SUPER_MAJORITY = 6700; // 67%
     uint256 public constant STAKING_TOKEN_ID = 0;
@@ -91,14 +92,14 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     function submitWantedList(
         address sheriff,
         uint256 wantedListId,
-        uint256 deadlinePeriod,
+        uint256 duration,
         uint256 proposalReward,
         uint16 amountProposals,
         uint16 sheriffsRewardShare,
         uint32 votingDuration
     ) external override onlyIdNotExists(wantedListId) onlySheriff(sheriff) {
         require(sheriff == _msgSender(), "Sender not sheriff");
-        require(deadlinePeriod > 1 weeks && deadlinePeriod <= 52 weeks, "Deadline period invalid");
+        require(duration > 1 weeks && duration <= 52 weeks, "Deadline period invalid");
         require(votingDuration > 1 hours && votingDuration <= 4 weeks, "Voting period invalid");
         require(sheriffsRewardShare <= MAX_PERCENT, "Reward share invalid");
         require(amountProposals > 0 && amountProposals < MAX_PROPOSALS_PER_WANTED_LIST, "Amount proposals invalid");
@@ -107,7 +108,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
 
         wantedLists[wantedListId].sheriff = sheriff;
         wantedLists[wantedListId].proposalReward = proposalReward;
-        wantedLists[wantedListId].finishTime = block.timestamp.add(deadlinePeriod);
+        wantedLists[wantedListId].finishTime = block.timestamp.add(duration);
         wantedLists[wantedListId].amountProposals = amountProposals;
 
         _mint(sheriff, wantedListId, rewardPool, "");
@@ -194,6 +195,17 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         }
 
         emit Voted(sheriff, proposalId, amount, voteFor);
+    }
+
+    function mint(
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) external override {
+        require(hasRole(MINTER_ROLE, _msgSender()), "Sender isnt minter");
+
+        _mint(to, id, amount, data);
     }
 
     function discardRequest(uint256 proposalId)
@@ -306,12 +318,6 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     {
 
         for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
-
-            if (_proposalState(_activeRequests[user].at(i)) == State.ACTIVE) {
-                // voting is not finished
-                continue;
-            }
-
             if (proposals[_activeRequests[user].at(i)].hunter == user) {
                 totalReward = totalReward.add(hunterReward(_activeRequests[user].at(i)));
             } else {

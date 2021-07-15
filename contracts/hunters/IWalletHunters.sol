@@ -91,7 +91,7 @@ interface IWalletHunters {
      * @dev        Submit a new wanted list. Wanted list id is used for submiting new request.
      * @param      sheriff              The sheriff address
      * @param      wantedListId         The wanted list id
-     * @param      deadlinePeriod       The deadline period, after which wanted list is ended
+     * @param      duration       The deadline period, after which wanted list is ended
      * @param      proposalReward       The proposal reward
      * @param      amountProposals      The proposals limit
      * @param      sheriffsRewardShare  The sheriffs reward share
@@ -99,11 +99,25 @@ interface IWalletHunters {
     function submitWantedList(
         address sheriff,
         uint256 wantedListId,
-        uint256 deadlinePeriod,
+        uint256 duration,
         uint256 proposalReward,
         uint16 amountProposals,
         uint16 sheriffsRewardShare,
         uint32 votingDuration
+    ) external;
+
+    /**
+     * @dev        Mint NFT token
+     * @param      to      User address
+     * @param      id      The id
+     * @param      amount  The amount
+     * @param      data    The calldata
+     */
+    function mint(
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
     ) external;
 
     /**
