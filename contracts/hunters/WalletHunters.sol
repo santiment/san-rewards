@@ -24,7 +24,6 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     uint256 private constant SUPER_MAJORITY = 6700; // 67%
     uint256 public constant STAKING_TOKEN_ID = 0;
     uint256 public constant MINIMAL_STAKE = 50 ether;
-    uint256 public constant FIXED_SHERIFF_REWARD = 10 ether;
     uint256 public constant MINIMAL_VOTES = MINIMAL_STAKE * 2;
     uint256 public constant MAX_PROPOSALS_PER_WANTED_LIST = 100;
 
@@ -60,12 +59,12 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     }
 
     modifier whenVoting(uint256 proposalId) {
-        require(_proposalState(proposalId) == State.ACTIVE, "Voting finished");
+        require(proposalState(proposalId) == State.ACTIVE, "Voting finished");
         _;
     }
 
     modifier whenVotingFinished(uint256 proposalId) {
-        require(_proposalState(proposalId) != State.ACTIVE, "Voting not finished");
+        require(proposalState(proposalId) != State.ACTIVE, "Voting not finished");
         _;
     }
 
@@ -224,7 +223,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
 
         proposals[proposalId].state = State.DISCARDED;
 
-        emit RequestDiscarded(proposalId, proposals[proposalId].wantedListId);
+        emit RequestDiscarded(proposalId);
     }
 
     function withdraw(address sheriff, uint256 amount) public override {
@@ -243,11 +242,12 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         require(user == _msgSender(), "Sender not user");
 
         uint256 totalReward = 0;
+        uint256 threshold = _activeRequests[user].length().sub(amountClaims);
 
-        for (uint256 i = _activeRequests[user].length(); i > _activeRequests[user].length().sub(amountClaims); i = i.sub(1)) {
+        for (uint256 i = _activeRequests[user].length(); i > threshold; i = i.sub(1)) {
             uint256 proposalId = _activeRequests[user].at(i.sub(1));
 
-            State state = _proposalState(proposalId);
+            State state = proposalState(proposalId);
             _saveProposalState(proposalId, state);
             if (state == State.ACTIVE) {
                 // voting is not finished
@@ -269,13 +269,16 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
                 delete _sheriffVotes[proposalId][user];
             }
 
+            if (reward > 0) {
+                uint256 wantedListId = proposals[proposalId].wantedListId;
+                _burn(
+                    wantedLists[wantedListId].sheriff,
+                    wantedListId,
+                    reward
+                );
+            }
+
             totalReward = totalReward.add(reward);
-            uint256 wantedListId = proposals[proposalId].wantedListId;
-            _burn(
-                wantedLists[wantedListId].sheriff,
-                wantedListId,
-                reward
-            );
         }
 
         // reward staking tokens
@@ -292,7 +295,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
             for (uint256 i = _wantedListSlots[wantedListId].length(); i > 0; i = i.sub(1)) {
                 uint256 _proposalId = _wantedListSlots[wantedListId].at(i.sub(1));
 
-                State state = _proposalState(_proposalId);
+                State state = proposalState(_proposalId);
                 _saveProposalState(_proposalId, state);
                 if (state == State.DISCARDED || state == State.INSUFFICIENTED) {
                     require(_wantedListSlots[wantedListId].remove(_proposalId), "Smth wrong");
@@ -335,7 +338,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         whenVotingFinished(proposalId)
         returns (uint256)
     {
-        State state = _proposalState(proposalId);
+        State state = proposalState(proposalId);
 
         if (state == State.APPROVED) {
             return wantedLists[proposals[proposalId].wantedListId].proposalReward
@@ -353,7 +356,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         whenVotingFinished(proposalId)
         returns (uint256)
     {
-        State state = _proposalState(proposalId);
+        State state = proposalState(proposalId);
 
         int256 votes = _sheriffVotes[proposalId][sheriff].amount;
 
@@ -381,7 +384,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         for (uint256 i = _wantedListSlots[wantedListId].length(); i > 0; i = i.sub(1)) {
             uint256 _proposalId = _wantedListSlots[wantedListId].at(i.sub(1));
 
-            State state = _proposalState(_proposalId);
+            State state = proposalState(_proposalId);
             _saveProposalState(_proposalId, state);
 
             if (state == State.ACTIVE) {
@@ -408,25 +411,8 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
 
         delete _wantedListSlots[wantedListId];
         delete wantedLists[wantedListId].amountProposals;
-    }
 
-    function activeRequests(
-        address user,
-        uint256 startIndex,
-        uint256 pageSize
-    ) external view override returns (uint256[] memory) {
-        require(
-            startIndex.add(pageSize) <= _activeRequests[user].length(),
-            "Out of bounds"
-        );
-
-        uint256[] memory result = new uint256[](pageSize);
-
-        for (uint256 i = 0; i < pageSize; i = i.add(1)) {
-            result[i] = _activeRequests[user].at(startIndex.add(i));
-        }
-
-        return result;
+        emit RemainingRewardPoolWithdrawed(sheriff, withdrawAmount);
     }
 
     function activeRequestsLength(address user)
@@ -454,7 +440,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
     {
         for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
             uint256 proposalId = _activeRequests[user].at(i);
-            if (_proposalState(proposalId) != State.ACTIVE || proposals[proposalId].hunter == user) {
+            if (proposalState(proposalId) != State.ACTIVE || proposals[proposalId].hunter == user) {
                 // voting finished
                 continue;
             }
@@ -475,7 +461,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         }
     }
 
-    function _proposalState(uint256 proposalId) private view returns (State) {
+    function proposalState(uint256 proposalId) public view returns (State) {
         if (proposals[proposalId].state == State.ACTIVE) {
             if (_proposalVoting(proposalId)) {
                 return State.ACTIVE;

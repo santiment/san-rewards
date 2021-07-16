@@ -168,7 +168,7 @@ describe("WalletHunters", function () {
       context("Submit wanted list", function () {
         const duration = bn(7 * 24 * 60 * 60) // 1 week
         const votingDuration = bn(60 * 60) // 1 hour
-        const amountProposals = bn(3)
+        const amountProposals = bn(2)
         const proposalReward = token(`300`)
         const sheriffsRewardShare = bn(20 * 100) // 20%
         const rewardPool = proposalReward.mul(amountProposals)
@@ -297,8 +297,16 @@ describe("WalletHunters", function () {
               expect(voting.votesAgainst).to.be.equal(token("100"))
             })
 
+            it('Check proposal state', async function () {
+              expect(await hunters.proposalState(proposalId)).to.be.equal(0)
+            })
+
             it('Wait voting finish', async function () {
               await increaseTime(+ votingDuration.toString())
+            })
+
+            it('Check proposal state', async function () {
+              expect(await hunters.proposalState(proposalId)).to.be.equal(1)
             })
 
             it(`Check locked balance`, async function () {
@@ -308,6 +316,288 @@ describe("WalletHunters", function () {
             })
           })
         })
+
+        context("Submit proposal with no votes", function () {
+          let proposalId
+
+          it("Submit", async function () {
+            hunters = hunters.connect(hunter)
+
+            proposalId = await getHash("Proposal with no votes")
+
+            await expect(
+              hunters.submitProposal(hunter.address, proposalId, wantedListId)
+            )
+              .to.emit(hunters, "NewProposal")
+              .withArgs(
+                hunter.address,
+                proposalId,
+                wantedListId,
+                anyValue,
+                anyValue
+              )
+          })
+
+          context("Voting workflow", function () {
+            it('Check proposal state', async function () {
+              expect(await hunters.proposalState(proposalId)).to.be.equal(0)
+            })
+
+            it('Wait voting finish', async function () {
+              await increaseTime(+ votingDuration.toString())
+            })
+
+            it('Check proposal state', async function () {
+              expect(await hunters.proposalState(proposalId)).to.be.equal(3)
+            })
+          })
+        })
+
+        context("Submit spam proposal", function () {
+          let proposalId
+
+          it("Submit", async function () {
+            hunters = hunters.connect(hunter)
+
+            proposalId = await getHash("Spam proposal")
+
+            await expect(
+              hunters.submitProposal(hunter.address, proposalId, wantedListId)
+            )
+              .to.emit(hunters, "NewProposal")
+              .withArgs(
+                hunter.address,
+                proposalId,
+                wantedListId,
+                anyValue,
+                anyValue
+              )
+          })
+
+          context("Voting workflow", function () {
+
+            votingWorkflow(() => proposalId, [true, false, true])
+
+            it('Check proposal state', async function () {
+              expect(await hunters.proposalState(proposalId)).to.be.equal(0)
+            })
+
+            it('Discard proposal', async function () {
+              hunters = hunters.connect(sheriffBounty)
+
+              await expect(hunters.discardRequest(proposalId))
+                .to.emit(hunters, "RequestDiscarded")
+                .withArgs(proposalId)
+            })
+
+            it('Check proposal state', async function () {
+              expect(await hunters.proposalState(proposalId)).to.be.equal(4)
+            })
+
+            it(`Check locked balance`, async function () {
+              for (let sheriff of [sheriff1, sheriff2, sheriff3]) {
+                expect(await hunters.lockedBalance(sheriff.address)).to.be.equal(ZERO)
+              }
+            })
+          })
+        })
+
+        context("Submit incorrect proposal", function () {
+          let proposalId
+
+          it("Submit", async function () {
+            hunters = hunters.connect(hunter)
+
+            proposalId = await getHash("Incorrect proposal")
+
+            await expect(
+              hunters.submitProposal(hunter.address, proposalId, wantedListId)
+            )
+              .to.emit(hunters, "NewProposal")
+              .withArgs(
+                hunter.address,
+                proposalId,
+                wantedListId,
+                anyValue,
+                anyValue
+              )
+          })
+
+          context("Voting workflow", function () {
+
+            votingWorkflow(() => proposalId, [true, false, false])
+
+            it("Check votings", async function () {
+              const voting = await hunters.requestVotings(proposalId)
+
+              expect(voting.votesFor).to.be.equal(token("100"))
+              expect(voting.votesAgainst).to.be.equal(token("500"))
+            })
+
+            it('Check proposal state', async function () {
+              expect(await hunters.proposalState(proposalId)).to.be.equal(0)
+            })
+
+            it('Wait voting finish', async function () {
+              await increaseTime(+ votingDuration.toString())
+            })
+
+            it('Check proposal state', async function () {
+              expect(await hunters.proposalState(proposalId)).to.be.equal(2)
+            })
+
+            it(`Check locked balance`, async function () {
+              for (let sheriff of [sheriff1, sheriff2, sheriff3]) {
+                expect(await hunters.lockedBalance(sheriff.address)).to.be.equal(ZERO)
+              }
+            })
+          })
+        })
+
+        context("Submit excess proposal", function () {
+          let proposalId
+
+          it("Submit failure", async function () {
+            hunters = hunters.connect(hunter)
+
+            proposalId = await getHash("Excess proposal")
+
+            await expect(
+              hunters.submitProposal(hunter.address, proposalId, wantedListId)
+            )
+              .to.be.revertedWith('Limit reached')
+          })
+        })
+
+        context("Wait wanted list finish", function () {
+          let proposalId
+
+          it('Wait wanted list finish', async function () {
+            await increaseTime(+ duration.toString())
+          })
+
+          it("Submit failure", async function () {
+            hunters = hunters.connect(hunter)
+
+            proposalId = await getHash("Wanted list finished")
+
+            await expect(
+              hunters.submitProposal(hunter.address, proposalId, wantedListId)
+            )
+              .to.be.revertedWith('Wanted list finished')
+          })
+        })
+
+        context('Withdraw remaining reward pool', function () {
+
+          const withdrawAmount = token('240')
+
+          it('Withdraw', async function () {
+            hunters = hunters.connect(sheriffBounty)
+
+            await expect(hunters.withdrawRemainingRewardPool(sheriffBounty.address, wantedListId))
+              .to.emit(hunters, 'RemainingRewardPoolWithdrawed')
+              .withArgs(sheriffBounty.address, withdrawAmount)
+              .to.emit(realToken, "Transfer")
+              .withArgs(hunters.address, sheriffBounty.address, withdrawAmount)
+          })
+        })
+      })
+
+      context("Reward workflow", function () {
+
+        context("Hunter reward", function () {
+
+          const reward = token('240')
+
+          it('Check reward', async function () {
+            expect(await hunters.userRewards(hunter.address)).to.be.equal(reward)
+          })
+
+          it('Claim reward', async function () {
+            hunters = hunters.connect(hunter)
+
+            const amountClaims = await hunters.activeRequestsLength(hunter.address)
+
+            await expect(hunters.claimRewards(hunter.address, amountClaims))
+              .to.emit(hunters, 'UserRewardPaid')
+              .withArgs(hunter.address, reward)
+              .to.emit(hunters, "TransferSingle")
+              .withArgs(hunter.address, ZERO_ADDRESS, hunter.address, await getHash("Correct proposal"), 1)
+              .to.emit(realToken, "Transfer")
+              .withArgs(hunters.address, hunter.address, reward)
+          })
+
+          it('Check NFT token', async function () {
+            expect(await hunters.balanceOf(hunter.address, await getHash("Correct proposal"))).to.be.equal(1)
+          })
+        })
+
+        context("Sheriffs reward", function () {
+
+          const sheriff1Reward = ZERO
+          const sheriff2Reward = token('48')
+          const sheriff3Reward = token('72')
+
+          it('Check reward', async function () {
+            expect(await hunters.userRewards(sheriff1.address)).to.be.equal(sheriff1Reward)
+            expect(await hunters.userRewards(sheriff2.address)).to.be.equal(sheriff2Reward)
+            expect(await hunters.userRewards(sheriff3.address)).to.be.equal(sheriff3Reward)
+          })
+
+          it('Claim reward sheriff1', async function () {
+            hunters = hunters.connect(sheriff1)
+
+            const amountClaims = await hunters.activeRequestsLength(sheriff1.address)
+
+            await expect(hunters.claimRewards(sheriff1.address, amountClaims))
+              .to.emit(hunters, 'UserRewardPaid')
+              .withArgs(sheriff1.address, sheriff1Reward)
+          })
+
+          it('Claim reward sheriff2', async function () {
+            hunters = hunters.connect(sheriff2)
+
+            const amountClaims = await hunters.activeRequestsLength(sheriff2.address)
+
+            await expect(hunters.claimRewards(sheriff2.address, amountClaims))
+              .to.emit(hunters, 'UserRewardPaid')
+              .withArgs(sheriff2.address, sheriff2Reward)
+              .to.emit(realToken, "Transfer")
+              .withArgs(hunters.address, sheriff2.address, sheriff2Reward)
+          })
+
+          it('Claim reward sheriff3', async function () {
+            hunters = hunters.connect(sheriff3)
+
+            const amountClaims = await hunters.activeRequestsLength(sheriff3.address)
+
+            await expect(hunters.claimRewards(sheriff3.address, amountClaims))
+              .to.emit(hunters, 'UserRewardPaid')
+              .withArgs(sheriff3.address, sheriff3Reward)
+              .to.emit(realToken, "Transfer")
+              .withArgs(hunters.address, sheriff3.address, sheriff3Reward)
+          })
+        })
+      })
+    })
+
+    context("Withdraw stake", function () {
+
+      it('Withdraw', async function () {
+        for (let sheriff of [sheriffBounty, sheriff1, sheriff2, sheriff3]) {
+          hunters = hunters.connect(sheriff)
+          realToken = realToken.connect(sheriff)
+
+          const balance = await hunters.balanceOf(sheriff.address, await hunters.STAKING_TOKEN_ID())
+
+          await expect(hunters.withdraw(sheriff.address, balance))
+            .to.emit(realToken, "Transfer")
+            .withArgs(hunters.address, sheriff.address, balance)
+            .to.emit(hunters, "TransferSingle")
+            .to.emit(hunters, "Withdrawn")
+            .withArgs(sheriff.address, balance)
+        }
       })
     })
   })

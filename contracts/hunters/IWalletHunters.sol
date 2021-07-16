@@ -68,11 +68,12 @@ interface IWalletHunters {
     event UserRewardPaid(address indexed user, uint256 totalReward);
 
     event RequestDiscarded(
-        uint256 indexed proposalId,
-        uint256 indexed wantedListId
+        uint256 indexed proposalId
     );
 
     event TrustedForwarderChanged(address previous, address current);
+
+    event RemainingRewardPoolWithdrawed(address indexed sheriff, uint256 amount);
 
     /**
      * @dev        Submit a new wallet request. Request automatically moved in active state, see
@@ -157,20 +158,6 @@ interface IWalletHunters {
      * @param      amount   The amount
      */
     function withdraw(address sheriff, uint256 amount) external;
-
-    /**
-     * @dev        Return wallet requests that user participates at this time as sheriff or hunter.
-     * Request can be in voting or finished state.
-     * @param      user         The user address
-     * @param      startIndex  The start index. Can be 0
-     * @param      pageSize     The page size. Can be #activeRequestsLength
-     * @return     array of request ids
-     */
-    function activeRequests(
-        address user,
-        uint256 startIndex,
-        uint256 pageSize
-    ) external view returns (uint256[] memory);
 
     /**
      * @dev        Return amount of requests that user participates at this time as sheriff or
