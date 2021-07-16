@@ -1,0 +1,157 @@
+{
+    "address": "0xC6E118D96afc60406a500146EE93593B3a0Da8d7",
+    "distribution": {
+        "merkleRoot": "0xddca499c86140df98f46c90a2e5ea54c61b460bb7b1955774c8a9c1157a91c4e",
+        "tokenTotal": "1200000000000000000000",
+        "claims": {
+            "0x6BD55dcF7d012af2Be313e8D6371bBE179241CD6": {
+                "index": 0,
+                "amount": "300000000000000000000",
+                "proof": [
+                    "0x2180a0e1330eaa4f2ae1be891c937d88568ab51d5580758306a58f0443d6cc9c",
+                    "0x8d51a22ee512296eda459b616064a8cbcb3cfe1b300b7b025ba46342d13cc11e"
+                ]
+            },
+            "0x904B452a804E9C59Bafb0Fc9FCD56A7369D518B7": {
+                "index": 1,
+                "amount": "300000000000000000000",
+                "proof": [
+                    "0xd4c9149d16d3ec84d990bb05fa454d138586d47b5b822f011aa5ed07af86bd34",
+                    "0xa15bbcb706ba499c68e537d0db798e7c01df5c8582198ab5d8dcf80136cde4c6"
+                ]
+            },
+            "0xCB8C7409fe98A396F32d6CFF4736BEDc7B60008c": {
+                "index": 2,
+                "amount": "300000000000000000000",
+                "proof": [
+                    "0x84a84db88b3901abbf5ebbabca81f534da24212522aabb4908a046c7e5f8b063",
+                    "0x8d51a22ee512296eda459b616064a8cbcb3cfe1b300b7b025ba46342d13cc11e"
+                ]
+            },
+            "0xf878c003a359EF5Ea703614c6Bf40E96703e0269": {
+                "index": 3,
+                "amount": "300000000000000000000",
+                "proof": [
+                    "0xf0651770c3090573fbc5e16e0cab6d83e65f80e44517660caa9f42c166356662",
+                    "0xa15bbcb706ba499c68e537d0db798e7c01df5c8582198ab5d8dcf80136cde4c6"
+                ]
+            }
+        }
+    },
+    "abi": [
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "token_",
+                    "type": "address"
+                },
+                {
+                    "internalType": "bytes32",
+                    "name": "merkleRoot_",
+                    "type": "bytes32"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "constructor"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "index",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "Claimed",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "index",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "amount",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "bytes32[]",
+                    "name": "merkleProof",
+                    "type": "bytes32[]"
+                }
+            ],
+            "name": "claim",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "index",
+                    "type": "uint256"
+                }
+            ],
+            "name": "isClaimed",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "merkleRoot",
+            "outputs": [
+                {
+                    "internalType": "bytes32",
+                    "name": "",
+                    "type": "bytes32"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "token",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ]
+}

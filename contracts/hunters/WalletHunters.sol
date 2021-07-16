@@ -1,753 +1,418 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.7.6;
+pragma abicoder v2;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 
-import "../interfaces/IWalletHunters.sol";
-import "../utils/AccountingTokenUpgradeable.sol";
+import "../openzeppelin/ERC1155Upgradeable.sol";
+import "../openzeppelin/AccessControlUpgradeable.sol";
+import "../openzeppelin/ContextUpgradeable.sol";
+
 import "../gsn/RelayRecipientUpgradeable.sol";
 
-contract WalletHunters is
-    IWalletHunters,
-    AccountingTokenUpgradeable,
-    RelayRecipientUpgradeable,
-    AccessControlUpgradeable
-{
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-    using SafeERC20Upgradeable for IERC20Upgradeable;
+import "./IWalletHunters.sol";
+
+contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgradeable {
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet;
-    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
-    using AddressUpgradeable for address;
-
-    struct Request {
-        address hunter;
-        uint256 reward;
-        uint256 creationTime;
-        uint256 configurationIndex;
-        bool discarded;
-    }
-
-    struct RequestVoting {
-        uint256 votesFor;
-        uint256 votesAgainst;
-        EnumerableSetUpgradeable.AddressSet voters;
-        mapping(address => SheriffVote) votes;
-    }
-
-    struct SheriffVote {
-        uint256 amount;
-        bool voteFor;
-    }
-
-    struct Configuration {
-        uint256 votingDuration;
-        uint256 sheriffsRewardShare;
-        uint256 fixedSheriffReward;
-        uint256 minimalVotesForRequest;
-        uint256 minimalDepositForSheriff;
-        uint256 requestReward;
-    }
-
-    uint256 public constant MAX_PERCENT = 10000; // 100%
-    uint256 public constant SUPER_MAJORITY = 6700; // 67%
+    using SafeMathUpgradeable for uint256;
 
     bytes32 public constant MAYOR_ROLE = keccak256("MAYOR_ROLE");
-    string private constant ERC20_NAME = "Wallet Hunters, Sheriff Token";
-    string private constant ERC20_SYMBOL = "WHST";
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    uint256 public constant MAX_PERCENT = 10000; // 100%
+    uint256 private constant SUPER_MAJORITY = 6700; // 67%
+    uint256 public constant STAKING_TOKEN_ID = 0;
+    uint256 public constant MINIMAL_STAKE = 50 ether;
+    uint256 public constant MINIMAL_VOTES = MINIMAL_STAKE * 2;
+    uint256 public constant MAX_PROPOSALS_PER_WANTED_LIST = 100;
 
     IERC20Upgradeable public stakingToken;
+    address public trustedForwarder;
 
-    uint256 public rewardsPool;
-    CountersUpgradeable.Counter private _requestCounter;
-    mapping(uint256 => Request) private _requests;
-    mapping(uint256 => RequestVoting) private _requestVotings;
-    mapping(address => EnumerableSetUpgradeable.UintSet)
-        private _activeRequests;
-    Configuration[] private _configurations;
+    mapping(uint256 => Proposal) private proposals;
+    mapping(uint256 => WantedList) private wantedLists;
+    mapping(uint256 => RequestVoting) public requestVotings;
+
+    mapping(uint256 => mapping(address => SheriffVote)) private _sheriffVotes;
+    mapping(address => EnumerableSetUpgradeable.UintSet) private _activeRequests;
+    mapping(uint256 => EnumerableSetUpgradeable.UintSet) private _wantedListSlots;
+
+    modifier onlyProposalIdExists(uint256 id) {
+        require(proposals[id].hunter != address(0), "Id not exist");
+        _;
+    }
+
+    modifier onlyWantedListIdExists(uint256 id) {
+        require(wantedLists[id].sheriff != address(0), "Id not exist");
+        _;
+    }
+
+    modifier onlyIdNotWantedListOrProposal(uint256 id) {
+        require(
+            id != STAKING_TOKEN_ID &&
+                wantedLists[id].sheriff == address(0) &&
+                proposals[id].hunter == address(0),
+            "Id already exists"
+        );
+        _;
+    }
+
+    modifier whenVoting(uint256 proposalId) {
+        require(proposalState(proposalId) == State.ACTIVE, "Voting finished");
+        _;
+    }
+
+    modifier whenVotingFinished(uint256 proposalId) {
+        require(proposalState(proposalId) != State.ACTIVE, "Voting not finished");
+        _;
+    }
+
+    modifier onlySheriff(address sheriff) {
+        require(_isSheriff(sheriff), "User not sheriff");
+        _;
+    }
 
     function initialize(
         address admin_,
-        address trustedForwarder_,
         address stakingToken_,
-        uint256 votingDuration_,
-        uint256 sheriffsRewardShare_,
-        uint256 fixedSheriffReward_,
-        uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_,
-        uint256 requestReward_
+        string calldata uri_
     ) external initializer {
-        __WalletHunters_init(
-            admin_,
-            trustedForwarder_,
-            stakingToken_,
-            votingDuration_,
-            sheriffsRewardShare_,
-            fixedSheriffReward_,
-            minimalVotesForRequest_,
-            minimalDepositForSheriff_,
-            requestReward_
-        );
-    }
+        __Context_init_unchained();
+        __ERC165_init_unchained();
+        __ERC1155_init_unchained(uri_);
 
-    function __WalletHunters_init(
-        address admin_,
-        address trustedForwarder_,
-        address stakingToken_,
-        uint256 votingDuration_,
-        uint256 sheriffsRewardShare_,
-        uint256 fixedSheriffReward_,
-        uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_,
-        uint256 requestReward_
-    ) internal initializer {
-        __AccountingToken_init(ERC20_NAME, ERC20_SYMBOL);
-        __RelayRecipientUpgradeable_init();
-        __AccessControl_init();
-
-        __WalletHunters_init_unchained(
-            admin_,
-            trustedForwarder_,
-            stakingToken_,
-            votingDuration_,
-            sheriffsRewardShare_,
-            fixedSheriffReward_,
-            minimalVotesForRequest_,
-            minimalDepositForSheriff_,
-            requestReward_
-        );
-    }
-
-    function __WalletHunters_init_unchained(
-        address admin,
-        address trustedForwarder_,
-        address stakingToken_,
-        uint256 votingDuration_,
-        uint256 sheriffsRewardShare_,
-        uint256 fixedSheriffReward_,
-        uint256 minimalVotesForRequest_,
-        uint256 minimalDepositForSheriff_,
-        uint256 requestReward_
-    ) internal initializer {
-        require(stakingToken_.isContract(), "StakingToken must be contract");
-        require(
-            trustedForwarder_.isContract(),
-            "StakingToken must be contract"
-        );
-
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
-        _setupRole(MAYOR_ROLE, admin);
+        _setupRole(DEFAULT_ADMIN_ROLE, admin_);
 
         stakingToken = IERC20Upgradeable(stakingToken_);
+    }
 
-        super._setTrustedForwarder(trustedForwarder_);
+    function submitWantedList(
+        address sheriff,
+        uint256 wantedListId,
+        uint256 duration,
+        uint256 proposalReward,
+        uint16 amountProposals,
+        uint16 sheriffsRewardShare,
+        uint32 votingDuration
+    ) external override onlyIdNotWantedListOrProposal(wantedListId) onlySheriff(sheriff) {
+        require(sheriff == _msgSender(), "Sender not sheriff");
+        require(duration >= 1 weeks && duration <= 52 weeks, "Duration invalid");
+        require(votingDuration >= 1 hours && votingDuration <= 4 weeks, "Voting period invalid");
+        require(sheriffsRewardShare <= MAX_PERCENT, "Reward share invalid");
+        require(amountProposals > 0 && amountProposals < MAX_PROPOSALS_PER_WANTED_LIST, "Amount proposals invalid");
+        require(proposalReward > 0, "Reward zero");
 
-        _updateConfiguration(
-            votingDuration_,
-            sheriffsRewardShare_,
-            fixedSheriffReward_,
-            minimalVotesForRequest_,
-            minimalDepositForSheriff_,
-            requestReward_
+        uint256 rewardPool = proposalReward.mul(amountProposals);
+
+        wantedLists[wantedListId].sheriff = sheriff;
+        wantedLists[wantedListId].proposalReward = proposalReward;
+        wantedLists[wantedListId].finishTime = block.timestamp.add(duration);
+        wantedLists[wantedListId].amountProposals = amountProposals;
+        wantedLists[wantedListId].sheriffsRewardShare = sheriffsRewardShare;
+        wantedLists[wantedListId].votingDuration = votingDuration;
+
+        _mint(sheriff, wantedListId, rewardPool, "");
+        require(
+            stakingToken.transferFrom(sheriff, address(this), rewardPool),
+            "Transfer fail"
+        );
+
+        emit NewWantedList(
+            sheriff,
+            wantedListId,
+            block.timestamp,
+            wantedLists[wantedListId].finishTime,
+            proposalReward,
+            amountProposals,
+            sheriffsRewardShare,
+            votingDuration
         );
     }
 
-    function submitRequest(address hunter) external override returns (uint256) {
-        require(_msgSender() == hunter, "Sender must be hunter");
+    function submitProposal(
+        address hunter,
+        uint256 proposalId,
+        uint256 wantedListId
+    )
+        external
+        override
+        onlyWantedListIdExists(wantedListId)
+        onlyIdNotWantedListOrProposal(proposalId)
+    {
+        require(hunter == _msgSender(), "Sender must be hunter");
+        require(_wantedListActive(wantedListId), "Wanted list finished");
+        acquireWantedListSlot(wantedListId, proposalId);
+        require(_activeRequests[hunter].add(proposalId), "Smth wrong");
 
-        uint256 id = _requestCounter.current();
-        _requestCounter.increment();
+        proposals[proposalId].finishTime = block.timestamp.add(wantedLists[wantedListId].votingDuration);
+        proposals[proposalId].hunter = hunter;
+        proposals[proposalId].wantedListId = wantedListId;
+        // proposals[proposalId].state = STATE.ACTIVE; initial value
 
-        Request storage _request = _requests[id];
-
-        uint256 configurationIndex = _currentConfigurationIndex();
-
-        _request.hunter = hunter;
-        _request.reward = _configurations[configurationIndex].requestReward;
-        _request.configurationIndex = configurationIndex;
-        _request.discarded = false;
-        // solhint-disable-next-line not-rely-on-time
-        _request.creationTime = block.timestamp;
-
-        // ignore return
-        _activeRequests[hunter].add(id);
-
-        emit NewWalletRequest(id, hunter, _request.reward);
-
-        return id;
+        emit NewProposal(
+            hunter,
+            proposalId,
+            wantedListId,
+            block.timestamp,
+            proposals[proposalId].finishTime
+        );
     }
 
     function stake(address sheriff, uint256 amount) external override {
-        require(sheriff == _msgSender(), "Sender must be sheriff");
-        require(amount > 0, "Cannot deposit 0");
-        _mint(sheriff, amount);
-        stakingToken.safeTransferFrom(sheriff, address(this), amount);
+        require(sheriff == _msgSender(), "Sender not sheriff");
+
+        _mint(sheriff, STAKING_TOKEN_ID, amount, "");
+        require(
+            stakingToken.transferFrom(sheriff, address(this), amount),
+            "Transfer fail"
+        );
+
         emit Staked(sheriff, amount);
     }
 
     function vote(
         address sheriff,
-        uint256 requestId,
+        uint256 proposalId,
         bool voteFor
-    ) external override {
-        require(sheriff == _msgSender(), "Sender must be sheriff");
-        require(isSheriff(sheriff), "Sender is not sheriff");
-        require(_votingState(requestId), "Voting is finished");
+    ) external override whenVoting(proposalId) onlySheriff(sheriff) {
+        require(sheriff == _msgSender(), "Sender not sheriff");
         require(
-            _requests[requestId].hunter != sheriff,
-            "Sheriff can't be hunter"
+            _activeRequests[sheriff].add(proposalId),
+            "User already participated"
         );
 
-        uint256 amount = balanceOf(sheriff);
-
-        require(
-            _activeRequests[sheriff].add(requestId),
-            "User is already participated"
-        );
-        require(
-            _requestVotings[requestId].voters.add(sheriff),
-            "Sheriff is already participated"
-        );
-        _requestVotings[requestId].votes[sheriff].amount = amount;
+        uint256 amount = balanceOf(sheriff, STAKING_TOKEN_ID);
+        require(amount <= uint256(type(int256).max), "Too many votes");
 
         if (voteFor) {
-            _requestVotings[requestId].votes[sheriff].voteFor = true;
-            _requestVotings[requestId].votesFor =
-                _requestVotings[requestId].votesFor +
-                amount;
+            _sheriffVotes[proposalId][sheriff].amount = int256(amount);
+            requestVotings[proposalId].votesFor = requestVotings[proposalId].votesFor
+                .add(amount);
         } else {
-            _requestVotings[requestId].votes[sheriff].voteFor = false;
-            _requestVotings[requestId].votesAgainst =
-                _requestVotings[requestId].votesAgainst +
-                amount;
+            _sheriffVotes[proposalId][sheriff].amount = -int256(amount);
+            requestVotings[proposalId].votesAgainst = requestVotings[proposalId].votesAgainst
+                .add(amount);
         }
 
-        emit Voted(requestId, sheriff, amount, voteFor);
+        emit Voted(sheriff, proposalId, amount, voteFor);
     }
 
-    function discardRequest(uint256 requestId)
+    function mint(
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) external override {
+        require(hasRole(MINTER_ROLE, _msgSender()), "Sender isnt minter");
+
+        _mint(to, id, amount, data);
+    }
+
+    function discardRequest(uint256 proposalId)
         external
         override
-        onlyRole(MAYOR_ROLE)
+        onlyProposalIdExists(proposalId)
+        whenVoting(proposalId)
     {
-        require(_votingState(requestId), "Voting is finished");
+        require(
+            wantedLists[proposals[proposalId].wantedListId].sheriff == _msgSender()
+                || hasRole(MAYOR_ROLE, _msgSender()),
+            "Sender not sheriff"
+        );
 
-        _requests[requestId].discarded = true;
+        proposals[proposalId].state = State.DISCARDED;
 
-        emit RequestDiscarded(requestId);
+        emit RequestDiscarded(proposalId);
     }
 
     function withdraw(address sheriff, uint256 amount) public override {
-        require(sheriff == _msgSender(), "Sender must be sheriff");
-        require(amount > 0, "Cannot withdraw 0");
-        uint256 available = balanceOf(sheriff) - lockedBalance(sheriff);
+        require(sheriff == _msgSender(), "Sender not sheriff");
+        uint256 available = balanceOf(sheriff, STAKING_TOKEN_ID)
+            .sub(lockedBalance(sheriff));
         require(amount <= available, "Withdraw exceeds balance");
-        _burn(sheriff, amount);
-        stakingToken.safeTransfer(sheriff, amount);
+
+        _burn(sheriff, STAKING_TOKEN_ID, amount);
+        require(stakingToken.transfer(sheriff, amount), "Transfer fail");
+
         emit Withdrawn(sheriff, amount);
     }
 
-    function exit(address sheriff, uint256[] calldata requestIds)
-        external
-        override
-    {
-        claimRewards(sheriff, requestIds);
-        withdraw(sheriff, balanceOf(sheriff));
-    }
+    function claimRewards(address user, uint256 amountClaims) public override {
+        require(user == _msgSender(), "Sender not user");
 
-    function replenishRewardPool(address from, uint256 amount)
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        require(from == _msgSender(), "Sender must be from address");
-        rewardsPool += amount;
-
-        stakingToken.safeTransferFrom(from, address(this), amount);
-
-        emit ReplenishedRewardPool(from, amount);
-    }
-
-    function claimRewards(address user, uint256[] calldata requestIds)
-        public
-        override
-    {
-        require(user == _msgSender(), "Sender must be user");
         uint256 totalReward = 0;
+        uint256 threshold = _activeRequests[user].length().sub(amountClaims);
 
-        for (uint256 i = 0; i < requestIds.length; i++) {
-            uint256 requestId = requestIds[i];
+        for (uint256 i = _activeRequests[user].length(); i > threshold; i = i.sub(1)) {
+            uint256 proposalId = _activeRequests[user].at(i.sub(1));
 
-            uint256 reward = userReward(user, requestId);
+            State state = proposalState(proposalId);
+            _saveProposalState(proposalId, state);
+            if (state == State.ACTIVE) {
+                // voting is not finished
+                continue;
+            }
 
-            _activeRequests[user].remove(requestId);
-
-            totalReward = totalReward + reward;
-        }
-
-        if (totalReward > 0) {
-            _transferReward(user, totalReward);
-        }
-
-        emit UserRewardPaid(user, requestIds, totalReward);
-    }
-
-    function claimHunterReward(address hunter, uint256[] calldata requestIds)
-        external
-        override
-    {
-        require(hunter == _msgSender(), "Sender must be hunter");
-        uint256 totalReward = 0;
-
-        for (uint256 i = 0; i < requestIds.length; i++) {
-            uint256 requestId = requestIds[i];
-
-            uint256 reward = hunterReward(hunter, requestId);
-            _activeRequests[hunter].remove(requestId);
-
-            totalReward = totalReward + reward;
-        }
-
-        if (totalReward > 0) {
-            _transferReward(hunter, totalReward);
-        }
-
-        emit HunterRewardPaid(hunter, requestIds, totalReward);
-    }
-
-    function claimSheriffRewards(address sheriff, uint256[] calldata requestIds)
-        external
-        override
-    {
-        require(sheriff == _msgSender(), "Sender must be sheriff");
-        uint256 totalReward = 0;
-
-        for (uint256 i = 0; i < requestIds.length; i++) {
-            uint256 requestId = requestIds[i];
-
-            uint256 reward = sheriffReward(sheriff, requestId);
-            _activeRequests[sheriff].remove(requestId);
-
-            totalReward = totalReward + reward;
-        }
-
-        if (totalReward > 0) {
-            _transferReward(sheriff, totalReward);
-        }
-
-        emit SheriffRewardPaid(sheriff, requestIds, totalReward);
-    }
-
-    function updateConfiguration(
-        uint256 _votingDuration,
-        uint256 _sheriffsRewardShare,
-        uint256 _fixedSheriffReward,
-        uint256 _minimalVotesForRequest,
-        uint256 _minimalDepositForSheriff,
-        uint256 _requestReward
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        _updateConfiguration(
-            _votingDuration,
-            _sheriffsRewardShare,
-            _fixedSheriffReward,
-            _minimalVotesForRequest,
-            _minimalDepositForSheriff,
-            _requestReward
-        );
-    }
-
-    function configuration()
-        external
-        view
-        override
-        returns (
-            uint256 votingDuration,
-            uint256 sheriffsRewardShare,
-            uint256 fixedSheriffReward,
-            uint256 minimalVotesForRequest,
-            uint256 minimalDepositForSheriff,
-            uint256 requestReward
-        )
-    {
-        Configuration storage _configuration = _configurations[
-            _currentConfigurationIndex()
-        ];
-
-        votingDuration = _configuration.votingDuration;
-        sheriffsRewardShare = _configuration.sheriffsRewardShare;
-        fixedSheriffReward = _configuration.fixedSheriffReward;
-        minimalVotesForRequest = _configuration.minimalVotesForRequest;
-        minimalDepositForSheriff = _configuration.minimalDepositForSheriff;
-        requestReward = _configuration.requestReward;
-    }
-
-    function configurationAt(uint256 index)
-        external
-        view
-        returns (
-            uint256 votingDuration,
-            uint256 sheriffsRewardShare,
-            uint256 fixedSheriffReward,
-            uint256 minimalVotesForRequest,
-            uint256 minimalDepositForSheriff,
-            uint256 requestReward
-        )
-    {
-        require(
-            index <= _currentConfigurationIndex(),
-            "Configuration doesn't exist"
-        );
-        Configuration storage _configuration = _configurations[index];
-
-        votingDuration = _configuration.votingDuration;
-        sheriffsRewardShare = _configuration.sheriffsRewardShare;
-        fixedSheriffReward = _configuration.fixedSheriffReward;
-        minimalVotesForRequest = _configuration.minimalVotesForRequest;
-        minimalDepositForSheriff = _configuration.minimalDepositForSheriff;
-        requestReward = _configuration.requestReward;
-    }
-
-    function _currentConfigurationIndex() internal view returns (uint256) {
-        return _configurations.length - 1;
-    }
-
-    function _updateConfiguration(
-        uint256 _votingDuration,
-        uint256 _sheriffsRewardShare,
-        uint256 _fixedSheriffReward,
-        uint256 _minimalVotesForRequest,
-        uint256 _minimalDepositForSheriff,
-        uint256 _requestReward
-    ) internal {
-        require(
-            _votingDuration >= 10 minutes && _votingDuration <= 1 weeks,
-            "Voting duration too long"
-        );
-        require(
-            _sheriffsRewardShare > 0 && _sheriffsRewardShare < MAX_PERCENT,
-            "Sheriff share too much"
-        );
-
-        _configurations.push(
-            Configuration({
-                votingDuration: _votingDuration,
-                sheriffsRewardShare: _sheriffsRewardShare,
-                fixedSheriffReward: _fixedSheriffReward,
-                minimalVotesForRequest: _minimalVotesForRequest,
-                minimalDepositForSheriff: _minimalDepositForSheriff,
-                requestReward: _requestReward
-            })
-        );
-
-        emit ConfigurationChanged(
-            _votingDuration,
-            _sheriffsRewardShare,
-            _fixedSheriffReward,
-            _minimalVotesForRequest,
-            _minimalDepositForSheriff,
-            _requestReward
-        );
-    }
-
-    function walletProposalsLength() external view override returns (uint256) {
-        return _requestCounter.current();
-    }
-
-    function walletProposals(uint256 startRequestId, uint256 pageSize)
-        external
-        view
-        override
-        returns (WalletProposal[] memory)
-    {
-        require(
-            startRequestId + pageSize <= _requestCounter.current(),
-            "Read index out of bounds"
-        );
-
-        WalletProposal[] memory result = new WalletProposal[](pageSize);
-
-        for (uint256 i = 0; i < pageSize; i++) {
-            _walletProposal(startRequestId + i, result[i]);
-        }
-
-        return result;
-    }
-
-    function walletProposal(uint256 requestId)
-        public
-        view
-        override
-        returns (WalletProposal memory)
-    {
-        require(requestId < _requestCounter.current(), "Request doesn't exist");
-        WalletProposal memory proposal;
-
-        _walletProposal(requestId, proposal);
-
-        return proposal;
-    }
-
-    function _walletProposal(uint256 requestId, WalletProposal memory proposal)
-        internal
-        view
-    {
-        proposal.requestId = requestId;
-
-        proposal.hunter = _requests[requestId].hunter;
-        proposal.reward = _requests[requestId].reward;
-        proposal.creationTime = _requests[requestId].creationTime;
-
-        uint256 configurationIndex = _requests[requestId].configurationIndex;
-
-        proposal.finishTime =
-            _requests[requestId].creationTime +
-            _configurations[configurationIndex].votingDuration;
-
-        proposal.sheriffsRewardShare = _configurations[configurationIndex]
-        .sheriffsRewardShare;
-        proposal.fixedSheriffReward = _configurations[configurationIndex]
-        .fixedSheriffReward;
-
-        proposal.votesFor = _requestVotings[requestId].votesFor;
-        proposal.votesAgainst = _requestVotings[requestId].votesAgainst;
-
-        proposal.claimedReward = !_activeRequests[_requests[requestId].hunter]
-        .contains(requestId);
-        proposal.state = _walletState(requestId);
-    }
-
-    function getVotesLength(uint256 requestId)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return _requestVotings[requestId].voters.length();
-    }
-
-    function getVotes(
-        uint256 requestId,
-        uint256 startIndex,
-        uint256 pageSize
-    ) external view override returns (WalletVote[] memory) {
-        require(
-            startIndex + pageSize <= _requestVotings[requestId].voters.length(),
-            "Read index out of bounds"
-        );
-
-        WalletVote[] memory result = new WalletVote[](pageSize);
-
-        for (uint256 i = 0; i < pageSize; i++) {
-            address voter = _requestVotings[requestId].voters.at(
-                startIndex + i
+            require(
+                _activeRequests[user].remove(proposalId),
+                "Already rewarded"
             );
-            _getVote(requestId, voter, result[i]);
+
+            uint256 reward;
+            if (proposals[proposalId].hunter == user) {
+                reward = hunterReward(proposalId);
+                _mint(user, proposalId, 1, "");
+            } else {
+                reward = sheriffReward(user, proposalId);
+
+                delete _sheriffVotes[proposalId][user];
+            }
+
+            if (reward > 0) {
+                uint256 wantedListId = proposals[proposalId].wantedListId;
+                _burn(
+                    wantedLists[wantedListId].sheriff,
+                    wantedListId,
+                    reward
+                );
+            }
+
+            totalReward = totalReward.add(reward);
         }
 
-        return result;
+        // reward staking tokens
+        if (totalReward > 0) {
+            require(stakingToken.transfer(user, totalReward), "Transfer fail");
+        }
+
+        emit UserRewardPaid(user, totalReward);
     }
 
-    function getVote(uint256 requestId, address sheriff)
-        external
-        view
-        override
-        returns (WalletVote memory)
-    {
-        WalletVote memory _vote;
+    function acquireWantedListSlot(uint256 wantedListId, uint256 proposalId) private {
 
-        _getVote(requestId, sheriff, _vote);
+        if (_wantedListSlots[wantedListId].length() == wantedLists[wantedListId].amountProposals) {
+            for (uint256 i = _wantedListSlots[wantedListId].length(); i > 0; i = i.sub(1)) {
+                uint256 _proposalId = _wantedListSlots[wantedListId].at(i.sub(1));
 
-        return _vote;
+                State state = proposalState(_proposalId);
+                _saveProposalState(_proposalId, state);
+                if (state == State.DISCARDED || state == State.INSUFFICIENTED) {
+                    require(_wantedListSlots[wantedListId].remove(_proposalId), "Smth wrong");
+                    break;
+                }
+            }
+        }
+
+        require(_wantedListSlots[wantedListId].add(proposalId), "Smth wrong");
+        require(_wantedListSlots[wantedListId].length() <= wantedLists[wantedListId].amountProposals, "Limit reached");
     }
 
-    function _transferReward(address destination, uint256 amount) internal {
-        require(amount <= rewardsPool, "Don't enough tokens in reward pool");
-
-        rewardsPool -= amount;
-
-        stakingToken.safeTransfer(destination, amount);
-    }
-
-    function _getVote(
-        uint256 requestId,
-        address sheriff,
-        WalletVote memory _vote
-    ) internal view {
-        require(requestId < _requestCounter.current(), "Request doesn't exist");
-
-        _vote.requestId = requestId;
-        _vote.sheriff = sheriff;
-
-        _vote.amount = _requestVotings[requestId].votes[sheriff].amount;
-        _vote.voteFor = _requestVotings[requestId].votes[sheriff].voteFor;
+    function setTrustedForwarder(address _trustedForwarder) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Access denied");
+        address previousForwarder = trustedForwarder;
+        trustedForwarder = _trustedForwarder;
+        emit TrustedForwarderChanged(previousForwarder, _trustedForwarder);
     }
 
     function userRewards(address user)
         external
         view
         override
-        returns (uint256)
+        returns (uint256 totalReward)
     {
-        uint256 totalReward = 0;
 
-        for (uint256 i = 0; i < _activeRequests[user].length(); i++) {
-            uint256 requestId = _activeRequests[user].at(i);
-
-            if (_votingState(requestId)) {
-                // voting is not finished
-                continue;
+        for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
+            if (proposals[_activeRequests[user].at(i)].hunter == user) {
+                totalReward = totalReward.add(hunterReward(_activeRequests[user].at(i)));
+            } else {
+                totalReward = totalReward.add(sheriffReward(user, _activeRequests[user].at(i)));
             }
-
-            uint256 reward = userReward(user, requestId);
-
-            totalReward = totalReward + reward;
         }
-
-        return totalReward;
     }
 
-    function userReward(address user, uint256 requestId)
+    function hunterReward(uint256 proposalId)
         public
         view
         override
+        whenVotingFinished(proposalId)
         returns (uint256)
     {
-        uint256 reward;
-        if (_requests[requestId].hunter == user) {
-            reward = hunterReward(user, requestId);
-        } else {
-            reward = sheriffReward(user, requestId);
-        }
+        State state = proposalState(proposalId);
 
-        return reward;
-    }
-
-    function hunterReward(address hunter, uint256 requestId)
-        public
-        view
-        override
-        returns (uint256)
-    {
-        require(!_votingState(requestId), "Voting is not finished");
-        require(
-            hunter == _requests[requestId].hunter,
-            "Hunter isn't valid for request"
-        );
-        require(
-            _activeRequests[hunter].contains(requestId),
-            "Already rewarded"
-        );
-
-        if (!_isEnoughVotes(requestId) || _requests[requestId].discarded) {
-            return 0;
-        }
-
-        if (_walletApproved(requestId)) {
-            uint256 sheriffsRewardShare = _configurations[
-                _requests[requestId].configurationIndex
-            ]
-            .sheriffsRewardShare;
-
-            return
-                (_requests[requestId].reward *
-                    (MAX_PERCENT - sheriffsRewardShare)) / MAX_PERCENT;
+        if (state == State.APPROVED) {
+            return wantedLists[proposals[proposalId].wantedListId].proposalReward
+                .mul(MAX_PERCENT.sub(uint256(wantedLists[proposals[proposalId].wantedListId].sheriffsRewardShare)))
+                .div(MAX_PERCENT);
         } else {
             return 0;
         }
     }
 
-    function sheriffReward(address sheriff, uint256 requestId)
+    function sheriffReward(address sheriff, uint256 proposalId)
         public
         view
         override
+        whenVotingFinished(proposalId)
         returns (uint256)
     {
-        require(!_votingState(requestId), "Voting is not finished");
-        require(
-            _requestVotings[requestId].votes[sheriff].amount > 0,
-            "Sheriff doesn't vote"
-        );
-        require(
-            _activeRequests[sheriff].contains(requestId),
-            "Already rewarded"
-        );
+        State state = proposalState(proposalId);
 
-        if (!_isEnoughVotes(requestId) || _requests[requestId].discarded) {
-            return 0;
-        }
+        int256 votes = _sheriffVotes[proposalId][sheriff].amount;
 
-        bool walletApproved = _walletApproved(requestId);
+        if (state == State.APPROVED && votes > 0 || state == State.DECLINED && votes < 0) {
+            uint256 totalVotes = votes > 0 ? requestVotings[proposalId].votesFor : requestVotings[proposalId].votesAgainst;
+            uint256 wantedListId = proposals[proposalId].wantedListId;
 
-        if (
-            walletApproved && _requestVotings[requestId].votes[sheriff].voteFor
-        ) {
-            uint256 reward = _requests[requestId].reward;
-            uint256 votes = _requestVotings[requestId].votes[sheriff].amount;
-            uint256 totalVotes = _requestVotings[requestId].votesFor;
-            uint256 sheriffsRewardShare = _configurations[
-                _requests[requestId].configurationIndex
-            ]
-            .sheriffsRewardShare;
-            uint256 fixedSheriffReward = _configurations[
-                _requests[requestId].configurationIndex
-            ]
-            .fixedSheriffReward;
-
-            uint256 actualReward = (((reward * votes) / totalVotes) *
-                sheriffsRewardShare) / MAX_PERCENT;
-
-            return MathUpgradeable.max(actualReward, fixedSheriffReward);
-        } else if (
-            !walletApproved &&
-            !_requestVotings[requestId].votes[sheriff].voteFor
-        ) {
-            return
-                _configurations[_requests[requestId].configurationIndex]
-                    .fixedSheriffReward;
+            return wantedLists[wantedListId].proposalReward
+                .mul(uint256(abs(votes)))
+                .div(totalVotes)
+                .mul(uint256(wantedLists[wantedListId].sheriffsRewardShare))
+                .div(MAX_PERCENT);
         } else {
             return 0;
         }
     }
 
-    function setTrustedForwarder(address trustedForwarder)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        super._setTrustedForwarder(trustedForwarder);
-    }
+    function withdrawRemainingRewardPool(address sheriff, uint256 wantedListId) external override {
+        require(_msgSender() == sheriff, "Sender must be sheriff");
+        require(wantedLists[wantedListId].sheriff == sheriff, "Sheriff invalid");
+        require(!_wantedListActive(wantedListId), "Wanted list not finished");
 
-    function activeRequests(
-        address user,
-        uint256 startIndex,
-        uint256 pageSize
-    ) external view override returns (uint256[] memory) {
-        require(
-            startIndex + pageSize <= _activeRequests[user].length(),
-            "Read index out of bounds"
-        );
+        uint256 withdrawAmount = 0;
 
-        uint256[] memory result = new uint256[](pageSize);
+        for (uint256 i = _wantedListSlots[wantedListId].length(); i > 0; i = i.sub(1)) {
+            uint256 _proposalId = _wantedListSlots[wantedListId].at(i.sub(1));
 
-        for (uint256 i = 0; i < pageSize; i++) {
-            result[i] = _activeRequests[user].at(startIndex + i);
+            State state = proposalState(_proposalId);
+            _saveProposalState(_proposalId, state);
+
+            if (state == State.ACTIVE) {
+                revert("Voting is not finished");
+            } else if (state == State.DECLINED) {
+                withdrawAmount = wantedLists[wantedListId].proposalReward
+                    .mul(MAX_PERCENT.sub(uint256(wantedLists[wantedListId].sheriffsRewardShare)))
+                    .div(MAX_PERCENT)
+                    .add(withdrawAmount);
+            } else if (state == State.DISCARDED || state == State.INSUFFICIENTED) {
+                withdrawAmount = wantedLists[wantedListId].proposalReward
+                    .add(withdrawAmount);
+            }
         }
 
-        return result;
-    }
+        withdrawAmount = wantedLists[wantedListId].proposalReward
+            .mul(uint256(wantedLists[wantedListId].amountProposals).sub(_wantedListSlots[wantedListId].length()))
+            .add(withdrawAmount);
 
-    function activeRequest(address user, uint256 index)
-        external
-        view
-        override
-        returns (uint256)
-    {
-        return _activeRequests[user].at(index);
+        if (withdrawAmount > 0) {
+            _burn(sheriff, wantedListId, withdrawAmount);
+            require(stakingToken.transfer(sheriff, withdrawAmount), "Transfer fail");
+        }
+
+        delete _wantedListSlots[wantedListId];
+        delete wantedLists[wantedListId].amountProposals;
+
+        emit RemainingRewardPoolWithdrawed(sheriff, withdrawAmount);
     }
 
     function activeRequestsLength(address user)
@@ -760,10 +425,11 @@ contract WalletHunters is
     }
 
     function isSheriff(address sheriff) public view override returns (bool) {
-        return
-            balanceOf(sheriff) >=
-            _configurations[_currentConfigurationIndex()]
-            .minimalDepositForSheriff;
+        return _isSheriff(sheriff);
+    }
+
+    function _isSheriff(address sheriff) private view returns (bool) {
+        return balanceOf(sheriff, STAKING_TOKEN_ID) >= MINIMAL_STAKE;
     }
 
     function lockedBalance(address user)
@@ -772,89 +438,114 @@ contract WalletHunters is
         override
         returns (uint256 locked)
     {
-        locked = 0;
-
-        for (uint256 i = 0; i < _activeRequests[user].length(); i++) {
-            uint256 requestId = _activeRequests[user].at(i);
-            if (!_votingState(requestId)) {
+        for (uint256 i = 0; i < _activeRequests[user].length(); i = i.add(1)) {
+            uint256 proposalId = _activeRequests[user].at(i);
+            if (proposalState(proposalId) != State.ACTIVE || proposals[proposalId].hunter == user) {
                 // voting finished
                 continue;
             }
 
-            uint256 votes = _requestVotings[requestId].votes[user].amount;
-            if (votes > locked) {
-                locked = votes;
+            uint256 votes = uint256(abs(_sheriffVotes[proposalId][user].amount));
+
+            locked = votes > locked ? votes : locked;
+        }
+    }
+
+    function abs(int256 x) private pure returns (int256) {
+        return x >= 0 ? x : -x;
+    }
+
+    function _saveProposalState(uint256 proposalId, State state) private {
+        if (proposals[proposalId].state != state) {
+            proposals[proposalId].state = state;
+        }
+    }
+
+    function proposalState(uint256 proposalId) public view returns (State) {
+        if (proposals[proposalId].state == State.ACTIVE) {
+            if (_proposalVoting(proposalId)) {
+                return State.ACTIVE;
+            } else if (!_enoughVotes(proposalId)) {
+                return State.INSUFFICIENTED;
+            } else if (_walletApproved(proposalId)) {
+                return State.APPROVED;
+            } else {
+                return State.DECLINED;
+            }
+        } else {
+            return proposals[proposalId].state;
+        }
+    }
+
+    function _proposalVoting(uint256 proposalId) private view returns (bool) {
+        return
+            block.timestamp < proposals[proposalId].finishTime;
+    }
+
+    function _wantedListActive(uint256 wantedListId) private view returns (bool) {
+        return
+            block.timestamp < wantedLists[wantedListId].finishTime;
+    }
+
+    function _enoughVotes(uint256 proposalId) private view returns (bool) {
+        return
+            requestVotings[proposalId].votesFor
+                .add(requestVotings[proposalId].votesAgainst) >= MINIMAL_VOTES;
+    }
+
+    function _walletApproved(uint256 proposalId) private view returns (bool) {
+        uint256 totalVotes = requestVotings[proposalId].votesFor
+            .add(requestVotings[proposalId].votesAgainst);
+
+        return
+            requestVotings[proposalId].votesFor
+                .mul(MAX_PERCENT)
+                .div(totalVotes) > SUPER_MAJORITY;
+    }
+
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal virtual override {
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+
+        for (uint256 i = 0; i < ids.length; i = i.add(1)) {
+            if (from != address(0) && to != address(0)) {
+                require(
+                    ids[i] != STAKING_TOKEN_ID
+                    && wantedLists[ids[i]].sheriff == address(0),
+                    "Transfer protection"
+                );
             }
         }
-    }
-
-    function _walletState(uint256 requestId) internal view returns (State) {
-        if (_requests[requestId].discarded) {
-            return State.DISCARDED;
-        }
-
-        if (_votingState(requestId)) {
-            return State.ACTIVE;
-        }
-
-        if (_isEnoughVotes(requestId) && _walletApproved(requestId)) {
-            return State.APPROVED;
-        } else {
-            return State.DECLINED;
-        }
-    }
-
-    function _isEnoughVotes(uint256 requestId) internal view returns (bool) {
-        uint256 totalVotes = _requestVotings[requestId].votesFor +
-            _requestVotings[requestId].votesAgainst;
-
-        uint256 minimalVotesForRequest = _configurations[
-            _requests[requestId].configurationIndex
-        ]
-        .minimalVotesForRequest;
-
-        return totalVotes >= minimalVotesForRequest;
-    }
-
-    function _walletApproved(uint256 requestId) internal view returns (bool) {
-        uint256 totalVotes = _requestVotings[requestId].votesFor +
-            _requestVotings[requestId].votesAgainst;
-
-        return
-            (_requestVotings[requestId].votesFor * MAX_PERCENT) / totalVotes >
-            SUPER_MAJORITY;
-    }
-
-    function _votingState(uint256 requestId) internal view returns (bool) {
-        require(requestId < _requestCounter.current(), "Request doesn't exist");
-
-        // solhint-disable-next-line not-rely-on-time
-        uint256 votingDuration = _configurations[
-            _requests[requestId].configurationIndex
-        ]
-        .votingDuration;
-
-        return
-            block.timestamp <
-            _requests[requestId].creationTime + votingDuration &&
-            !_requests[requestId].discarded;
     }
 
     function _msgSender()
         internal
         view
-        override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (address)
+        virtual
+        override
+        returns (address payable sender)
     {
-        return super._msgSender();
+        if (msg.sender == trustedForwarder) {
+            // The assembly code is more direct than the Solidity version using `abi.decode`.
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return super._msgSender();
+        }
     }
 
-    function _msgData()
-        internal
-        view
-        override(ContextUpgradeable, ERC2771ContextUpgradeable)
-        returns (bytes calldata)
-    {
-        return super._msgData();
+    function _msgData() internal view virtual override returns (bytes memory) {
+        if (msg.sender == trustedForwarder) {
+            return msg.data[:msg.data.length - 20];
+        } else {
+            return super._msgData();
+        }
     }
 }

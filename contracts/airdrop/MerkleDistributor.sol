@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.7.6;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "../interfaces/IMerkleDistributor.sol";
+import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
+
+import "./IMerkleDistributor.sol";
 import "../utils/UintBitmap.sol";
 
 contract MerkleDistributor is IMerkleDistributor {
     using UintBitmap for UintBitmap.Bitmap;
-    using SafeERC20 for IERC20;
 
-    address public override immutable token;
-    bytes32 public override immutable merkleRoot;
+    address public override token;
+    bytes32 public override merkleRoot;
 
     UintBitmap.Bitmap private _claimedBitMap;
 
@@ -36,7 +35,7 @@ contract MerkleDistributor is IMerkleDistributor {
         );
 
         _claimedBitMap.set(index);
-        IERC20(token).safeTransfer(account, amount);
+        require(IERC20(token).transfer(account, amount), "Transfer fail");
 
         emit Claimed(index, account, amount);
     }

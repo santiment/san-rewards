@@ -1,27 +1,22 @@
+/* global hre */
+
 const fs = require('fs')
 const util = require('util');
 
-const readAsync = util.promisify(fs.readFile)
 const writeAsync = util.promisify(fs.writeFile)
 
-module.exports.saveContract = async ({ name, address, network, description }) => {
-    const fileName = `./abi/deployments.json`
+module.exports.saveContract = async ({ name, address, addressImpl }) => {
+    const { abi } = await hre.artifacts.readArtifact(name)
+    const path = `./abi/${hre.network.name}`
+    const filePath = `${path}/${name}.json`
 
-    let deployments = {}
-    try {
-        deployments = JSON.parse(await readAsync(fileName))
-    } catch (e) {
-        console.log(e.message)
+    let deployment = {
+        address,
+        addressImpl,
+        abi,
     }
 
-    deployments[network] = deployments[network] ?? {}
-    deployments[network][name] = deployments[network][name] ?? []
+    fs.mkdirSync(path, { recursive: true })
 
-    deployments[network][name].push({
-        address,
-        description,
-        time: (new Date()).toLocaleString()
-    })
-
-    await writeAsync(fileName, JSON.stringify(deployments, null, 4))
+    await writeAsync(filePath, JSON.stringify(deployment, null, 4))
 }

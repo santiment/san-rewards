@@ -6,7 +6,8 @@ require('@nomiclabs/hardhat-solhint')
 
 require('@openzeppelin/hardhat-upgrades')
 
-require('hardhat-abi-exporter')
+require('@eth-optimism/hardhat-ovm')
+
 require('hardhat-gas-reporter')
 require('hardhat-contract-sizer')
 
@@ -26,11 +27,38 @@ module.exports = {
             gasPrice: 'auto',
             gasMultiplier: 1,
             loggingEnabled: true
-        }
+        },
+        mainnet: {
+            url: `https://mainnet.infura.io/v3/${infuraKey}`,
+            chainId: 1,
+            accounts: { mnemonic },
+            gas: 'auto',
+            gasPrice: 'auto',
+            gasMultiplier: 1,
+            loggingEnabled: true
+        },
+
+        kovan: {
+            url: `https://kovan.infura.io/v3/${infuraKey}`,
+            chainId: 42,
+            accounts: { mnemonic },
+            gas: 'auto',
+            gasPrice: 'auto',
+            gasMultiplier: 1,
+            loggingEnabled: true
+        },
+
+        'optimistic-kovan': {
+            url: `https://optimism-kovan.infura.io/v3/${infuraKey}`,
+            accounts: { mnemonic },
+            ovm: true,
+            gasPrice: 15000000,
+            gas: 5_000_000
+        },
     },
 
     solidity: {
-        version: '0.8.3',
+        version: '0.7.6',
         settings: {
             optimizer: {
                 enabled: true,
@@ -39,10 +67,8 @@ module.exports = {
         },
     },
 
-    abiExporter: {
-      path: './abi',
-      flat: true,
-      only: ['WalletHunters', 'WalletHuntersV2', 'TrustedForwarder', "IERC20Metadata"],
+    ovm: {
+        solcVersion: '0.7.6'
     },
 
     etherscan: {
