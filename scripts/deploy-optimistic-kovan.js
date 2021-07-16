@@ -11,7 +11,7 @@ async function main() {
     const l1Token = '0x529CCeB5E7C5271af5f0dcBfbD80bEb0EE3Ab7c8'
     const l2Token = '0xac47f49579c1Aabc231502007fA056635Fc7dDa8'
 
-    await deployAirdrop(l2Token, "0xddca499c86140df98f46c90a2e5ea54c61b460bb7b1955774c8a9c1157a91c4e")
+    await deployHunters(admin, proxyAdmin, l2Token)
 }
 
 async function deployAirdrop(token, merkleRoot) {
@@ -67,7 +67,6 @@ async function deployToken(l1Token) {
 async function deployHunters(admin, proxyAdmin, tokenAddress) {
 
     const WalletHunters = await ethers.getContractFactory('WalletHunters')
-    // const huntersImpl = await WalletHunters.attach("0x50A670ca720c0c9E9ad4C85bE6943a410aD47147")
     const huntersImpl = await WalletHunters.deploy()
     await huntersImpl.deployed()
 
