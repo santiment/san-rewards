@@ -74,7 +74,7 @@ async function deployHunters(admin, proxyAdmin, tokenAddress) {
     const initialize = await huntersImpl.interface.encodeFunctionData('initialize', [
         admin.address,
         tokenAddress,
-        "https://example.com/token/{id}",
+        "https://hunters-stage.satiment.net/token/{id}",
     ])
     const hunters = await TransparentUpgradeableProxy.deploy(huntersImpl.address, proxyAdmin, initialize)
     await hunters.deployed()

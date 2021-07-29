@@ -1,6 +1,6 @@
 {
-    "address": "0x754F26E969927603511da3c2ed7fEFab0EFEDD4e",
-    "addressImpl": "0xD6e0665dc0Cd77A831eDaFCE0A29FeA0dE1eC766",
+    "address": "0x985DAFb0fA61eb3C59B897E0E10C6f7AA27eA1Fc",
+    "addressImpl": "0x88fDb7Ea40C1b50edDEDa17Cc457Ca357e371c7A",
     "abi": [
         {
             "anonymous": false,
@@ -149,6 +149,31 @@
                 }
             ],
             "name": "RequestDiscarded",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "user",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "proposalId",
+                    "type": "uint256"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "reward",
+                    "type": "uint256"
+                }
+            ],
+            "name": "RewardPaid",
             "type": "event"
         },
         {
@@ -355,25 +380,6 @@
                 }
             ],
             "name": "URI",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "internalType": "address",
-                    "name": "user",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "totalReward",
-                    "type": "uint256"
-                }
-            ],
-            "name": "UserRewardPaid",
             "type": "event"
         },
         {
