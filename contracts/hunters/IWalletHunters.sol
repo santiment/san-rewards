@@ -65,7 +65,7 @@ interface IWalletHunters {
         bool voteFor
     );
 
-    event RewardPaid(address indexed user, uint256 proposalId, uint256 reward);
+    event RewardPaid(address indexed user, uint256 indexed proposalId, uint256 reward);
 
     event RequestDiscarded(uint256 indexed proposalId);
 

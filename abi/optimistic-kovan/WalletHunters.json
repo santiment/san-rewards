@@ -1,6 +1,6 @@
 {
-    "address": "0x985DAFb0fA61eb3C59B897E0E10C6f7AA27eA1Fc",
-    "addressImpl": "0x88fDb7Ea40C1b50edDEDa17Cc457Ca357e371c7A",
+    "address": "0xe88982EC778A9c2f6bE6924CFdE0bDA2af5d0f57",
+    "addressImpl": "0xC1595034141d6Ac4070B02D02fD790882Cac1114",
     "abi": [
         {
             "anonymous": false,
@@ -161,7 +161,7 @@
                     "type": "address"
                 },
                 {
-                    "indexed": false,
+                    "indexed": true,
                     "internalType": "uint256",
                     "name": "proposalId",
                     "type": "uint256"
