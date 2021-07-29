@@ -34,8 +34,8 @@ describe('MerkleDistributor', function () {
 
     it('Deploy airdrop', async function () {
 
-        const RealTokenMock = await ethers.getContractFactory('RealTokenMock')
-        tokenContract = await RealTokenMock.deploy(1_000_000_000)
+        const RealTokenL1 = await ethers.getContractFactory('RealTokenL1')
+        tokenContract = await RealTokenL1.deploy(1_000_000_000)
         await tokenContract.deployed()
 
         const MerkleDistributor = await ethers.getContractFactory('MerkleDistributor')

@@ -276,17 +276,18 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
                     wantedListId,
                     reward
                 );
+
+                totalReward = totalReward.add(reward);
+
             }
 
-            totalReward = totalReward.add(reward);
+            emit RewardPaid(user, proposalId, reward);
         }
 
         // reward staking tokens
         if (totalReward > 0) {
             require(stakingToken.transfer(user, totalReward), "Transfer fail");
         }
-
-        emit UserRewardPaid(user, totalReward);
     }
 
     function acquireWantedListSlot(uint256 wantedListId, uint256 proposalId) private {

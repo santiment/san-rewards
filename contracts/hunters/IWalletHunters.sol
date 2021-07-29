@@ -65,11 +65,9 @@ interface IWalletHunters {
         bool voteFor
     );
 
-    event UserRewardPaid(address indexed user, uint256 totalReward);
+    event RewardPaid(address indexed user, uint256 proposalId, uint256 reward);
 
-    event RequestDiscarded(
-        uint256 indexed proposalId
-    );
+    event RequestDiscarded(uint256 indexed proposalId);
 
     event TrustedForwarderChanged(address previous, address current);
 
