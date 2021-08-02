@@ -11,7 +11,8 @@ async function main() {
     const l1Token = '0x529CCeB5E7C5271af5f0dcBfbD80bEb0EE3Ab7c8'
     const l2Token = '0xac47f49579c1Aabc231502007fA056635Fc7dDa8'
 
-    await deployHunters(admin, proxyAdmin, l2Token)
+    const token = await deployTokenL1()
+    await deployHunters(admin, proxyAdmin, token.address)
 }
 
 async function deployAirdrop(token, merkleRoot) {
@@ -51,7 +52,20 @@ async function deployForwarder(relayerAddress) {
     })
 }
 
-async function deployToken(l1Token) {
+async function deployTokenL1() {
+    const RealTokenL1 = await ethers.getContractFactory('RealTokenL1')
+    const l1token = await RealTokenL1.deploy(token('1000000000'))
+    await l1token.deployed()
+
+    await saveContract({
+        name: 'RealTokenL1',
+        address: l1token.address,
+    })
+
+    return l1token
+}
+
+async function deployTokenL2(l1Token) {
     const RealTokenL2 = await ethers.getContractFactory('RealTokenL2')
     const token = await RealTokenL2.deploy(l1Token)
     await token.deployed()

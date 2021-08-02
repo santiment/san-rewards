@@ -71,7 +71,11 @@ interface IWalletHunters {
 
     event TrustedForwarderChanged(address previous, address current);
 
-    event RemainingRewardPoolWithdrawed(address indexed sheriff, uint256 amount);
+    event RemainingRewardPoolWithdrawed(
+        address indexed sheriff,
+        uint256 indexed wantedListId,
+        uint256 amount
+    );
 
     /**
      * @dev        Submit a new wallet request. Request automatically moved in active state, see

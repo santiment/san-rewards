@@ -19,6 +19,10 @@ const report = process.env.REPORT
 
 module.exports = {
     networks: {
+        dev: {
+            url: `http://127.0.0.1:8545/`,
+            accounts: { mnemonic: "test test test test test test test test test test test junk" },
+        },
         rinkeby: {
             url: `https://rinkeby.infura.io/v3/${infuraKey}`,
             chainId: 4,

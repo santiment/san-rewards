@@ -413,7 +413,7 @@ contract WalletHunters is IWalletHunters, ERC1155Upgradeable, AccessControlUpgra
         delete _wantedListSlots[wantedListId];
         delete wantedLists[wantedListId].amountProposals;
 
-        emit RemainingRewardPoolWithdrawed(sheriff, withdrawAmount);
+        emit RemainingRewardPoolWithdrawed(sheriff, wantedListId, withdrawAmount);
     }
 
     function activeRequestsLength(address user)
