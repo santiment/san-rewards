@@ -497,7 +497,7 @@ describe("WalletHunters", function () {
 
             await expect(hunters.withdrawRemainingRewardPool(sheriffBounty.address, wantedListId))
               .to.emit(hunters, 'RemainingRewardPoolWithdrawed')
-              .withArgs(sheriffBounty.address, withdrawAmount)
+              .withArgs(sheriffBounty.address, wantedListId, withdrawAmount)
               .to.emit(realToken, "Transfer")
               .withArgs(hunters.address, sheriffBounty.address, withdrawAmount)
           })
