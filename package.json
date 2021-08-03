@@ -22,6 +22,7 @@
     "author": "Nail Khafizov <854297992c@gmail.com>",
     "devDependencies": {
         "@eth-optimism/contracts": "^0.4.5",
+        "@eth-optimism/hardhat-ovm": "^0.2.2",
         "@nomiclabs/hardhat-ethers": "^2.0.2",
         "@nomiclabs/hardhat-etherscan": "^2.1.2",
         "@nomiclabs/hardhat-solhint": "^2.0.0",
@@ -29,14 +30,13 @@
         "@openzeppelin/contracts": "3.4.1-solc-0.7-2",
         "@openzeppelin/contracts-upgradeable": "3.4.1-solc-0.7",
         "@openzeppelin/hardhat-upgrades": "^1.8.2",
-        "@truffle/hdwallet-provider": "^1.2.1",
         "chai": "^4.3.4",
         "commander": "^7.0.0",
         "defender-relay-client": "^1.8.0",
         "dotenv": "^8.2.0",
         "eslint": "^7.21.0",
         "eth-sig-util": "^3.0.1",
-        "ethereum-waffle": "^3.3.0",
+        "ethereum-waffle": "^3.4.0",
         "ethereumjs-util": "^7.0.8",
         "ethereumjs-wallet": "^1.0.1",
         "ganache-cli": "^6.12.2",
@@ -49,11 +49,9 @@
         "prettier-plugin-solidity": "^1.0.0-beta.5",
         "solhint": "^3.3.2",
         "solhint-plugin-prettier": "0.0.5",
-        "solidity-coverage": "^0.7.15",
         "solidity-docgen": "^0.5.11"
     },
     "dependencies": {
-        "@eth-optimism/hardhat-ovm": "^0.2.2",
         "ethers": "^5.3.0",
         "ipfs-http-client": "^49.0.2"
     },
