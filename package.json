@@ -58,6 +58,7 @@
         "ipfs-http-client": "^49.0.2"
     },
     "resolutions": {
+        "tar": ">=4.4.15",
         "lodash": ">=4.17.21",
         "node-fetch": ">=2.6.1",
         "yargs-parser": ">=5.0.1",
